@@ -1,4 +1,7 @@
 import type { OrangehrmAdminApi } from '../../api/orangehrmMaster/OrangehrmAdminApi';
+import { logger } from '../../lib/logger';
+import { seedEmployees } from './employees';
+import { seedEmploymentStatuses } from './employmentStatuses';
 import { seedJobTitles } from './jobTitles';
 import { seedLocations } from './locations';
 
@@ -16,10 +19,14 @@ import { seedLocations } from './locations';
  * });
  */
 export async function seedAllMasterData(adminApi: OrangehrmAdminApi): Promise<void> {
+  logger.info('Master data seeding started');
   await adminApi.loginAsAdmin();
 
   await seedJobTitles(adminApi);
+  await seedEmployees(adminApi);
+  await seedEmploymentStatuses(adminApi);
   await seedLocations(adminApi);
+  logger.info('Master data seeding finished');
 }
 
-export { seedJobTitles, seedLocations };
+export { seedJobTitles, seedEmployees, seedEmploymentStatuses, seedLocations };

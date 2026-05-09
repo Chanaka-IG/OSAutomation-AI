@@ -1,6 +1,9 @@
 import type { JobTitleSeed } from '../../../test-data/api/jobTitles';
 import { jobTitles as jobTitlesData } from '../../../test-data/api/jobTitles';
+import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
+
+const log = createLogger('JobTitlesApi');
 
 /**
  * OrangeHRM Admin API v2 — job titles.
@@ -23,9 +26,15 @@ export class JobTitlesApi extends BaseApiService {
 
     if (!response.ok()) {
       const text = await response.text();
+      log.error(`Failed to add job title: ${payload.title}`, {
+        status: response.status(),
+        body: text.slice(0, 400),
+      });
       throw new Error(
         `JobTitlesApi.create failed: HTTP ${response.status()} ${payload.title}\n${text.slice(0, 600)}`,
       );
     }
+
+    log.info(`Job title successfully added: ${payload.title}`);
   }
 }

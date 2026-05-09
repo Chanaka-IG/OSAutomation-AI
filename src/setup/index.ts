@@ -1,1 +1,7 @@
-export { seedAllMasterData, seedJobTitles, seedLocations } from './masterData';
+export {
+  seedAllMasterData,
+  seedJobTitles,
+  seedEmployees,
+  seedEmploymentStatuses,
+  seedLocations,
+} from './masterData';

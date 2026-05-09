@@ -60,13 +60,13 @@ export default defineConfig({
     //   },
     // },
 
-    // {
-    //   name: 'master-data',
-    //   testMatch: '**/setup/**/*.spec.ts',
-    //   use: {
-    //     trace: 'off',
-    //   },
-    // },
+    {
+      name: 'master-data',
+      testMatch: '**/setup/**/*.spec.ts',
+      use: {
+        trace: 'off',
+      },
+    },
 
     /* Test against mobile viewports. */
     // {

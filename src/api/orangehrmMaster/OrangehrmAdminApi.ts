@@ -1,5 +1,8 @@
 import { env } from '../../config/env';
+import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
+
+const log = createLogger('OrangehrmAdminApi');
 
 /**
  * Session/bootstrap calls against OrangeHRM OS (same host as {@link env.baseURL}).
@@ -44,11 +47,15 @@ export class OrangehrmAdminApi extends BaseApiService {
     const body = await response.text();
 
     if (!response.ok()) {
+      log.error('OrangeHRM admin login failed', { status, body: body.slice(0, 400) });
       throw new Error(`OrangeHRM login failed: HTTP ${status}\n${body.slice(0, 800)}`);
     }
 
     if (body.includes('Invalid credentials')) {
+      log.error('OrangeHRM admin login rejected: invalid credentials');
       throw new Error('Invalid username or password');
     }
+
+    log.info(`Admin session established: ${env.adminUsername}`);
   }
 }
