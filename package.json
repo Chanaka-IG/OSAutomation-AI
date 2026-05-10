@@ -9,16 +9,17 @@
     "node": "20.18.1"
   },
   "scripts": {
+    "preinstall": "node scripts/check-node-version.cjs",
     "pretest": "node scripts/check-node-version.cjs",
     "seed": "node index.js",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "test:headed": "playwright test --headed"
+    "test": "playwright test --config automation.config.ts",
+    "test:ui": "playwright test --config automation.config.ts --ui",
+    "test:headed": "playwright test --config automation.config.ts --headed"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "OrangeHRM Playwright automation. Config is automation.config.ts (not playwright.config.ts) so the IDE Playwright extension does not auto-activate on outdated Node. Requires Node 18+ (see .nvmrc).",
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.2"

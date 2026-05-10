@@ -7,7 +7,13 @@ const path = require('path');
 const playwrightBin = path.join(__dirname, 'node_modules', '.bin', 'playwright');
 const result = spawnSync(
   playwrightBin,
-  ['test', 'tests/setup/seed-master-data.spec.ts', '--project=master-data'],
+  [
+    'test',
+    'tests/setup/seed-master-data.spec.ts',
+    '--project=master-data',
+    '--config',
+    'automation.config.ts',
+  ],
   { stdio: 'inherit', cwd: __dirname, env: process.env },
 );
 
