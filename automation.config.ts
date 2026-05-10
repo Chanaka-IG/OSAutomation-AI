@@ -2,6 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 import { env } from './src/config/env';
 
 /**
+ * Named without `playwright` in the filename on purpose: the VS Code/Cursor Playwright
+ * extension activates on `*playwright*.config.*` and may run `node` from an outdated PATH.
+ * CLI uses `--config automation.config.ts` (see package.json scripts).
+ *
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
@@ -24,7 +28,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  /* Shared settings for all projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL: env.baseURL || undefined,
 
@@ -89,7 +93,7 @@ export default defineConfig({
     // },
   ],
 
-  /* Run your local dev server before starting the tests */
+  /* Run your local dev server before starting tests */
   // webServer: {
   //   command: 'npm run start',
   //   url: 'http://localhost:3000',

@@ -1,6 +1,12 @@
 import type { OrangehrmAdminApi } from '../../api/orangehrmMaster/OrangehrmAdminApi';
+import { LocationsApi } from '../../api/orangehrmMaster/LocationsApi';
+import { api } from '../../../test-data';
 
-/** Location master data (implement OrangeHRM API calls when endpoints are known). Called after login via {@link seedAllMasterData}. */
+/** Creates locations via Admin API v2 (`api.locations`). Called after login via {@link seedAllMasterData}. */
 export async function seedLocations(adminApi: OrangehrmAdminApi): Promise<void> {
-  // TODO: POST/PUT admin APIs to create locations
+  const locationsApi = new LocationsApi(adminApi.request);
+
+  for (const row of api.locations.seedRecords) {
+    await locationsApi.create(row);
+  }
 }
