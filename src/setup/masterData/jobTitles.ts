@@ -1,5 +1,5 @@
-import type { OrangehrmAdminApi } from '../../api/orangehrmMaster/OrangehrmAdminApi';
-import { JobTitlesApi } from '../../api/orangehrmMaster/JobTitlesApi';
+import type { OrangehrmAdminApi } from '../../api/orangehrmOSAPI/OrangehrmAdminApi';
+import { JobTitlesApi } from '../../api/orangehrmOSAPI/JobTitlesApi';
 import { api } from '../../../test-data';
 
 /** Creates job titles via Admin API v2 (`api.jobTitles`). Called after login via {@link seedAllMasterData}. */
