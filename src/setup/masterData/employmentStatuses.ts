@@ -1,5 +1,5 @@
-import type { OrangehrmAdminApi } from '../../api/orangehrmMaster/OrangehrmAdminApi';
-import { EmploymentStatusesApi } from '../../api/orangehrmMaster/EmploymentStatusesApi';
+import type { OrangehrmAdminApi } from '../../api/orangehrmOSAPI/OrangehrmAdminApi';
+import { EmploymentStatusesApi } from '../../api/orangehrmOSAPI/EmploymentStatusesApi';
 import { api } from '../../../test-data';
 
 /** Creates employment statuses via Admin API v2 (`api.employmentStatuses`). Called after login via {@link seedAllMasterData}. */

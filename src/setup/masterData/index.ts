@@ -1,9 +1,16 @@
-import type { OrangehrmAdminApi } from '../../api/orangehrmMaster/OrangehrmAdminApi';
+import type { OrangehrmAdminApi } from '../../api/orangehrmOSAPI/OrangehrmAdminApi';
 import { logger } from '../../lib/logger';
+import { seedAdminUsers } from './adminUsers';
 import { seedEmployees } from './employees';
 import { seedEmploymentStatuses } from './employmentStatuses';
+import { seedHolidays } from './holidays';
 import { seedJobTitles } from './jobTitles';
+import { seedLeavePeriod } from './leavePeriod';
+import { seedLeaveTypes } from './leaveTypes';
 import { seedLocations } from './locations';
+import { seedPayGrades } from './payGrades';
+import { seedSubunits } from './subunits';
+import { seedWorkweek } from './workweek';
 
 /**
  * Single entry point for OrangeHRM master data seeding before UI/API tests.
@@ -26,7 +33,27 @@ export async function seedAllMasterData(adminApi: OrangehrmAdminApi): Promise<vo
   await seedEmployees(adminApi);
   await seedEmploymentStatuses(adminApi);
   await seedLocations(adminApi);
+  await seedPayGrades(adminApi);
+  await seedLeavePeriod(adminApi);
+  await seedSubunits(adminApi);
+  await seedLeaveTypes(adminApi);
+  await seedWorkweek(adminApi);
+  await seedHolidays(adminApi);
+  await seedAdminUsers(adminApi);
+
   logger.info('Master data seeding finished');
 }
 
-export { seedJobTitles, seedEmployees, seedEmploymentStatuses, seedLocations };
+export {
+  seedJobTitles,
+  seedEmployees,
+  seedEmploymentStatuses,
+  seedLocations,
+  seedPayGrades,
+  seedLeavePeriod,
+  seedSubunits,
+  seedLeaveTypes,
+  seedWorkweek,
+  seedHolidays,
+  seedAdminUsers,
+};

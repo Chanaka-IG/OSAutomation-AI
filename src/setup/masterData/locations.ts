@@ -1,5 +1,5 @@
-import type { OrangehrmAdminApi } from '../../api/orangehrmMaster/OrangehrmAdminApi';
-import { LocationsApi } from '../../api/orangehrmMaster/LocationsApi';
+import type { OrangehrmAdminApi } from '../../api/orangehrmOSAPI/OrangehrmAdminApi';
+import { LocationsApi } from '../../api/orangehrmOSAPI/LocationsApi';
 import { api } from '../../../test-data';
 
 /** Creates locations via Admin API v2 (`api.locations`). Called after login via {@link seedAllMasterData}. */
