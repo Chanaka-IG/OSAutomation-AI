@@ -10,5 +10,5 @@
     "resolveJsonModule": true,
     "types": ["node", "@playwright/test"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "test-data/**/*.ts", "automation.config.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts", "test-data/**/*.ts", "automation.config.ts", "scripts/**/*.ts"]
 }

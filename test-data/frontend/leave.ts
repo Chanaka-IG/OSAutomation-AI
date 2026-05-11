@@ -8,6 +8,7 @@ export const leave = {
     leaveList: /viewLeaveList/i,
   },
   samples: {
-    comment: 'Automated leave request',
+    comment:
+      'Annual leave: 5 working days for approved travel (manager signed off 12 May; ticket ref HR-44102).',
   },
 } as const;

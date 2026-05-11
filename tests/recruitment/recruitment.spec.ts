@@ -3,8 +3,9 @@ import { env } from '../../src/config/env';
 import { frontend } from '../../test-data';
 
 test.describe('Recruitment', () => {
-  test.beforeEach(() => {
+  test.beforeEach(async ({ masterDataReadiness }) => {
     test.skip(!env.baseURL, 'Set BASE_URL to your app URL (e.g. OrangeHRM instance).');
+    void masterDataReadiness;
   });
 
   test('candidates route loads', async ({ recruitmentModulePage }) => {

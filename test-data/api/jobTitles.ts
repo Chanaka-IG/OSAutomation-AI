@@ -30,33 +30,39 @@ export const jobTitles = {
   seedRecords: [
     {
       title: 'Software Engineer',
-      description: 'Software Engineer',
-      note: 'Software Engineer position',
+      description:
+        'Designs, implements, and maintains application features; collaborates on technical design and code review.',
+      note: 'Individual contributor — engineering ladder levels L3–L5.',
     },
     {
       title: 'QA Engineer',
-      description: 'QA Enginee',
-      note: 'QA Enginee position',
+      description:
+        'Defines test scope, executes exploratory and regression testing, and maintains automated checks.',
+      note: 'Embedded with squads prior to major releases.',
     },
     {
       title: 'UI Engineer',
-      description: 'UI Engineer',
-      note: 'UI Engineer position',
+      description:
+        'Builds responsive interfaces and design-system components; partners with UX on accessibility.',
+      note: 'Design systems guild.',
     },
     {
-      title: 'BA',
-      description: 'BA',
-      note: 'BA position',
+      title: 'Business Analyst',
+      description:
+        'Captures requirements, maps processes, and validates acceptance criteria with stakeholders.',
+      note: 'Aligned to product domains.',
     },
     {
-      title: 'HR',
-      description: 'HR',
-      note: 'HR position',
+      title: 'HR Specialist',
+      description:
+        'Delivers employee lifecycle support: onboarding, policy guidance, and HRIS transactions.',
+      note: 'People Operations — shared services.',
     },
     {
       title: 'Senior Software Engineer',
-      description: 'Senior Software Engineer',
-      note: 'Senior Software Engineer position',
+      description:
+        'Leads technical initiatives, mentors engineers, and owns reliability and scalability outcomes.',
+      note: 'Senior IC track; staff-equivalent in some regions.',
     },
   ] as const satisfies readonly JobTitleSeed[],
 };
