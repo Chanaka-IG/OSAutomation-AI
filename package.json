@@ -12,6 +12,7 @@
     "preinstall": "node scripts/check-node-version.cjs",
     "pretest": "node scripts/check-node-version.cjs",
     "seed": "node index.js",
+    "seed:master-data": "playwright test --config automation.config.ts --project=master-data tests/setup/seed-master-data.spec.ts",
     "test": "playwright test --config automation.config.ts",
     "test:ui": "playwright test --config automation.config.ts --ui",
     "test:headed": "playwright test --config automation.config.ts --headed"

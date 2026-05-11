@@ -1,5 +1,33 @@
 /** Auth routes (OrangeHRM OS). */
 
+export type LoginRole = 'admin' | 'ess' | 'supervisor';
+
+function resolveCredentials(role: LoginRole): { username: string; password: string } {
+  switch (role) {
+    case 'admin':
+      return {
+        username:
+          process.env.OHRM_USERNAME ?? process.env.ADMIN_USERNAME ?? 'admin',
+        password:
+          process.env.OHRM_PASSWORD ?? process.env.ADMIN_PASSWORD ?? 'admin@OHRM123',
+      };
+    case 'ess':
+      return {
+        username: process.env.OHRM_ESS_USERNAME ?? '',
+        password: process.env.OHRM_ESS_PASSWORD ?? '',
+      };
+    case 'supervisor':
+      return {
+        username: process.env.OHRM_SUPERVISOR_USERNAME ?? '',
+        password: process.env.OHRM_SUPERVISOR_PASSWORD ?? '',
+      };
+    default: {
+      const _exhaustive: never = role;
+      return _exhaustive;
+    }
+  }
+}
+
 export const auth = {
   routes: {
     login: '/web/index.php/auth/login',
@@ -7,9 +35,19 @@ export const auth = {
   urlPatterns: {
     login: /auth\/login/i,
   },
-  /** Override with OHRM_USERNAME / OHRM_PASSWORD if you avoid committing defaults. */
+  /** Override with OHRM_USERNAME / OHRM_PASSWORD (or ADMIN_*); same source as `getCredentials('admin')`. */
   credentials: {
-    username: process.env.OHRM_USERNAME ?? 'admin',
-    password: process.env.OHRM_PASSWORD ?? 'admin@OHRM123',
+    get username() {
+      return resolveCredentials('admin').username;
+    },
+    get password() {
+      return resolveCredentials('admin').password;
+    },
   },
-} as const;
+  getCredentials: resolveCredentials,
+  /** True when both username and password are non-empty for the role (env-configured). */
+  hasLoginCredentials(role: LoginRole): boolean {
+    const { username, password } = resolveCredentials(role);
+    return Boolean(username && password);
+  },
+};

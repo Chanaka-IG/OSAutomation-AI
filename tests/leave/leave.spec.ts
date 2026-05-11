@@ -3,8 +3,9 @@ import { env } from '../../src/config/env';
 import { frontend } from '../../test-data';
 
 test.describe('Leave', () => {
-  test.beforeEach(() => {
+  test.beforeEach(async ({ masterDataReadiness }) => {
     test.skip(!env.baseURL, 'Set BASE_URL to your app URL (e.g. OrangeHRM instance).');
+    void masterDataReadiness;
   });
 
   test('leave list route loads', async ({ leaveModulePage }) => {

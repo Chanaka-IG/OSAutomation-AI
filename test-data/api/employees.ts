@@ -31,15 +31,15 @@ export const employees = {
   seedRecords: [
     {
       employeeId: '0002',
-      firstName: 'Daniel',
-      lastName: 'Vittori',
-      middleName: 'Harber',
+      firstName: 'Marcus',
+      lastName: 'Chen',
+      middleName: 'James',
     },
     {
       employeeId: '0003',
-      firstName: 'glenn',
-      lastName: 'Maxewll',
-      middleName: 'Peter',
+      firstName: 'Elena',
+      lastName: 'Vasquez',
+      middleName: 'Sofia',
     },
   ] as const satisfies readonly EmployeeSeed[],
 };

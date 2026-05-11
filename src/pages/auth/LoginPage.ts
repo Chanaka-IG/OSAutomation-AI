@@ -8,10 +8,7 @@ export class LoginPage extends BasePage {
   readonly loginButton: Locator = this.page.getByRole('button', { name: 'Login' });
 
   async open(): Promise<void> {
-    await this.page.goto(auth.routes.login, {
-      waitUntil: 'domcontentloaded',
-      timeout: 60_000,
-    });
+    await this.page.goto(auth.routes.login, { waitUntil: 'domcontentloaded' });
   }
 
   async login(username: string, password: string): Promise<void> {

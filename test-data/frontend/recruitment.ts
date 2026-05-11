@@ -8,7 +8,7 @@ export const recruitment = {
     candidates: /viewCandidates/i,
   },
   samples: {
-    candidateFirstName: 'Test',
-    candidateLastName: 'Candidate',
+    candidateFirstName: 'Priya',
+    candidateLastName: 'Sharma',
   },
 } as const;

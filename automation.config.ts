@@ -17,20 +17,37 @@ import { env } from './src/config/env';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  /** Verifies seeded master data before UI/API runs; writes `test-results/master-data-status.json`. See `scripts/playwright-global-setup.ts`. */
+  globalSetup:
+    process.env.SKIP_MASTER_DATA_CHECK === '1'
+      ? undefined
+      : './scripts/playwright-global-setup.ts',
+
   testDir: './tests',
-  /* Run tests in files in parallel */
-  fullyParallel: true,
+  /** Run test cases one after another (stable against shared UI/session flakiness). Override locally: `--workers=4`. */
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
+
+  /** Prefer locator visibility over long sleeps; caps assertion retries for `expect(locator)...`. */
+  expect: {
+    timeout: 15_000,
+  },
+
   /* Shared settings for all projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL: env.baseURL || undefined,
+    /**
+     * Worst-case cap for `goto` / `waitForURL` on slow hosts or CI.
+     * Fast loads still finish as soon as `domcontentloaded` fires — this is not a sleep.
+     * Prefer waiting on specific locators after navigation (see `EmployeeListPage.waitForListReady`).
+     */
+    navigationTimeout: 60_000,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -56,13 +73,13 @@ export default defineConfig({
     //   use: { ...devices['Desktop Safari'] },
     // },
 
-    // {
-    //   name: 'api',
-    //   testMatch: '**/api/**/*.spec.ts',
-    //   use: {
-    //     trace: 'off',
-    //   },
-    // },
+    {
+      name: 'api',
+      testMatch: '**/api/**/*.spec.ts',
+      use: {
+        trace: 'off',
+      },
+    },
 
     {
       name: 'master-data',
