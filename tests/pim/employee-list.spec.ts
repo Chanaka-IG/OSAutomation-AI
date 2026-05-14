@@ -288,6 +288,76 @@ test.describe('Authenticated — PIM Employee List (admin)', () => {
     });
     await expect(matches.first()).toBeVisible();
   });
+
+  test('TC-PIM-EL-012 — Filter by Employee ID validates all table row columns', async ({
+    employeeListPage,
+    page,
+  }) => {
+    await employeeListPage.employeeIdInput.fill(pim.samples.seededEmployeeId);
+    await employeeListPage.runSearch();
+    await page.waitForLoadState('networkidle').catch(() => {});
+
+    await expect(employeeListPage.tableRows).toHaveCount(1);
+    const row = employeeListPage.tableRows.first();
+
+    const id = await employeeListPage.getRowCellText(row, 'Id');
+    const firstMiddle = await employeeListPage.getRowCellText(row, 'First (& Middle) Name');
+    const lastName = await employeeListPage.getRowCellText(row, 'Last Name');
+    const jobTitle = await employeeListPage.getRowCellText(row, 'Job Title');
+    const empStatus = await employeeListPage.getRowCellText(row, 'Employment Status');
+    const subUnit = await employeeListPage.getRowCellText(row, 'Sub Unit');
+
+    expect(id).toBe(pim.samples.seededEmployeeId);
+    expect(firstMiddle).toBe(pim.samples.seededFirstMiddleName);
+    expect(lastName).toBe(pim.samples.employeeLastName);
+    expect(jobTitle).toBe(pim.samples.seededJobTitle);
+    expect(empStatus).toBe(pim.samples.seededEmploymentStatus);
+    expect(subUnit).toBe(pim.samples.seededSubUnit);
+  });
+
+  test('TC-PIM-EL-013 — Multiple filters combined narrow results to a single employee', async ({
+    employeeListPage,
+    page,
+  }) => {
+    // Name alone ("Olivia") matches two rows (Nguyen + Petrovic); combining job details narrows to one.
+    await employeeListPage.employeeNameInput.fill(pim.samples.seededEmployeeName);
+    await employeeListPage.selectJobTitle(pim.samples.seededJobTitle);
+    await employeeListPage.selectEmploymentStatus(pim.samples.seededEmploymentStatus);
+    await employeeListPage.selectSubUnit(pim.samples.seededSubUnit);
+    await employeeListPage.runSearch();
+    await page.waitForLoadState('networkidle').catch(() => {});
+
+    await expect(employeeListPage.tableRows).toHaveCount(1);
+
+    const row = employeeListPage.tableRows.first();
+    await expect(row).toContainText(pim.samples.seededEmployeeId);
+    await expect(row).toContainText(pim.samples.seededJobTitle);
+    await expect(row).toContainText(pim.samples.seededEmploymentStatus);
+    await expect(row).toContainText(pim.samples.seededSubUnit);
+  });
+
+  test('TC-PIM-EL-014 — Filter returning multiple records shows all rows with correct data', async ({
+    employeeListPage,
+    page,
+  }) => {
+    // Both Nguyen (061001 — QA Engineer) and Petrovic (061002 — UI Engineer) are in Engineering.
+    // Filtering by Sub Unit returns both; each row is validated independently.
+    await employeeListPage.selectSubUnit(pim.samples.seededSubUnit);
+    await employeeListPage.runSearch();
+    await page.waitForLoadState('networkidle').catch(() => {});
+
+    await employeeListPage.validateTableRow(pim.samples.employeeLastName, {
+      id: pim.samples.seededEmployeeId,
+      jobTitle: pim.samples.seededJobTitle,
+      employmentStatus: pim.samples.seededEmploymentStatus,
+    });
+
+    await employeeListPage.validateTableRow(pim.samples.seededSecondEmployeeLastName, {
+      id: pim.samples.seededSecondEmployeeId,
+      jobTitle: pim.samples.seededSecondJobTitle,
+      employmentStatus: pim.samples.seededSecondEmploymentStatus,
+    });
+  });
 });
 
 test.describe('TC-PIM-EL-N05 — Non-admin access (instance-specific)', () => {

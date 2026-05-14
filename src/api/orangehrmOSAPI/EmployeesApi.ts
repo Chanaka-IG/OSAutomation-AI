@@ -125,6 +125,24 @@ export class EmployeesApi extends BaseApiService {
     log.info(`Supervisor empNumber=${supervisorEmpNumber} added for empNumber=${empNumber}`);
   }
 
+  /** Bulk-delete employees by empNumber. Silently ignores partial failures. */
+  async deleteEmployees(empNumbers: number[]): Promise<void> {
+    if (empNumbers.length === 0) return;
+    const response = await this.delete(employeesData.adminPath, {
+      data: { ids: empNumbers },
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok()) {
+      const text = await response.text();
+      log.warn(`deleteEmployees partial failure: HTTP ${response.status()} ${text.slice(0, 200)}`);
+    } else {
+      log.info(`Employees deleted: [${empNumbers.join(', ')}]`);
+    }
+  }
+
   private displayName(payload: EmployeeSeed): string {
     return [payload.firstName, payload.middleName, payload.lastName].filter(Boolean).join(' ');
   }

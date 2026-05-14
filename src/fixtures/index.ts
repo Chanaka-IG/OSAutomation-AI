@@ -10,6 +10,7 @@ import {
 } from '../setup/masterDataVerification';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { LeaveModulePage } from '../pages/leave/LeaveModulePage';
+import { AddEmployeePage } from '../pages/pim/AddEmployeePage';
 import { EmployeeListPage } from '../pages/pim/EmployeeListPage';
 import { PimModulePage } from '../pages/pim/PimModulePage';
 import { RecruitmentModulePage } from '../pages/recruitment/RecruitmentModulePage';
@@ -17,6 +18,7 @@ import { RecruitmentModulePage } from '../pages/recruitment/RecruitmentModulePag
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
 export type OrangehrmFixtures = {
   loginPage: LoginPage;
+  addEmployeePage: AddEmployeePage;
   pimModulePage: PimModulePage;
   employeeListPage: EmployeeListPage;
   leaveModulePage: LeaveModulePage;
@@ -38,6 +40,10 @@ export type OrangehrmWorkerFixtures = {
 export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
+  },
+
+  addEmployeePage: async ({ page }, use) => {
+    await use(new AddEmployeePage(page));
   },
 
   pimModulePage: async ({ page }, use) => {

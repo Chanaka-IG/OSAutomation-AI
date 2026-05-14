@@ -1,0 +1,14 @@
+---
+description: Tests must use self-contained test data (frontend-api), not master seed rows
+alwaysApply: true
+---
+
+# Test data ownership
+
+- **`test-data/api/**`** (`export * as api`) feeds **master-data seeding** only. Never assert against `api.*.seedRecords` in Playwright tests — values can change when seeds or admins update the environment.
+
+- **`test-data/frontend-api/**`** (`export * as frontendApi`) holds payloads and IDs **owned by tests**. When a test needs entities (employees, etc.), add definitions under `frontend-api`, seed them in the test suite (`ensureEmployeeRecords`, `ensurePimFilterEmployees`, or a dedicated helper), and assert using **those** exports.
+
+- **`test-data/frontend/**`** should reference stable samples via **`frontendApi`** or literals — not master seed records.
+
+- Endpoint paths duplicated under `frontend-api` (e.g. `employeesAdminPath`) are intentional so HTTP tests avoid importing seed modules for URLs only.

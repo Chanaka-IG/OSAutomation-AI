@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { pim } from '../../../test-data/frontend/pim';
 import { BasePage } from '../BasePage';
 
@@ -131,9 +132,50 @@ export class EmployeeListPage extends BasePage {
   }
 
   /**
+   * Returns the trimmed value for a named column in an OXD card-layout table row.
+   * Each `.oxd-table-card-cell` contains a `.header` label and a `.data` value div.
+   */
+  async getRowCellText(row: Locator, columnLabel: string): Promise<string> {
+    const result = await row.evaluate((el, label) => {
+      const cells = Array.from(el.querySelectorAll('.oxd-table-card-cell'));
+      for (const cell of cells) {
+        const h = cell.querySelector('.header');
+        if (h && (h.textContent || '').trim() === label) {
+          const d = cell.querySelector('.data');
+          return d ? (d.textContent || '').trim() : '';
+        }
+      }
+      return null;
+    }, columnLabel);
+    if (result === null) throw new Error(`Column "${columnLabel}" not found in row`);
+    return result;
+  }
+
+  /**
    * Fills the Supervisor Name autocomplete and selects the first suggestion containing `name`.
    * Types the search term, waits for the dropdown, then clicks the matching entry.
    */
+  /**
+   * Finds the table row matching `rowIdentifier` (any text in the row) and asserts that each
+   * provided field value is present. Omit a field to skip that assertion.
+   */
+  async validateTableRow(
+    rowIdentifier: string,
+    expected: {
+      id?: string;
+      jobTitle?: string;
+      employmentStatus?: string;
+      subUnit?: string;
+    },
+  ): Promise<void> {
+    const row = this.tableRows.filter({ hasText: rowIdentifier });
+    await expect(row).toBeVisible();
+    if (expected.id !== undefined) await expect(row).toContainText(expected.id);
+    if (expected.jobTitle !== undefined) await expect(row).toContainText(expected.jobTitle);
+    if (expected.employmentStatus !== undefined) await expect(row).toContainText(expected.employmentStatus);
+    if (expected.subUnit !== undefined) await expect(row).toContainText(expected.subUnit);
+  }
+
   async fillSupervisorName(name: string): Promise<void> {
     await this.supervisorNameInput.fill(name);
     await this.page

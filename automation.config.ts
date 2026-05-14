@@ -48,6 +48,8 @@ export default defineConfig({
      * Prefer waiting on specific locators after navigation (see `EmployeeListPage.waitForListReady`).
      */
     navigationTimeout: 60_000,
+    video: 'on',
+    screenshot: 'on',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',

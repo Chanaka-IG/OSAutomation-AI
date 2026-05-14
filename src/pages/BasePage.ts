@@ -15,6 +15,25 @@ export abstract class BasePage {
   }
 
   /**
+   * Waits for the OXD success toast and returns its trimmed text.
+   *
+   * Call this **before** triggering the save/action so Playwright starts polling
+   * immediately and catches the toast in the brief window before it auto-dismisses
+   * or the page redirects.
+   *
+   * Usage:
+   *   const toastPromise = page.waitForSuccessToast();
+   *   await page.save();
+   *   const text = await toastPromise;
+   *   expect(text).toContain('Successfully Saved');
+   */
+  async waitForSuccessToast(timeout = 10_000): Promise<string> {
+    const toast = this.page.locator('.oxd-toast--success');
+    await toast.waitFor({ state: 'visible', timeout });
+    return (await toast.innerText()).trim();
+  }
+
+  /**
    * Opens the login page and signs in using credentials from env for the given role.
    *
    * Env vars: **admin** — `OHRM_USERNAME` / `OHRM_PASSWORD` or `ADMIN_USERNAME` / `ADMIN_PASSWORD`;
