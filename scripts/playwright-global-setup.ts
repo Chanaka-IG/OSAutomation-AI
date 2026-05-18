@@ -2,6 +2,7 @@ import type { FullConfig } from '@playwright/test';
 import { chromium } from '@playwright/test';
 import { OrangehrmAdminApi } from '../src/api/orangehrmOSAPI/OrangehrmAdminApi';
 import { env } from '../src/config/env';
+import { seedAllMasterData } from '../src/setup/masterData';
 import { verifyMasterData, writeMasterDataStatus } from '../src/setup/masterDataVerification';
 
 /** Playwright CLI `--project` / `-p` values (globalSetup receives full config, so we read argv). */
@@ -80,17 +81,28 @@ export default async function playwrightGlobalSetup(_config: FullConfig): Promis
   try {
     const adminApi = new OrangehrmAdminApi(context.request);
     const status = await verifyMasterData(adminApi);
-    writeMasterDataStatus(status);
 
     if (!status.ok) {
-      throw new Error(
-        `[master-data] Verification failed against BASE_URL=${env.baseURL}\n` +
-          `Missing: ${status.missing.join('; ')}\n\n` +
-          `Seed this OrangeHRM instance once (same BASE_URL and admin credentials):\n` +
-          `  npm run seed:master-data\n` +
-          `  # or: npx playwright test --config automation.config.ts --project=master-data tests/setup/seed-master-data.spec.ts\n\n` +
-          `Then re-run tests. To bypass only for local debugging: SKIP_MASTER_DATA_CHECK=1`,
+      console.log(
+        `[master-data] Missing data detected (${status.missing.length} item(s)) — seeding now...\n` +
+          `  ${status.missing.join('\n  ')}`,
       );
+      await seedAllMasterData(adminApi);
+
+      const recheck = await verifyMasterData(adminApi);
+      writeMasterDataStatus(recheck);
+
+      if (!recheck.ok) {
+        throw new Error(
+          `[master-data] Seeding completed but verification still failed against BASE_URL=${env.baseURL}\n` +
+            `Still missing: ${recheck.missing.join('; ')}\n\n` +
+            `Check admin credentials and OrangeHRM API availability.`,
+        );
+      }
+
+      console.log('[master-data] Seeding completed successfully.');
+    } else {
+      writeMasterDataStatus(status);
     }
   } finally {
     await browser.close();

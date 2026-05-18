@@ -12,6 +12,7 @@ import { LoginPage } from '../pages/auth/LoginPage';
 import { LeaveModulePage } from '../pages/leave/LeaveModulePage';
 import { AddEmployeePage } from '../pages/pim/AddEmployeePage';
 import { EmployeeListPage } from '../pages/pim/EmployeeListPage';
+import { PersonalDetailsPage } from '../pages/pim/PersonalDetailsPage';
 import { PimModulePage } from '../pages/pim/PimModulePage';
 import { RecruitmentModulePage } from '../pages/recruitment/RecruitmentModulePage';
 
@@ -21,6 +22,7 @@ export type OrangehrmFixtures = {
   addEmployeePage: AddEmployeePage;
   pimModulePage: PimModulePage;
   employeeListPage: EmployeeListPage;
+  personalDetailsPage: PersonalDetailsPage;
   leaveModulePage: LeaveModulePage;
   recruitmentModulePage: RecruitmentModulePage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
@@ -52,6 +54,10 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
 
   employeeListPage: async ({ page }, use) => {
     await use(new EmployeeListPage(page));
+  },
+
+  personalDetailsPage: async ({ page }, use) => {
+    await use(new PersonalDetailsPage(page));
   },
 
   leaveModulePage: async ({ page }, use) => {
