@@ -38,7 +38,6 @@ Write to **`docs/test-scenarios.md`** (consumed by `/test-strategy` skill). Use 
 ```
 ### TC-<NNN>: <Title>
 **Category**: <Happy Path | Business Rule | Security | Negative | Edge Case | UI State>
-**Priority**: <P0 | P1 | P2 | P3>
 **Preconditions**: <what must be true>
 **Steps**: <numbered actions>
 **Expected Results**: <what to verify>

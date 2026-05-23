@@ -151,6 +151,14 @@ await expect(page.locator('#refund-spinner')).not.toBeVisible({ timeout: 6000 })
 refer automation-framework
 ```
 
+### Hooks inside the spec files
+- Use `test.beforeEach()` only one time per spec file for common setup (e.g., login). If different tests require different setups, consider separate describe blocks or explicit setup steps in the test body.
+- Use `test.afterEach()` for cleanup if necessary (e.g., logging out, clearing test data).
+
+### Pass data to Page class from test body
+-Dont pass hardcode data to the page class from the test body, if you need to pass data from the test body to the page class, make sure that the data is not hardcoded and it is coming from the test-data files. This will make the test more maintainable and less flaky.
+
+
 ### Multi-Step Test with Comments
 Use `// -- Step N: Description --` comment blocks to separate logical steps:
 ```javascript

@@ -1,974 +1,919 @@
-# Test Scenarios: Add Vacancies
-**Module**: Recruitment → Vacancies  
-**Feature**: Add a new Job Vacancy  
-**Navigation**: Recruitment → Vacancies → Add  
-**API Endpoint**: `POST /web/index.php/api/v2/recruitment/vacancies`  
+# Test Scenarios: Add Vacancies — OrangeHRM Open Source
+
+> **Feature**: Recruitment → Vacancies → Add Vacancy
+> **API endpoint**: `POST /web/index.php/api/v2/recruitment/vacancies`
+> **UI path**: `/recruitment/viewVacancies` → Add button → `/recruitment/addVacancy`
+> **Generated**: 2026-05-23
 
 ---
 
-## Happy Path
+## Happy Path — TC-001 to TC-099
 
-### TC-001: Add Vacancy with Required Fields Only
-**Category**: Happy Path  
-**Priority**: P0  
-**Preconditions**: Admin logged in; at least one Job Title exists in Admin → Job → Job Titles; at least one Employee record exists  
+### TC-001: Add a vacancy with all required fields only
+**Category**: Happy Path
+**Preconditions**: Admin logged in; at least one Job Title exists (e.g. "Software Engineer"); at least one active Employee exists to act as Hiring Manager
 **Steps**:
-1. Navigate to Recruitment → Vacancies
+1. Navigate to `Recruitment → Vacancies`
 2. Click **Add**
-3. Enter a unique **Vacancy Name** (e.g., `Software Engineer - QA`)
-4. Select a valid **Job Title** from the dropdown (e.g., `QA Engineer`)
-5. Type at least 2 characters in **Hiring Manager** autocomplete; select a valid employee
-6. Enter **Number of Positions** = `1`
-7. Leave Description blank
-8. Leave Published toggle as-is (default off)
-9. Click **Save**
+3. Enter **Vacancy Name**: `QA Engineer - 2026`
+4. Select **Job Title**: `Software Engineer` from the OXD dropdown
+5. In **Hiring Manager** autocomplete, type at least 2 characters of an employee's name and click the first suggestion
+6. Enter **Number of Positions**: `1`
+7. Leave Description, Published, and Status fields at defaults
+8. Click **Save**
 **Expected Results**:
-- Success toast `"Successfully Saved"` appears in bottom-right
-- Page redirects to vacancy list or vacancy detail
-- New vacancy row appears in the vacancies table
-**Business Rule**: Vacancy requires name, jobTitleId, hiringManagerId, numOfPositions (≥1)  
+- Green toast appears: `"Successfully Saved"`
+- Page redirects back to the Vacancies list (or stays on the form with fields cleared)
+- The new vacancy `"QA Engineer - 2026"` appears in the list with status **Active**
+**Business Rule**: Vacancy requires Name, Job Title, Hiring Manager, and numOfPositions ≥ 1 (business-rules.md §7; user-flows.md Flow 6)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-002: Add Vacancy with All Fields Populated
-**Category**: Happy Path  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Job Title and Employee record exist  
+### TC-002: Add a vacancy with all fields populated (including optional)
+**Category**: Happy Path
+**Preconditions**: Admin logged in; Job Title and an Employee for Hiring Manager exist
 **Steps**:
-1. Navigate to Recruitment → Vacancies → click **Add**
-2. Enter **Vacancy Name**: `Senior Frontend Developer`
+1. Navigate to `Recruitment → Vacancies` → click **Add**
+2. Enter **Vacancy Name**: `Senior Backend Developer`
 3. Select **Job Title** from dropdown
 4. Select **Hiring Manager** via autocomplete
-5. Enter **Number of Positions**: `5`
-6. Enter **Description**: `We are looking for a senior frontend engineer with Vue.js experience.`
-7. Toggle **Active** to active (if not already)
-8. Toggle **Publish in Job Board / RSS Feed** to enabled
+5. Enter **Number of Positions**: `3`
+6. Enter **Description**: `We are looking for a senior backend developer with 5+ years of experience.`
+7. Toggle **Active** status to **Active**
+8. Toggle **Publish in Job Site** to **ON** (isPublished = true)
 9. Click **Save**
 **Expected Results**:
-- Toast `"Successfully Saved"` is shown
-- Vacancy appears in the list with status Active and published indicator
-- All fields reflect saved values when vacancy is reopened for editing
-**Business Rule**: `isPublished` flag controls visibility on public job board; `status` controls Active/Closed  
+- Toast: `"Successfully Saved"`
+- Vacancy appears in the list with status Active and publish flag visible
+- API `GET /recruitment/vacancies` returns the new record with `isPublished: true`
+**Business Rule**: `isPublished` controls visibility on the public job board (business-rules.md §7)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-003: Verify New Vacancy Appears in Vacancies List
-**Category**: Happy Path  
-**Priority**: P0  
-**Preconditions**: Admin logged in; at least one Job Title and Employee exist  
+### TC-003: Add vacancy with status set to Active
+**Category**: Happy Path
+**Preconditions**: Admin logged in; prerequisites satisfied
 **Steps**:
-1. Note the current record count on the Vacancies list page
-2. Add a vacancy (TC-001 steps)
-3. After save, navigate to Recruitment → Vacancies list
-4. Wait for `.oxd-loading-spinner` to disappear
-5. Verify the newly added vacancy name appears in the table
-**Expected Results**:
-- Record count increments by 1
-- Vacancy row shows correct Name, Job Title, Hiring Manager, Status
-**Business Rule**: Vacancy list shows all created vacancies  
-**Suggested Layer**: E2E
-
----
-
-### TC-004: Add Vacancy with Active Status
-**Category**: Happy Path  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill all required fields
-3. Ensure the **Status** toggle is set to **Active**
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill required fields (Name, Job Title, Hiring Manager, Number of Positions)
+3. Set **Status** to **Active**
 4. Click **Save**
 **Expected Results**:
-- Vacancy saved successfully
-- Vacancy list shows status as `Active`
-- Vacancy appears in the dropdown when adding a candidate (`/recruitment/addCandidate`)
-**Business Rule**: Active vacancies are selectable for candidate applications  
+- Vacancy saved with `status: true` (Active)
+- Vacancy appears in the default list view (which filters for active vacancies)
+**Business Rule**: `status: Boolean` — Active/Closed (domain model)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-005: Add Vacancy with Closed Status
-**Category**: Happy Path  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
+### TC-004: Add vacancy with status set to Closed
+**Category**: Happy Path
+**Preconditions**: Admin logged in; prerequisites satisfied
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill all required fields
-3. Set **Status** toggle to **Closed / Inactive**
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill required fields
+3. Set **Status** to **Closed**
 4. Click **Save**
 **Expected Results**:
-- Vacancy saved successfully with status Closed
-- Vacancy does NOT appear in the Vacancy dropdown when adding a new candidate
-- Vacancy appears in the list with Closed status indicator
-**Business Rule**: Closed/Inactive vacancies are not available for new candidate applications  
+- Toast: `"Successfully Saved"`
+- Vacancy is saved with `status: false` (Closed)
+- Vacancy may not appear in the default Active-filtered list; confirm by changing filter or via API
+**Business Rule**: Closed vacancies cannot accept new applications (business-rules.md §7)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-006: Navigate to Add Vacancy via Recruitment Menu
-**Category**: Happy Path  
-**Priority**: P1  
-**Preconditions**: Admin logged in  
+### TC-005: Add vacancy with a large number of positions
+**Category**: Happy Path
+**Preconditions**: Admin logged in; prerequisites satisfied
 **Steps**:
-1. Click **Recruitment** in the left side panel
-2. Click **Vacancies** sub-menu item
-3. Click **Add** button (`.orangehrm-header-container button:has-text("Add")`)
-**Expected Results**:
-- Add Vacancy form renders with all expected fields: Vacancy Name, Job Title, Hiring Manager, Number of Positions, Description, Active status toggle, Published toggle
-- URL contains the vacancy add path
-**Business Rule**: Only Admin role can access Recruitment module  
-**Suggested Layer**: E2E
-
----
-
-### TC-007: Add Vacancy and Associate a Candidate
-**Category**: Happy Path  
-**Priority**: P0  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
-**Steps**:
-1. Add a vacancy using TC-001 steps; note the vacancy name
-2. Navigate to Recruitment → Candidates → Add
-3. Fill candidate First Name, Last Name, Email
-4. In the **Vacancy** dropdown, select the newly created vacancy
-5. Set Date of Application; check Consent to keep data
-6. Click **Save**
-**Expected Results**:
-- Candidate saved with status `APPLICATION_INITIATED`
-- Candidate is associated with the created vacancy
-- Filtering candidates by the vacancy name returns this candidate
-**Business Rule**: A Vacancy must exist before candidates can be applied against it  
-**Suggested Layer**: E2E
-
----
-
-## Business Rules
-
-### TC-100: Vacancy Name Must Be Unique
-**Category**: Business Rule  
-**Priority**: P0  
-**Preconditions**: Admin logged in; a vacancy named `Duplicate Name Test` already exists  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Enter **Vacancy Name**: `Duplicate Name Test` (same as existing)
-3. Select a valid Job Title and Hiring Manager
-4. Enter Number of Positions: `1`
-5. Click **Save**
-**Expected Results**:
-- Save is blocked
-- Error toast or inline validation shows `"Already exists"` near the Vacancy Name field
-- No new vacancy is created
-**Business Rule**: Business rules §9: Unique violations surface as `"Already exists"` error; vacancy name must be unique  
-**Suggested Layer**: E2E, API
-
----
-
-### TC-101: Job Title Must Pre-exist in Admin → Job → Job Titles
-**Category**: Business Rule  
-**Priority**: P0  
-**Preconditions**: Admin logged in; the Job Title dropdown is populated only from Admin → Job → Job Titles  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Observe the **Job Title** dropdown options
-3. Attempt to manually type a non-existent job title name (if the field accepts text entry)
-4. Verify only existing job titles appear in the dropdown
-**Expected Results**:
-- Job Title is a constrained dropdown (not a free-text input)
-- Only job titles already defined in Admin → Job → Job Titles are selectable
-- Cannot save a vacancy with a job title not in the system
-**Business Rule**: §7 — Vacancy is tied to exactly one Job Title which must already exist  
-**Suggested Layer**: E2E
-
----
-
-### TC-102: Hiring Manager Must Be an Existing Employee
-**Category**: Business Rule  
-**Priority**: P0  
-**Preconditions**: Admin logged in  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. In the **Hiring Manager** autocomplete, type a name that does not match any employee
-3. Attempt to select a non-existent suggestion or leave the field with unresolved text
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill required fields
+3. Enter **Number of Positions**: `50`
 4. Click **Save**
 **Expected Results**:
-- No match appears in the autocomplete dropdown for non-existent names
-- If free text is left without selecting a valid autocomplete option, save fails with a required/invalid field error
-- Vacancy cannot be saved with an unresolved Hiring Manager
-**Business Rule**: §7 — Hiring Manager must be an existing Employee (FK constraint)  
+- Toast: `"Successfully Saved"`
+- Vacancy record shows `numOfPositions: 50`
+**Business Rule**: numOfPositions must be ≥ 1 (no documented upper limit; test-data.md boundary values)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-103: Number of Positions Must Be at Least 1
-**Category**: Business Rule  
-**Priority**: P0  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
+### TC-006: Add a vacancy via API (POST /recruitment/vacancies)
+**Category**: Happy Path
+**Preconditions**: Valid Bearer token (or session + CSRF); valid `jobTitleId` and `hiringManagerId` (empNumber)
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill in Name, Job Title, Hiring Manager
-3. Enter **Number of Positions**: `0`
-4. Click **Save**
-**Expected Results**:
-- Save is blocked
-- Inline validation message: `"Should be greater than 0"` or similar
-- No vacancy is created
-**Business Rule**: §Edge-Boundary test data — `numOfPositions`: 0 rejected, 1 minimum  
-**Suggested Layer**: E2E, API
-
----
-
-### TC-104: Published Vacancy Appears on Public Job Board
-**Category**: Business Rule  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
-**Steps**:
-1. Create a vacancy with **Publish in Job Board** toggled ON and Status = Active
-2. Create a second vacancy with **Publish in Job Board** toggled OFF
-3. Navigate to the public job site (RSS feed or job site URL if configured)
-**Expected Results**:
-- Vacancy 1 (published) appears in the public listing
-- Vacancy 2 (unpublished) does NOT appear in the public listing
-**Business Rule**: `isPublished` flag controls visibility on public job site  
-**Suggested Layer**: E2E
-
----
-
-### TC-105: Vacancy Status Controls Candidate Availability
-**Category**: Business Rule  
-**Priority**: P1  
-**Preconditions**: Admin logged in; one Active vacancy and one Closed vacancy exist  
-**Steps**:
-1. Navigate to Recruitment → Candidates → Add
-2. Open the **Vacancy** dropdown
-3. Observe which vacancies are listed
-**Expected Results**:
-- Only Active vacancies appear in the dropdown
-- The Closed vacancy does not appear as an option
-**Business Rule**: §7 — candidates can only be applied against existing (active) vacancies  
-**Suggested Layer**: E2E
-
----
-
-### TC-106: Deleting a Job Title Blocked When Referenced by a Vacancy
-**Category**: Business Rule  
-**Priority**: P1  
-**Preconditions**: Admin logged in; a vacancy exists that references Job Title X  
-**Steps**:
-1. Navigate to Admin → Job → Job Titles
-2. Attempt to delete Job Title X (the one referenced by the active vacancy)
-3. Confirm the delete action
-**Expected Results**:
-- Delete is blocked
-- Error message: `"This record is in use and cannot be deleted"`
-- Job Title remains in the system
-**Business Rule**: §11 — Job Titles are hard-deleted but deletion is blocked if referenced by a vacancy  
-**Suggested Layer**: E2E
-
----
-
-### TC-107: API POST Vacancy — All Required Fields Validated
-**Category**: Business Rule  
-**Priority**: P0  
-**Preconditions**: Valid Admin session with Bearer token  
-**Steps**:
-1. Send `POST /web/index.php/api/v2/recruitment/vacancies` with body:
+1. Authenticate and obtain Bearer token
+2. Retrieve a valid `jobTitleId` from `GET /api/v2/admin/job-titles`
+3. Retrieve a valid employee `empNumber` from `GET /api/v2/pim/employees`
+4. Send `POST /api/v2/recruitment/vacancies` with body:
    ```json
-   { "name": "API Test Vacancy", "jobTitleId": <valid_id>, "hiringManagerId": <valid_emp_id>, "numOfPositions": 3, "isPublished": false, "status": true }
+   {
+     "name": "API Created Vacancy",
+     "jobTitleId": <id>,
+     "hiringManagerId": <empNumber>,
+     "numOfPositions": 2,
+     "isPublished": false,
+     "status": true
+   }
    ```
-2. Note the response
 **Expected Results**:
 - HTTP 200/201
-- Response contains created vacancy data with auto-generated `vacancyId`
-- `GET /recruitment/vacancies` returns the new record
-**Business Rule**: API POST endpoint requires all mandatory fields; returns standard envelope `{ "data": {...}, "meta": {...} }`  
+- Response body contains `{ "data": { "id": <new_id>, "name": "API Created Vacancy", ... } }`
+- `GET /api/v2/recruitment/vacancies` lists the new record
+**Business Rule**: API endpoint documented in api-reference.md §Recruitment
 **Suggested Layer**: API
 
 ---
 
-### TC-108: API POST Vacancy — Missing Required Field Returns 422
-**Category**: Business Rule  
-**Priority**: P0  
-**Preconditions**: Valid Admin session with Bearer token  
+### TC-007: Add vacancy and verify it appears in Candidates filter
+**Category**: Happy Path
+**Preconditions**: Vacancy created successfully (TC-001)
 **Steps**:
-1. Send `POST /web/index.php/api/v2/recruitment/vacancies` with `name` omitted:
-   ```json
-   { "jobTitleId": <valid_id>, "hiringManagerId": <valid_emp_id>, "numOfPositions": 1, "isPublished": false, "status": true }
-   ```
+1. Navigate to `Recruitment → Candidates` → click **Add**
+2. On the Add Candidate form, open the **Vacancy** dropdown
 **Expected Results**:
-- HTTP 422
-- Response body: `{ "error": { "status": "422", "text": "Invalid Parameter" }, "data": { "name": "Required" } }`
-**Business Rule**: §9 — Required fields return 422 with `"Required"` in the data field  
-**Suggested Layer**: API
-
----
-
-## Security
-
-### TC-200: ESS User Cannot Access Recruitment → Vacancies via UI
-**Category**: Security  
-**Priority**: P0  
-**Preconditions**: ESS user account exists and is logged in  
-**Steps**:
-1. Login as an ESS user
-2. Observe the side navigation menu
-3. Attempt direct URL navigation to the Recruitment Vacancies list page
-**Expected Results**:
-- Recruitment menu item is NOT visible in the ESS side panel
-- Direct URL navigation renders an empty page, 403, or redirects with "Forbidden" message
-- No vacancy data is displayed
-**Business Rule**: §2 — ESS users only see My Info, Leave, Time, Performance, Directory, Dashboard, Buzz  
+- The newly created vacancy name appears as an option in the Vacancy dropdown
+**Business Rule**: Candidates are applied against a specific Vacancy (business-rules.md §7; user-flows.md Flow 6)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-201: ESS User Cannot Create Vacancy via API
-**Category**: Security  
-**Priority**: P0  
-**Preconditions**: ESS user session cookie and CSRF token obtained  
+## Business Rules — TC-100 to TC-199
+
+### TC-100: Job Title must pre-exist before it can be selected
+**Category**: Business Rule
+**Preconditions**: Admin logged in; NO custom job titles have been added beyond the system defaults
 **Steps**:
-1. Login as ESS user; capture session cookie and `_token`
-2. Send `POST /web/index.php/api/v2/recruitment/vacancies` with valid body and ESS session
+1. Note the current list of available Job Titles via `Admin → Job → Job Titles`
+2. Navigate to `Recruitment → Vacancies` → **Add**
+3. Open the **Job Title** dropdown
+**Expected Results**:
+- Only job titles that exist in the system appear in the dropdown
+- A non-existent title cannot be typed in and saved (the field is a constrained dropdown, not a free-text input)
+**Business Rule**: "A Vacancy is tied to exactly one Job Title which must already exist in Admin → Job → Job Titles" (business-rules.md §7)
+**Suggested Layer**: E2E
+
+---
+
+### TC-101: Hiring Manager must be an existing active Employee
+**Category**: Business Rule
+**Preconditions**: Admin logged in; at least one active employee exists
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. In the **Hiring Manager** autocomplete field, type a partial name of an active employee
+3. Verify the autocomplete dropdown shows the employee
+4. Select the employee
+**Expected Results**:
+- Only existing employees appear in the autocomplete suggestions
+- A free-text non-employee string cannot be submitted as the Hiring Manager
+**Business Rule**: "Hiring Manager must be an existing Employee" (business-rules.md §7)
+**Suggested Layer**: E2E
+
+---
+
+### TC-102: Terminated employee cannot be set as Hiring Manager
+**Category**: Business Rule
+**Preconditions**: Admin logged in; at least one **terminated** employee exists; their name is known
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. In **Hiring Manager** autocomplete, type the terminated employee's name
+**Expected Results**:
+- Terminated employee does NOT appear in autocomplete suggestions (or is excluded by filter)
+- If somehow submitted via API with a terminated employee's empNumber, the API should reject with a validation error
+**Business Rule**: Terminated employees are logically removed from active records (business-rules.md §3)
+**Suggested Layer**: E2E + API
+
+---
+
+### TC-103: Vacancy name must be unique
+**Category**: Business Rule
+**Preconditions**: A vacancy named `"Unique Test Vacancy"` already exists in the system
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Enter **Vacancy Name**: `Unique Test Vacancy` (exact duplicate)
+3. Fill remaining required fields with valid data
+4. Click **Save**
+**Expected Results**:
+- Error toast or inline field error: `"Already exists"` (or similar unique constraint message)
+- No new vacancy record is created
+**Business Rule**: Vacancy name uniqueness (domain model — name field in vacancy table)
+**Suggested Layer**: E2E + API
+
+---
+
+### TC-104: Number of Positions minimum value is 1
+**Category**: Business Rule
+**Preconditions**: Admin logged in; prerequisites satisfied
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill required fields; set **Number of Positions** to `0`
+3. Click **Save**
+**Expected Results**:
+- Inline validation error: `"Should be greater than 0"` or similar
+- Form does not submit
+**Business Rule**: "numOfPositions >= 1" (user-flows.md test-data boundary values, api-reference.md)
+**Suggested Layer**: E2E + API
+
+---
+
+### TC-105: Published vacancy is visible on public job site
+**Category**: Business Rule
+**Preconditions**: Admin logged in; prerequisites satisfied
+**Steps**:
+1. Create a vacancy with **Publish in Job Site** toggled ON
+2. Navigate to the public job application URL (if configured)
+**Expected Results**:
+- The vacancy appears on the public-facing job listing
+- An unpublished (isPublished=false) vacancy does NOT appear on the public job listing
+**Business Rule**: "`isPublished` controls visibility on public job board" (domain model; user-flows.md Flow 6)
+**Suggested Layer**: E2E
+
+---
+
+### TC-106: Active vacancy accepts candidate applications; Closed vacancy does not
+**Category**: Business Rule
+**Preconditions**: One Active vacancy and one Closed vacancy exist
+**Steps**:
+1. Navigate to `Recruitment → Candidates` → **Add**
+2. Open the **Vacancy** dropdown
+**Expected Results**:
+- Active vacancies appear as selectable options
+- Closed vacancies do not appear (or are visually disabled) in the Vacancy dropdown for new candidate applications
+**Business Rule**: Closed vacancies halt the recruitment pipeline (business-rules.md §7)
+**Suggested Layer**: E2E
+
+---
+
+### TC-107: Deleting a Job Title that is referenced by a Vacancy is blocked
+**Category**: Business Rule
+**Preconditions**: A vacancy exists that references Job Title "Test Title"
+**Steps**:
+1. Navigate to `Admin → Job → Job Titles`
+2. Attempt to delete `"Test Title"`
+**Expected Results**:
+- Error: `"This record is in use and cannot be deleted"`
+- The Job Title remains in the system
+**Business Rule**: "Job Titles: hard-deleted, but deletion is BLOCKED if any Vacancy still references them" (business-rules.md §11)
+**Suggested Layer**: E2E + API
+
+---
+
+## Security — TC-200 to TC-299
+
+### TC-200: ESS user cannot access the Vacancies page via UI navigation
+**Category**: Security
+**Preconditions**: Logged in as an ESS user (non-Admin)
+**Steps**:
+1. Log in as an ESS user
+2. Inspect the left-side navigation menu
+**Expected Results**:
+- `Recruitment` menu item is NOT visible in the side panel
+- ESS user has no path to reach Vacancies through UI navigation
+**Business Rule**: "ESS sees only My Info, Leave, Time, Performance, Directory, Dashboard, Buzz" (business-rules.md §2)
+**Suggested Layer**: E2E
+
+---
+
+### TC-201: ESS user cannot access Vacancies list via direct URL
+**Category**: Security
+**Preconditions**: Logged in as an ESS user
+**Steps**:
+1. Log in as ESS user
+2. Directly navigate to `/web/index.php/recruitment/viewVacancies` in the browser address bar
+**Expected Results**:
+- Page renders an error, empty state, or redirects — no vacancy data is shown
+- No "Add" button is accessible
+**Business Rule**: Role-based menu access (business-rules.md §2; user-flows.md Flow 9)
+**Suggested Layer**: E2E
+
+---
+
+### TC-202: ESS user cannot create a vacancy via direct API call
+**Category**: Security
+**Preconditions**: Valid ESS session cookie and CSRF token obtained
+**Steps**:
+1. Log in as ESS user (obtain `orangehrm` session cookie and `_token`)
+2. Send `POST /api/v2/recruitment/vacancies` with valid vacancy payload and the ESS session credentials
 **Expected Results**:
 - HTTP 403 Forbidden
-- Response: `{ "error": { "status": "403", "text": "Unauthorized" } }`
-- No vacancy is created
-**Business Rule**: §9 — Cross-user/role API access returns 403 Unauthorized  
+- Response body: `{ "error": { "status": "403", "text": "Unauthorized" } }`
+- No vacancy record is created
+**Business Rule**: Cross-role API protection (business-rules.md §2; api-reference.md Error Scenarios)
 **Suggested Layer**: API
 
 ---
 
-### TC-202: ESS User Cannot Read Vacancy List via API
-**Category**: Security  
-**Priority**: P0  
-**Preconditions**: ESS user Bearer token obtained  
+### TC-203: Unauthenticated request to create vacancy is rejected
+**Category**: Security
+**Preconditions**: No active session (logged out or fresh incognito window)
 **Steps**:
-1. Send `GET /web/index.php/api/v2/recruitment/vacancies` with ESS Bearer token
-**Expected Results**:
-- HTTP 403 Forbidden
-- Zero vacancy records returned; no data leak
-**Business Rule**: §9 — ESS role cannot read Recruitment data  
-**Suggested Layer**: API
-
----
-
-### TC-203: Unauthenticated API Call to Create Vacancy is Rejected
-**Category**: Security  
-**Priority**: P0  
-**Preconditions**: No active session (logged out)  
-**Steps**:
-1. Send `POST /web/index.php/api/v2/recruitment/vacancies` with no auth header and no session cookie
+1. Send `POST /api/v2/recruitment/vacancies` with no session cookie and no Bearer token
 **Expected Results**:
 - HTTP 401 Unauthorized
 - Response: `{ "error": { "status": "401", "text": "Unauthorized" } }`
-**Business Rule**: §1 — All API calls require valid session; §API Auth — Missing/expired Bearer token returns 401  
+**Business Rule**: Session-based auth; unauthenticated calls rejected (business-rules.md §1; api-reference.md)
 **Suggested Layer**: API
 
 ---
 
-### TC-204: CSRF Token Required for Form Submission
-**Category**: Security  
-**Priority**: P0  
-**Preconditions**: Admin logged in  
+### TC-204: CSRF token is required for UI-driven vacancy creation
+**Category**: Security
+**Preconditions**: Admin session active; CSRF token known
 **Steps**:
-1. Open the Add Vacancy form
-2. Intercept the form POST request (using a proxy or browser DevTools)
-3. Remove the `_token` field from the request
-4. Submit the modified request
+1. Obtain a valid Admin session cookie
+2. Send `POST /api/v2/recruitment/vacancies` with the session cookie but WITHOUT the `X-CSRF-Token` header
 **Expected Results**:
-- HTTP 401 or 403
+- HTTP 401
 - Response: `{ "error": { "status": "401", "text": "Invalid CSRF token" } }`
-- No vacancy is created
-**Business Rule**: §1 — Every form includes a hidden `_token` CSRF field; automated posts without it are rejected  
+**Business Rule**: "Every state-changing UI action requires CSRF token" (business-rules.md §10; api-reference.md Error Scenarios)
 **Suggested Layer**: API
 
 ---
 
-### TC-205: Session Timeout Redirects to Login Before Vacancy Save
-**Category**: Security  
-**Priority**: P1  
-**Preconditions**: Admin session aged past 30 minutes idle timeout  
+### TC-205: Admin cannot inject malicious script into Vacancy Name (XSS)
+**Category**: Security
+**Preconditions**: Admin logged in
 **Steps**:
-1. Fill the Add Vacancy form but do not submit
-2. Wait for the session to expire (idle timeout = 30 min)
-3. Click **Save**
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Enter **Vacancy Name**: `<script>alert('xss')</script>`
+3. Fill remaining required fields with valid data
+4. Click **Save**
 **Expected Results**:
-- Request is rejected or redirect to `/auth/login?next=<original-url>`
-- No vacancy is created without a valid session
-**Business Rule**: §1 — Idle timeout defaults to 30 minutes; deep links after timeout redirect to `/auth/login?next=<url>`  
+- Either the input is rejected with a validation error, OR
+- The value is saved but rendered as escaped HTML (the script tag is not executed when the vacancy name is displayed in the list or form)
+- No alert dialog appears; no script executes
+**Business Rule**: OXD input sanitization; standard OWASP XSS prevention
 **Suggested Layer**: E2E
 
 ---
 
-### TC-206: Hiring Manager Field Cannot Be Injected with Script
-**Category**: Security  
-**Priority**: P1  
-**Preconditions**: Admin logged in  
+### TC-206: SQL injection attempt in Vacancy Name field
+**Category**: Security
+**Preconditions**: Admin logged in
 **Steps**:
-1. In the **Hiring Manager** autocomplete field, type `<script>alert('xss')</script>`
-2. In the **Vacancy Name** field, type `"><img src=x onerror=alert(1)>`
-3. Click **Save**
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Enter **Vacancy Name**: `'; DROP TABLE ohrm_job_vacancy; --`
+3. Fill remaining required fields with valid data
+4. Click **Save**
 **Expected Results**:
-- Input is treated as plain text; no script executes
-- If saved, the value is HTML-escaped when displayed in the vacancy list
-- No XSS alert fires
-**Business Rule**: Inputs must be sanitized; OXD renders via Vue's safe text bindings  
+- Input is treated as a literal string (parameterized queries used by Doctrine ORM)
+- System remains stable; no database error; no table dropped
+- The value is either saved as a literal string or rejected by validation
+**Business Rule**: ORM-level SQL injection protection (Doctrine ORM used; business-rules.md §1)
+**Suggested Layer**: API
+
+---
+
+### TC-207: Admin user session cannot be hijacked to create vacancy on behalf of another admin
+**Category**: Security
+**Preconditions**: Two admin sessions; valid CSRF token from session A
+**Steps**:
+1. Log in as Admin A and capture session cookie + CSRF token
+2. Log in as Admin B in a separate session
+3. Use Admin A's CSRF token with Admin B's session cookie on a vacancy POST
+**Expected Results**:
+- Request is rejected (CSRF token is bound to session)
+- HTTP 401 Invalid CSRF token
+**Business Rule**: CSRF tokens are session-scoped (business-rules.md §10)
+**Suggested Layer**: API
+
+---
+
+## Negative — TC-300 to TC-399
+
+### TC-300: Submit the Add Vacancy form with all required fields empty
+**Category**: Negative
+**Preconditions**: Admin logged in; on the Add Vacancy form
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Click **Save** without filling any field
+**Expected Results**:
+- Form does not submit
+- Inline validation messages appear below each required field: `"Required"` for Vacancy Name, Job Title, Hiring Manager, and Number of Positions
+- No toast for success; no record created
+**Business Rule**: Required field validation (business-rules.md §9)
 **Suggested Layer**: E2E
 
 ---
 
-## Negative / Error
-
-### TC-300: Save Without Vacancy Name Shows Required Error
-**Category**: Negative  
-**Priority**: P0  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
+### TC-301: Submit without Vacancy Name
+**Category**: Negative
+**Preconditions**: Admin logged in; Job Title and Employee available
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
+1. Navigate to `Recruitment → Vacancies` → **Add**
 2. Leave **Vacancy Name** blank
-3. Fill Job Title, Hiring Manager, Number of Positions
-4. Click **Save** (or blur the Name field)
+3. Fill all other required fields with valid data
+4. Click **Save**
 **Expected Results**:
-- Inline error `"Required"` appears below the Vacancy Name input
+- Inline error under Vacancy Name: `"Required"`
 - Form does not submit
-- No toast appears
-**Business Rule**: §9 — Required text fields show `"Required"` immediately below the OXD input when blurred empty  
+**Business Rule**: Name is mandatory (api-reference.md POST `/recruitment/vacancies` body)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-301: Save Without Job Title Shows Required Error
-**Category**: Negative  
-**Priority**: P0  
-**Preconditions**: Admin logged in  
+### TC-302: Submit without selecting a Job Title
+**Category**: Negative
+**Preconditions**: Admin logged in
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill **Vacancy Name** and **Hiring Manager** and **Number of Positions**
-3. Leave **Job Title** unselected
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill Vacancy Name, Hiring Manager, Number of Positions
+3. Leave **Job Title** unselected (default/empty state)
 4. Click **Save**
 **Expected Results**:
-- Inline error `"Required"` appears below the Job Title dropdown
+- Inline error: `"Required"` under Job Title
 - Form does not submit
-**Business Rule**: §9 — Required fields show `"Required"` on invalid submit attempt  
+**Business Rule**: `jobTitleId` is required (api-reference.md §Recruitment)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-302: Save Without Hiring Manager Shows Required Error
-**Category**: Negative  
-**Priority**: P0  
-**Preconditions**: Admin logged in; Job Title exists  
+### TC-303: Submit without selecting a Hiring Manager
+**Category**: Negative
+**Preconditions**: Admin logged in
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill **Vacancy Name**, **Job Title**, **Number of Positions**
-3. Leave **Hiring Manager** blank
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill Vacancy Name, Job Title, Number of Positions
+3. Leave **Hiring Manager** autocomplete empty
 4. Click **Save**
 **Expected Results**:
-- Inline error `"Required"` appears below the Hiring Manager input
+- Inline error: `"Required"` under Hiring Manager
 - Form does not submit
-**Business Rule**: §7, §9 — Hiring Manager is mandatory for a vacancy  
+**Business Rule**: `hiringManagerId` is required (api-reference.md §Recruitment)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-303: Save Without Number of Positions Shows Required Error
-**Category**: Negative  
-**Priority**: P0  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
+### TC-304: Submit with Number of Positions = 0
+**Category**: Negative
+**Preconditions**: Admin logged in; prerequisites satisfied
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill Name, Job Title, Hiring Manager
-3. Leave **Number of Positions** blank
-4. Click **Save**
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill all required fields; enter **Number of Positions**: `0`
+3. Click **Save**
 **Expected Results**:
-- Inline error `"Required"` or `"Should be a number"` appears below the field
+- Inline error: `"Should be greater than 0"` (or similar numeric constraint message)
 - Form does not submit
-**Business Rule**: §9 — Numeric fields show `"Should be a number"` or `"Should be greater than 0"`  
-**Suggested Layer**: E2E
+**Business Rule**: numOfPositions ≥ 1 (user-flows.md test-data boundary values)
+**Suggested Layer**: E2E + API
 
 ---
 
-### TC-304: Number of Positions = 0 is Rejected
-**Category**: Negative  
-**Priority**: P0  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
+### TC-305: Submit with negative Number of Positions via API
+**Category**: Negative
+**Preconditions**: Valid Admin session + CSRF token
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill Name, Job Title, Hiring Manager
-3. Enter **Number of Positions**: `0`
-4. Click **Save**
+1. Send `POST /api/v2/recruitment/vacancies` with `"numOfPositions": -1`
 **Expected Results**:
-- Validation error `"Should be greater than 0"` (or equivalent) displayed
-- No vacancy created
-**Business Rule**: §Edge-Boundary — `numOfPositions`: 0 rejected, 1 minimum  
-**Suggested Layer**: E2E, API
+- HTTP 422 Unprocessable Entity
+- Response: `{ "error": { "status": "422", "text": "Invalid Parameter" }, "data": { "numOfPositions": "..." } }`
+**Business Rule**: Validation rule — positions must be positive (api-reference.md Error Scenarios)
+**Suggested Layer**: API
 
 ---
 
-### TC-305: Negative Number of Positions is Rejected
-**Category**: Negative  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
+### TC-306: Submit with duplicate Vacancy Name via API
+**Category**: Negative
+**Preconditions**: Vacancy named `"Duplicate Test"` already exists; valid Admin session
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill Name, Job Title, Hiring Manager
-3. Enter **Number of Positions**: `-5`
-4. Click **Save**
+1. Send `POST /api/v2/recruitment/vacancies` with `"name": "Duplicate Test"` and all other valid fields
 **Expected Results**:
-- Validation error shown (`"Should be greater than 0"`)
-- No vacancy created
-**Business Rule**: §9 — Numeric fields must be positive  
-**Suggested Layer**: E2E, API
+- HTTP 422
+- Response data contains `"name": "Already exists"` (or similar unique constraint error)
+**Business Rule**: Vacancy name uniqueness (business-rules.md §9)
+**Suggested Layer**: API
 
 ---
 
-### TC-306: Duplicate Vacancy Name Returns Error
-**Category**: Negative  
-**Priority**: P0  
-**Preconditions**: Admin logged in; a vacancy named `Existing Vacancy` already exists  
+### TC-307: Submit with non-existent jobTitleId via API
+**Category**: Negative
+**Preconditions**: Valid Admin session; knowing an `id` value that does not correspond to any Job Title
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Enter **Vacancy Name**: `Existing Vacancy`
-3. Fill all other required fields
-4. Click **Save**
+1. Send `POST /api/v2/recruitment/vacancies` with `"jobTitleId": 999999` (a non-existent ID)
 **Expected Results**:
-- Error toast or field-level message: `"Already exists"`
-- No second vacancy with the same name is created
-**Business Rule**: §9, §100 — Unique violations surface as `"Already exists"`  
-**Suggested Layer**: E2E, API
+- HTTP 422 or 404
+- Error message indicating the referenced job title does not exist
+**Business Rule**: FK integrity on `jobTitleId` (Doctrine ORM enforces FK constraints)
+**Suggested Layer**: API
 
 ---
 
-### TC-307: Cancel Button Does Not Create a Vacancy
-**Category**: Negative  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
+### TC-308: Submit with non-existent hiringManagerId via API
+**Category**: Negative
+**Preconditions**: Valid Admin session
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill all required fields with valid data
-3. Click **Cancel** instead of Save
+1. Send `POST /api/v2/recruitment/vacancies` with `"hiringManagerId": 999999` (non-existent employee)
 **Expected Results**:
-- No vacancy is created
-- User is redirected back to the Vacancies list
+- HTTP 422 or 404
+- Error response indicating the employee does not exist
+**Business Rule**: FK integrity on `hiringManagerId` (empNumber FK; business-rules.md §7)
+**Suggested Layer**: API
+
+---
+
+### TC-309: Submit with non-numeric Number of Positions (string value) via API
+**Category**: Negative
+**Preconditions**: Valid Admin session
+**Steps**:
+1. Send `POST /api/v2/recruitment/vacancies` with `"numOfPositions": "abc"`
+**Expected Results**:
+- HTTP 422
+- `"data": { "numOfPositions": "Should be a number" }` or similar validation message
+**Business Rule**: Numeric field validation (business-rules.md §9)
+**Suggested Layer**: API
+
+---
+
+### TC-310: Cancel Add Vacancy form — no record created
+**Category**: Negative
+**Preconditions**: Admin logged in
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill in **Vacancy Name**: `Cancel Test Vacancy`
+3. Fill in other required fields
+4. Click **Cancel** button
+**Expected Results**:
+- User is returned to the Vacancies list
+- No new vacancy `"Cancel Test Vacancy"` appears in the list
 - Record count remains unchanged
-**Business Rule**: Cancel action discards unsaved changes  
+**Business Rule**: Cancel action discards unsaved data (standard UI pattern)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-308: Non-numeric Input in Number of Positions is Rejected
-**Category**: Negative  
-**Priority**: P1  
-**Preconditions**: Admin logged in  
+### TC-311: Typing a partial name in Hiring Manager autocomplete that matches nothing
+**Category**: Negative
+**Preconditions**: Admin logged in; on Add Vacancy form
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill Name, Job Title, Hiring Manager
-3. Enter **Number of Positions**: `abc`
+1. In the **Hiring Manager** autocomplete, type `"zzzznonexistentemployee"`
+2. Wait for autocomplete suggestions to load
+**Expected Results**:
+- Autocomplete dropdown shows `"No Records Found"` (or is empty)
+- No suggestion is accidentally auto-selected
+**Business Rule**: Autocomplete behavior for no-match (OXD autocomplete component behavior)
+**Suggested Layer**: E2E
+
+---
+
+## Edge Cases — TC-400 to TC-499
+
+### TC-400: Vacancy Name at maximum allowed length
+**Category**: Edge Case
+**Preconditions**: Admin logged in; prerequisites satisfied; maximum length for the name field known (assumed ~100 chars based on typical OrangeHRM string fields)
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Enter a **Vacancy Name** of exactly the maximum character length (test with 100 chars, e.g. `"A" × 100`)
+3. Fill remaining required fields
 4. Click **Save**
 **Expected Results**:
-- Validation error `"Should be a number"` shown
-- No vacancy created
-**Business Rule**: §9 — Numeric fields show `"Should be a number"`  
+- If ≤ max: Toast `"Successfully Saved"`; vacancy created
+- If > max: Inline error `"Should be less than N characters"`
+**Business Rule**: String field length limits (business-rules.md §9)
+**Suggested Layer**: E2E + API
+
+---
+
+### TC-401: Vacancy Name exceeds maximum allowed length
+**Category**: Edge Case
+**Preconditions**: Admin logged in; prerequisites satisfied
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Enter a **Vacancy Name** of 300 characters (well beyond any reasonable maximum)
+3. Click **Save**
+**Expected Results**:
+- Inline error: `"Should be less than N characters"` where N is the configured max
+- Form does not submit
+**Business Rule**: String length validation (business-rules.md §9)
+**Suggested Layer**: E2E + API
+
+---
+
+### TC-402: Number of Positions = 1 (minimum valid boundary)
+**Category**: Edge Case
+**Preconditions**: Admin logged in; prerequisites satisfied
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill required fields; set **Number of Positions** to `1`
+3. Click **Save**
+**Expected Results**:
+- Toast: `"Successfully Saved"`
+- Vacancy saved with `numOfPositions: 1`
+**Business Rule**: numOfPositions ≥ 1 (user-flows.md boundary values)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-309: API POST with Non-existent jobTitleId Returns 422
-**Category**: Negative  
-**Priority**: P1  
-**Preconditions**: Valid Admin Bearer token  
+### TC-403: Number of Positions = very large number (boundary high)
+**Category**: Edge Case
+**Preconditions**: Admin logged in; prerequisites satisfied
 **Steps**:
-1. Send `POST /web/index.php/api/v2/recruitment/vacancies` with `jobTitleId: 999999` (non-existent)
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill required fields; set **Number of Positions** to `9999`
+3. Click **Save**
 **Expected Results**:
-- HTTP 422 with error body referencing invalid `jobTitleId`
-- No vacancy created
-**Business Rule**: §9 — FK constraints validated at API layer  
+- Toast: `"Successfully Saved"` (no documented upper cap — large values should be accepted)
+- If there is a max, the system shows a validation error
+**Business Rule**: No explicit upper bound documented; verify system behavior
+**Suggested Layer**: E2E + API
+
+---
+
+### TC-404: Vacancy Name with only whitespace
+**Category**: Edge Case
+**Preconditions**: Admin logged in; prerequisites satisfied
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Enter **Vacancy Name** as `"   "` (spaces only)
+3. Fill remaining required fields
+4. Click **Save**
+**Expected Results**:
+- Validation error: `"Required"` (whitespace-only treated as empty) OR
+- Error: name cannot consist solely of whitespace
+- No record created
+**Business Rule**: Required field validation; whitespace-only strings should be rejected (business-rules.md §9)
+**Suggested Layer**: E2E
+
+---
+
+### TC-405: Vacancy Name with special characters
+**Category**: Edge Case
+**Preconditions**: Admin logged in; prerequisites satisfied
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Enter **Vacancy Name**: `C++ Developer & Architect (2026) — Full-Time`
+3. Fill remaining required fields
+4. Click **Save**
+**Expected Results**:
+- Toast: `"Successfully Saved"`
+- Vacancy name renders correctly in the list with special characters intact (no HTML entity mangling)
+**Business Rule**: String storage and rendering with special characters
+**Suggested Layer**: E2E
+
+---
+
+### TC-406: Vacancy Name with leading and trailing whitespace
+**Category**: Edge Case
+**Preconditions**: Admin logged in; prerequisites satisfied
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Enter **Vacancy Name**: `"  DevOps Engineer  "` (leading and trailing spaces)
+3. Fill remaining required fields
+4. Click **Save**
+**Expected Results**:
+- Vacancy is saved with the name trimmed (e.g. `"DevOps Engineer"`) OR saved with whitespace intact
+- Uniqueness check should treat `"DevOps Engineer"` and `"  DevOps Engineer  "` as the same (or different — verify actual behavior)
+**Business Rule**: Input trimming behavior (OXD component behavior)
+**Suggested Layer**: E2E
+
+---
+
+### TC-407: Number of Positions as a decimal value
+**Category**: Edge Case
+**Preconditions**: Valid Admin session + CSRF token
+**Steps**:
+1. Send `POST /api/v2/recruitment/vacancies` with `"numOfPositions": 1.5`
+2. Also test UI: attempt to enter `"1.5"` in the Number of Positions field
+**Expected Results**:
+- API: HTTP 422 with validation error (integer expected)
+- UI: field may only accept integer input; decimal rejected or rounded
+**Business Rule**: numOfPositions is an integer field (domain model)
+**Suggested Layer**: E2E + API
+
+---
+
+### TC-408: Creating a vacancy when no Job Titles exist in the system
+**Category**: Edge Case
+**Preconditions**: Admin logged in; ALL job titles have been deleted (clean/empty system)
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Open the **Job Title** dropdown
+**Expected Results**:
+- Dropdown is empty (no options shown, or shows "No Options" / "No Records Found")
+- Form cannot be submitted without a Job Title
+- The UI communicates the empty state gracefully (no crash or unhandled error)
+**Business Rule**: Job Title is mandatory FK; graceful empty-state handling
+**Suggested Layer**: E2E
+
+---
+
+### TC-409: Creating a vacancy when no Employees exist
+**Category**: Edge Case
+**Preconditions**: Admin logged in; all employees have been terminated or purged (or not yet created)
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. In the **Hiring Manager** autocomplete, type any string
+**Expected Results**:
+- Autocomplete shows `"No Records Found"` (or empty dropdown)
+- Form cannot be submitted without a Hiring Manager
+**Business Rule**: Hiring Manager must be an existing employee (business-rules.md §7)
+**Suggested Layer**: E2E
+
+---
+
+### TC-410: Description field at maximum length
+**Category**: Edge Case
+**Preconditions**: Admin logged in; prerequisites satisfied
+**Steps**:
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Fill required fields; enter a **Description** of the maximum character count (250 chars if following OrangeHRM textarea convention)
+3. Click **Save**
+**Expected Results**:
+- Toast: `"Successfully Saved"`; description stored correctly
+- If over max: error `"Should be less than N characters"`
+**Business Rule**: Length-limited textarea (business-rules.md §9 — textareas ≤ 250 chars typical)
+**Suggested Layer**: E2E
+
+---
+
+### TC-411: POST API request with missing optional fields (only required fields)
+**Category**: Edge Case
+**Preconditions**: Valid Admin session + CSRF token; valid `jobTitleId` and `hiringManagerId`
+**Steps**:
+1. Send `POST /api/v2/recruitment/vacancies` with only the required fields:
+   ```json
+   {
+     "name": "Minimal Vacancy",
+     "jobTitleId": <id>,
+     "hiringManagerId": <empNumber>,
+     "numOfPositions": 1,
+     "isPublished": false,
+     "status": true
+   }
+   ```
+   (no `description`)
+**Expected Results**:
+- HTTP 200/201; vacancy created with `description: null`
+**Business Rule**: Optional fields can be omitted (api-reference.md §Recruitment)
 **Suggested Layer**: API
 
 ---
 
-### TC-310: API POST with Non-existent hiringManagerId Returns 422
-**Category**: Negative  
-**Priority**: P1  
-**Preconditions**: Valid Admin Bearer token  
+## UI State — TC-500 to TC-599
+
+### TC-500: Vacancies list shows empty state when no vacancies exist
+**Category**: UI State
+**Preconditions**: Admin logged in; no vacancies currently in the system (or all are deleted)
 **Steps**:
-1. Send `POST /web/index.php/api/v2/recruitment/vacancies` with `hiringManagerId: 999999` (non-existent employee)
+1. Navigate to `Recruitment → Vacancies`
 **Expected Results**:
-- HTTP 422 with appropriate error message
-- No vacancy created
-**Business Rule**: §7 — Hiring Manager must be a valid existing employee  
-**Suggested Layer**: API
-
----
-
-## Edge Cases
-
-### TC-400: Vacancy Name at Maximum Length (250 chars)
-**Category**: Edge Case  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Enter a **Vacancy Name** of exactly 250 characters (or the documented max length)
-3. Fill remaining required fields
-4. Click **Save**
-**Expected Results**:
-- Vacancy is saved successfully
-- Name displayed in full (or truncated with tooltip) in the list
-**Business Rule**: §9 — Length-limited fields show `"Should be less than N characters"` when exceeded  
+- Table shows `"No Records Found"` (or appropriate empty-state message)
+- The record count shows `"(0) Records Found"`
+- **Add** button is still visible and clickable
+**Business Rule**: Empty state rendering (standard OXD table behavior; business-rules.md §10)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-401: Vacancy Name Exceeding Maximum Length is Rejected
-**Category**: Edge Case  
-**Priority**: P1  
-**Preconditions**: Admin logged in  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Enter a **Vacancy Name** of 251+ characters
-3. Fill remaining required fields
-4. Click **Save**
-**Expected Results**:
-- Inline validation: `"Should be less than N characters"` (N = documented limit)
-- Vacancy not created
-**Business Rule**: §9 — Length-limited fields are validated on save  
-**Suggested Layer**: E2E
-
----
-
-### TC-402: Number of Positions = 1 (Minimum Valid Value)
-**Category**: Edge Case  
-**Priority**: P0  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill all required fields; set **Number of Positions**: `1`
-3. Click **Save**
-**Expected Results**:
-- Vacancy saved successfully
-- Positions shown as `1` in the vacancy record
-**Business Rule**: §Edge-Boundary — `numOfPositions`: 0 rejected, 1 minimum  
-**Suggested Layer**: E2E, API
-
----
-
-### TC-403: Large Number of Positions (e.g., 9999)
-**Category**: Edge Case  
-**Priority**: P2  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill all required fields; set **Number of Positions**: `9999`
-3. Click **Save**
-**Expected Results**:
-- Vacancy saved successfully (large values accepted per boundary table)
-- Number of Positions displayed correctly as `9999`
-**Business Rule**: §Edge-Boundary — large values accepted  
-**Suggested Layer**: E2E, API
-
----
-
-### TC-404: Vacancy Name with Special Characters
-**Category**: Edge Case  
-**Priority**: P2  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Enter **Vacancy Name**: `Senior Developer (R&D) – 2025/Q1`
-3. Fill remaining required fields
-4. Click **Save**
-**Expected Results**:
-- Vacancy saved successfully
-- Name displayed exactly as entered (special chars preserved, HTML-escaped in rendering)
-**Business Rule**: Fields should accept standard punctuation; no inadvertent XSS or truncation  
-**Suggested Layer**: E2E
-
----
-
-### TC-405: Vacancy Name with Only Whitespace is Rejected
-**Category**: Edge Case  
-**Priority**: P1  
-**Preconditions**: Admin logged in  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Enter **Vacancy Name**: `   ` (spaces only)
-3. Fill remaining required fields
-4. Click **Save**
-**Expected Results**:
-- Treated as empty; inline error `"Required"` shown
-- Vacancy not created
-**Business Rule**: §9 — Required fields must not be blank/whitespace-only  
-**Suggested Layer**: E2E
-
----
-
-### TC-406: Hiring Manager Autocomplete with Partial Name (2 Characters)
-**Category**: Edge Case  
-**Priority**: P1  
-**Preconditions**: Admin logged in; employees exist with names starting with `Pa` (e.g., `Paul Collings`)  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. In **Hiring Manager** autocomplete, type `Pa`
-3. Observe the autocomplete dropdown
-4. Select `Paul Collings`
-**Expected Results**:
-- Dropdown appears with matching employee suggestions after 2 characters typed
-- Can successfully select and save with the chosen employee
-**Business Rule**: OXD autocomplete requires at least 2 chars to trigger hints  
-**Suggested Layer**: E2E
-
----
-
-### TC-407: Description Field at Maximum Length
-**Category**: Edge Case  
-**Priority**: P2  
-**Preconditions**: Admin logged in; Job Title and Employee exist  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Fill all required fields
-3. Enter a **Description** of exactly the maximum allowed characters (250 chars if textarea limit applies)
-4. Click **Save**
-**Expected Results**:
-- Vacancy saved successfully
-- Description stored and displayed correctly
-**Business Rule**: §9 — Textarea fields have a max of 250 chars; `"Should be less than 250 characters"` at 251+  
-**Suggested Layer**: E2E
-
----
-
-### TC-408: Add Vacancy When No Job Titles Exist in the System
-**Category**: Edge Case  
-**Priority**: P2  
-**Preconditions**: Admin logged in; no Job Titles are configured in Admin → Job → Job Titles  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Click on the **Job Title** dropdown
-**Expected Results**:
-- Dropdown opens with empty list or placeholder message (e.g., `"No Results"`)
-- Cannot save vacancy without a job title selection
-**Business Rule**: §7 — Vacancy is tied to exactly one Job Title which must pre-exist  
-**Suggested Layer**: E2E
-
----
-
-### TC-409: Number of Positions as Decimal is Rejected
-**Category**: Edge Case  
-**Priority**: P2  
-**Preconditions**: Admin logged in  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Enter **Number of Positions**: `2.5`
-3. Fill remaining required fields
-4. Click **Save**
-**Expected Results**:
-- Validation error shown (decimal not accepted for integer position count)
-- Vacancy not created
-**Business Rule**: §9 — Numeric integer fields reject non-integer values  
-**Suggested Layer**: E2E, API
-
----
-
-## UI State
-
-### TC-500: Add Vacancy Form Renders All Expected Fields
-**Category**: UI State  
-**Priority**: P0  
-**Preconditions**: Admin logged in  
-**Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Observe the form layout
-**Expected Results**:
-- Form contains: **Vacancy Name** (text input), **Job Title** (OXD dropdown), **Hiring Manager** (OXD autocomplete), **Number of Positions** (numeric input), **Description** (textarea), **Active** status toggle, **Published** toggle
-- **Save** and **Cancel** buttons are visible
-- No fields are pre-filled except potentially toggles at their defaults
-**Business Rule**: Add form must expose all required and optional vacancy fields  
-**Suggested Layer**: E2E
-
----
-
-### TC-501: Required Field Inline Validation Appears on Blur
-**Category**: UI State  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Add Vacancy form is open  
-**Steps**:
-1. Click into the **Vacancy Name** input
-2. Leave it blank and click away (blur the field)
-3. Repeat for **Job Title** dropdown
-4. Repeat for **Hiring Manager** autocomplete
-5. Repeat for **Number of Positions**
-**Expected Results**:
-- Each field shows `"Required"` error immediately below its input upon losing focus while empty
-- Error disappears when a valid value is entered
-**Business Rule**: §9 — Required text fields show `"Required"` immediately below the OXD input when blurred empty  
-**Suggested Layer**: E2E
-
----
-
-### TC-502: Job Title Dropdown Lists Only Existing Job Titles
-**Category**: UI State  
-**Priority**: P1  
-**Preconditions**: Admin logged in; known Job Titles exist (e.g., `QA Engineer`, `Software Engineer`)  
-**Steps**:
-1. Open Recruitment → Vacancies → Add
-2. Click the **Job Title** dropdown
-**Expected Results**:
-- Dropdown options match exactly the Job Titles configured in Admin → Job → Job Titles
-- No free-text entry is possible
-- Dropdown closes after selection; selected value is displayed
-**Business Rule**: OXD dropdowns are NOT native `<select>` — click the dropdown body first  
-**Suggested Layer**: E2E
-
----
-
-### TC-503: Hiring Manager Autocomplete Dropdown Behavior
-**Category**: UI State  
-**Priority**: P1  
-**Preconditions**: Admin logged in; multiple employees exist  
-**Steps**:
-1. Open Add Vacancy form
-2. Type 2 characters in **Hiring Manager** autocomplete
-3. Observe dropdown
-4. Type more characters to narrow results
-5. Click a result to select
-**Expected Results**:
-- Dropdown (`.oxd-autocomplete-dropdown`) appears after 2 characters
-- Results narrow as more characters are typed
-- Clicking a result fills the field and closes the dropdown
-- Previously selected value can be cleared by deleting text
-**Business Rule**: OXD autocomplete requires click-to-select pattern; `getByPlaceholder('Type for hints...')`  
-**Suggested Layer**: E2E
-
----
-
-### TC-504: Success Toast Appears After Saving Vacancy
-**Category**: UI State  
-**Priority**: P0  
-**Preconditions**: Admin logged in; all required fields filled correctly  
+### TC-501: Success toast appears immediately after saving a vacancy
+**Category**: UI State
+**Preconditions**: Admin logged in; prerequisites satisfied
 **Steps**:
 1. Complete the Add Vacancy form with valid data
 2. Click **Save**
 3. Observe the bottom-right corner of the screen
 **Expected Results**:
-- Green success toast `"Successfully Saved"` appears in `.oxd-toast-container .oxd-toast`
-- Toast auto-dismisses after a few seconds
-**Business Rule**: §10 — Every state-changing UI action triggers a green/red toast in the bottom-right  
+- Green toast notification appears: `"Successfully Saved"`
+- Toast is visible for a few seconds then auto-dismisses
+- Test waits on `.oxd-toast .oxd-text--toast-message` before asserting success
+**Business Rule**: "Every state-changing UI action triggers a green/red toast" (business-rules.md §10)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-505: Page Redirects to Vacancy List After Successful Save
-**Category**: UI State  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Add Vacancy form filled correctly  
+### TC-502: Required field inline validation triggers on blur (not just on submit)
+**Category**: UI State
+**Preconditions**: Admin logged in; on Add Vacancy form
 **Steps**:
-1. Complete the Add Vacancy form and click **Save**
-2. Observe the URL and page after the success toast
+1. Click on the **Vacancy Name** input
+2. Leave it empty and click elsewhere (blur the field)
 **Expected Results**:
-- User is redirected to the Vacancies list page
-- The newly added vacancy appears in the list
-- Vacancy table loads (`.oxd-loading-spinner` disappears before asserting row)
-**Business Rule**: §10 — Wait on toast (not URL change) to assert success; then table re-loads asynchronously  
+- Inline validation message `"Required"` appears below the Vacancy Name field immediately on blur
+- User does not need to click Save to see the error
+**Business Rule**: OXD real-time inline validation on blur (business-rules.md §9)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-506: Cancel Redirects Back to Vacancies List Without Changes
-**Category**: UI State  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Add Vacancy form open with data entered  
+### TC-503: Job Title dropdown renders all available job titles
+**Category**: UI State
+**Preconditions**: Admin logged in; 3 Job Titles exist: "HR Manager", "QA Engineer", "DevOps Lead"
 **Steps**:
-1. Fill in the Add Vacancy form
-2. Click **Cancel**
-3. Observe resulting page and record count
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Click on the **Job Title** OXD dropdown
 **Expected Results**:
-- User returns to the Vacancies list page
-- No new row appears
-- Record count is unchanged
-**Business Rule**: Cancel discards unsaved form state  
+- Dropdown opens (`.oxd-select-dropdown` appears)
+- All 3 Job Titles are listed as selectable options
+- Selecting one closes the dropdown and populates the field
+**Business Rule**: OXD dropdown interaction pattern (ui-selectors.md §Conventions; OXD dropdowns require click to open)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-507: Vacancy Table Loading Spinner Disappears Before Asserting Rows
-**Category**: UI State  
-**Priority**: P1  
-**Preconditions**: Admin logged in  
+### TC-504: Hiring Manager autocomplete shows filtered suggestions as user types
+**Category**: UI State
+**Preconditions**: Admin logged in; employees "John Smith" and "Jane Smith" exist
 **Steps**:
-1. Navigate to Recruitment → Vacancies
-2. Observe the table load sequence
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Click the **Hiring Manager** input
+3. Type `"Smi"` (at least 2 characters to trigger autocomplete)
+4. Wait for `.oxd-autocomplete-dropdown` to appear
 **Expected Results**:
-- A loading spinner (`.oxd-loading-spinner`) or shimmer appears during data fetch (~200–800ms)
-- Spinner disappears before table rows render
-- Row count shown in `Records Found` span
-**Business Rule**: §10 — Tables load asynchronously; tests must wait for `.oxd-loading-spinner` to disappear  
+- Dropdown appears with matching results: "John Smith" and "Jane Smith"
+- Typing more characters (e.g. `"John Smi"`) narrows the results to only "John Smith"
+- Clicking a suggestion populates the field
+**Business Rule**: OXD autocomplete behavior (ui-selectors.md §Reusable OXD-Aware Helpers)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-508: Empty State — Vacancies List with No Records
-**Category**: UI State  
-**Priority**: P2  
-**Preconditions**: Admin logged in; no vacancies exist (fresh install or all deleted)  
+### TC-505: Vacancies list shows loading spinner while fetching data
+**Category**: UI State
+**Preconditions**: Admin logged in
 **Steps**:
-1. Navigate to Recruitment → Vacancies
-2. Observe the list state
+1. Navigate to `Recruitment → Vacancies`
+2. Observe the table area immediately after navigation
 **Expected Results**:
-- Table shows `"No Records Found"` message (or equivalent empty state)
-- Record count shows `0 Record(s) Found`
-- **Add** button is still visible and clickable
-**Business Rule**: Empty state should communicate clearly with no data  
+- A loading spinner (`.oxd-loading-spinner`) briefly appears while data is fetched (200–800ms)
+- Spinner disappears and rows are rendered
+- Tests must wait for spinner to disappear before asserting row count
+**Business Rule**: "Tables are loaded asynchronously and show a shimmer/skeleton loader" (business-rules.md §10)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-509: Active and Published Toggles Default State
-**Category**: UI State  
-**Priority**: P1  
-**Preconditions**: Admin logged in; Add Vacancy form is open  
+### TC-506: Vacancy list pagination defaults to 50 rows per page
+**Category**: UI State
+**Preconditions**: Admin logged in; more than 50 vacancies exist
 **Steps**:
-1. Navigate to Recruitment → Vacancies → Add
-2. Observe the initial state of the **Active** (Status) and **Published** toggles without clicking them
+1. Navigate to `Recruitment → Vacancies`
+2. Check the rows displayed per page
 **Expected Results**:
-- Document which toggle state is default (Active = ON by default; Published = OFF by default is the expected behaviour)
-- Toggles render as OXD switch components, not native checkboxes
-**Business Rule**: Default state should reflect most common use: Active=ON, Published=OFF  
+- Default page size is 50
+- Pagination controls appear (`.oxd-pagination`) when total records exceed 50
+- Page-size selector offers options: 10, 20, 50
+**Business Rule**: "Pagination defaults to 50 rows per page" (business-rules.md §10)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-510: Vacancies List Filter by Status (Active / Closed)
-**Category**: UI State  
-**Priority**: P1  
-**Preconditions**: Admin logged in; vacancies with both Active and Closed statuses exist  
+### TC-507: Cancel button on Add Vacancy form navigates back to Vacancies list
+**Category**: UI State
+**Preconditions**: Admin logged in; on the Add Vacancy form with partially filled data
 **Steps**:
-1. Navigate to Recruitment → Vacancies list
-2. Apply filter **Status = Active**; click **Search**
-3. Note results
-4. Apply filter **Status = Closed**; click **Search**
-5. Click **Reset**
+1. Navigate to `Recruitment → Vacancies` → **Add**
+2. Enter `"To Be Discarded"` in Vacancy Name
+3. Click **Cancel**
 **Expected Results**:
-- Active filter returns only Active vacancies
-- Closed filter returns only Closed vacancies
-- Reset clears filter and returns all vacancies
-- Wait for `.oxd-loading-spinner` between each filter action before asserting
-**Business Rule**: List filter by status must respect the `status` field value  
+- User is redirected back to the Vacancies list (`.oxd-topbar-header-breadcrumb-module` shows "Vacancies" or "Recruitment")
+- No record `"To Be Discarded"` appears in the list
+**Business Rule**: Cancel discards form state without saving
 **Suggested Layer**: E2E
 
 ---
 
-### TC-511: Vacancies List Pagination at 50 Rows per Page
-**Category**: UI State  
-**Priority**: P2  
-**Preconditions**: Admin logged in; more than 50 vacancies exist  
+### TC-508: Add Vacancy form field states after a failed save attempt
+**Category**: UI State
+**Preconditions**: Admin logged in; Add Vacancy form open
 **Steps**:
-1. Navigate to Recruitment → Vacancies
-2. Observe pagination controls at `.oxd-pagination`
-3. Navigate to page 2
+1. Click **Save** with all fields empty (to trigger validation)
+2. Observe the form state
+3. Fill in the **Vacancy Name** field with valid data
 **Expected Results**:
-- Default page size is 50 rows
-- Page 2 contains the next set of vacancies
-- Page-size selector offers 10/20/50
-**Business Rule**: §10 — Pagination defaults to 50 rows per page; page-size selector offers 10/20/50  
+- After filling in Vacancy Name, its `"Required"` error clears immediately (real-time re-validation)
+- Other empty required fields still show their errors
+**Business Rule**: OXD inline validation clears on valid input (OXD component behavior)
+**Suggested Layer**: E2E
+
+---
+
+### TC-509: Vacancy record count increments after successful creation
+**Category**: UI State
+**Preconditions**: Admin logged in; note the current `(N) Records Found` count on the Vacancies list
+**Steps**:
+1. Note current record count on Vacancies list page
+2. Add a new vacancy with valid data → Save
+3. Navigate back to the Vacancies list
+**Expected Results**:
+- Record count shows `(N+1) Records Found`
+- New vacancy row appears in the table
+**Business Rule**: Record count reflects actual data (business-rules.md §10)
+**Suggested Layer**: E2E
+
+---
+
+### TC-510: Add Vacancy form is accessible from the Recruitment menu without extra navigation
+**Category**: UI State
+**Preconditions**: Admin logged in; currently on Dashboard
+**Steps**:
+1. Click `Recruitment` in the left side menu
+2. Click `Vacancies` in the submenu
+3. Click **Add** button
+**Expected Results**:
+- Each navigation step works without errors
+- The Add Vacancy form loads with all fields blank and ready for input
+- URL changes to the add vacancy path
+**Business Rule**: Menu visibility for Admin role (business-rules.md §2; ui-selectors.md §Recruitment Module)
 **Suggested Layer**: E2E
