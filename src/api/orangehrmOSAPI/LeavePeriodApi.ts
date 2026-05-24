@@ -1,5 +1,5 @@
-import type { LeavePeriodSeed } from '../../../test-data/api/leavePeriod';
-import { leavePeriod as leavePeriodData } from '../../../test-data/api/leavePeriod';
+import type { LeavePeriodSeed } from '../../../test-data/leave/api/leavePeriod';
+import { leavePeriod as leavePeriodData } from '../../../test-data/leave/api/leavePeriod';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

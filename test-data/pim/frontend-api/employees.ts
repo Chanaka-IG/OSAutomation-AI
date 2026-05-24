@@ -1,4 +1,4 @@
-import type { EmployeeSeed } from '../../api/employees';
+import type { EmployeeSeed } from '../api/employees';
 
 /**
  * Payloads for `EmployeesApi` (same **shape** as `EmployeeSeed` in `test-data/api/employees.ts`).

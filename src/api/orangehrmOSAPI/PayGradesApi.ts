@@ -1,5 +1,5 @@
-import type { PayGradeSeed } from '../../../test-data/api/payGrades';
-import { payGrades as payGradesData } from '../../../test-data/api/payGrades';
+import type { PayGradeSeed } from '../../../test-data/pim/api/payGrades';
+import { payGrades as payGradesData } from '../../../test-data/pim/api/payGrades';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

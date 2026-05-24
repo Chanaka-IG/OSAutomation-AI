@@ -1,95 +1,121 @@
-# Test Priority: Add Vacancies — E2E Tests
+# Test Priority: Vacancies List & Filter Functionalities — E2E Tests
 
-> **Input**: `docs/test-strategy.md` — 27 E2E scenarios + TC-103 (defense-in-depth, confirmed E2E in strategy §2b†)
-> **Total E2E tests prioritized**: 28
-> **Feature**: Recruitment → Vacancies → Add Vacancy
+> **Input**: `docs/test-strategy.md` — 52 E2E scenarios
+> **Feature**: Recruitment → Vacancies List (`/web/index.php/recruitment/viewJobVacancy`)
 > **Generated**: 2026-05-23
 
 ---
 
-## Priority Summary
+## Summary
 
-| Priority | Count | Meaning |
-|----------|------:|---------|
-| **P0** | 5 | Blocks release — core flow or security |
-| **P1** | 12 | Primary feature path — high user reach |
-| **P2** | 9 | Secondary flows and common-path edge cases |
-| **P3** | 2 | Cosmetic / rare edge cases |
-| **Total** | **28** | |
+| Priority | Count | Focus |
+|---|---|---|
+| **P0** | 5 | Page load, delete flow, security (auth/role access) |
+| **P1** | 13 | All four filter types, reset, core navigation, bulk delete, empty state UX, data display |
+| **P2** | 18 | Combined filters, sort, dropdown content, counter accuracy, reset completeness, row actions |
+| **P3** | 16 | Pagination edge, dropdown freshness, cosmetic states, low-level checkbox UX |
+| **Total** | **52** | |
+
+> ⚠️ TC-500, TC-402, TC-403 are included in P3 but **excluded from automation** (see test-strategy.md — flake risk / high setup cost).
 
 ---
 
-## P0 — Blocks Release
+## P0 — Release Blocking
 
-> These tests MUST pass before any release. A failure here means either the core feature is broken or a security/compliance boundary has been crossed. No workaround exists for the user.
+> Core feature works end-to-end, security gates enforced. A failure here ships broken recruitment management or exposes data to unauthorized users.
 
-| TC | Title | Rationale |
-|----|-------|-----------|
-| TC-001 | Add vacancy — required fields only (full save flow) | **Core business flow.** This is the fundamental act of creating a vacancy. If the save → toast → list-verify chain fails, the entire feature is broken. Every other scenario depends on this working. No workaround exists. |
-| TC-007 | Created vacancy appears in the Candidate Vacancy dropdown | **Data integrity + pipeline integrity.** A vacancy that cannot be selected when adding a candidate is a dead vacancy — it severs the recruitment pipeline. The FK linkage between vacancy and candidate is the backbone of the Recruitment module. |
-| TC-200 | ESS user — Recruitment menu is not visible | **Security / role enforcement.** ESS users must not have access to Recruitment. Visible menu items are a direct authorization boundary. A breach here exposes vacancy data and creation capabilities to unauthorized users. Directly maps to business-rules.md §2. |
-| TC-201 | ESS user — direct URL `/recruitment/viewVacancies` is blocked | **Security / defense-in-depth.** Menu hiding alone is not sufficient — direct URL access must also be blocked. This is the second layer of the same authorization boundary. Together, TC-200 and TC-201 constitute the complete ESS access-control test. |
-| TC-205 | XSS probe in Vacancy Name does not execute | **Security / compliance.** If user-supplied input is executed as a script in the browser, any admin viewing the Vacancies list is at risk of session hijacking. The test must run in a real Chromium context (dialog-fired assertion pattern, matching `add-employee.spec.ts:421`). OXD input must render the name as escaped text only. |
+| ID | Description | Rationale |
+|---|---|---|
+| TC-001 | Vacancies list page loads with all records and correct columns | If the page fails to load or table is empty/misrendered, all recruitment management is blocked with no workaround |
+| TC-011 | Delete button → confirm → vacancy removed from list | Core destructive CRUD operation; broken delete means stale/unremovable data with no UI workaround |
+| TC-200 | Unauthenticated user redirected to login | Security gate — if bypassed, vacancy data is publicly exposed. Blocks release by compliance requirement |
+| TC-201 | ESS user has no Recruitment item in side navigation | Role-based access control; ESS users must not see the Recruitment module under any path |
+| TC-202 | ESS user accessing vacancies URL directly sees no Add/Edit/Delete controls | Defense-in-depth security — UI must not expose write actions to unauthorized roles even via direct URL |
 
 ---
 
 ## P1 — High Business Impact
 
-> These tests cover the primary feature path, high-reach interactions (every user creating a vacancy hits these), and data-quality rules that protect the integrity of the recruitment pipeline.
+> Primary feature paths used daily by Recruitment Admins. Failures degrade core workflows significantly; most have no practical workaround beyond direct API calls.
 
-| TC | Title | Rationale |
-|----|-------|-----------|
-| TC-002 | Add vacancy — all fields including optional (description, isPublished, status) | **Primary feature coverage.** The optional fields (description, isPublished, status) are the fields that differentiate active published vacancies from draft/closed ones. The `isPublished` toggle controls job-site visibility — a feature HR teams use on every vacancy they publish. |
-| TC-100 | Job Title is a constrained OXD dropdown (not free-text) | **Data quality on primary path.** Every vacancy creation begins with selecting a Job Title. If the control allows free-text input, invalid or inconsistent job titles enter the system, corrupting the FK relationship used by KPI assignments, reports, and the candidate pipeline. |
-| TC-101 | Hiring Manager autocomplete shows only active employees | **Data quality on primary path.** The Hiring Manager field is used on every save. If the autocomplete surfaces non-employees or system users, the FK `hiringManagerId` can be set to an invalid employee, causing downstream failures when the hiring manager reviews candidates. |
-| TC-102 | Terminated employee is excluded from the Hiring Manager autocomplete | **Business rule enforcement (browser layer).** Terminated employees must not appear as Hiring Manager options. The API layer (TC-102†) validates the POST; this E2E test validates that the **autocomplete never surfaces them** — so the bad assignment cannot even be attempted via the UI. Defense-in-depth with the API test. |
-| TC-103 | Duplicate Vacancy Name — error toast shown, form does not navigate away | **Data integrity.** Vacancy names must be unique (domain model constraint). If duplicates are allowed, vacancy lists become ambiguous and candidate applications may be misrouted. This E2E test verifies the user-visible signal: the toast appears and the URL remains on the add form. The API layer (TC-306) verifies the 422 contract. |
-| TC-106 | Closed vacancy is absent from the Candidate Vacancy dropdown | **Recruitment pipeline integrity.** A Closed vacancy is no longer accepting candidates. If it appears in the dropdown, an admin could accidentally assign a new candidate to a closed role — creating orphaned pipeline entries with no active hiring process behind them. |
-| TC-300 | Submit empty form — all four required fields show "Required" inline | **Primary validation UX.** All users creating a vacancy will encounter required field validation at some point. This test verifies the complete required-field set fires simultaneously and the form stays put. It is the single most informative validation test for the feature. |
-| TC-301 | Save without Vacancy Name — "Required" error on that field | **Required field — primary identifier.** Vacancy Name is the unique human-readable identifier of a vacancy record. Without it, nothing in the recruitment module (candidate lists, filters, pipeline views) is labeled. |
-| TC-302 | Save without Job Title — "Required" error on that field | **Required field — FK anchor.** Job Title is mandatory per the domain model and drives KPI assignments and filtering. |
-| TC-303 | Save without Hiring Manager — "Required" error on that field | **Required field — process owner.** The Hiring Manager is the person responsible for reviewing candidates. Without them, the vacancy has no accountable reviewer. |
-| TC-310 | Cancel returns to Vacancies list; no record is created | **Data integrity + UX.** If Cancel silently creates a partial record, admins will find ghost vacancies that cannot be completed. The test asserts record count is unchanged — no record is left behind. This also confirms the navigation returns to the correct parent page. *(TC-507 is a duplicate of this test; implement once.)* |
-| TC-504 | Hiring Manager autocomplete narrows as the user types | **Primary UX interaction — high frequency.** Every vacancy creation involves the autocomplete interaction. The OXD autocomplete must filter suggestions as the user types so they can find the right employee in large organizations. If filtering breaks, users cannot efficiently assign a Hiring Manager. |
-
----
-
-## P2 — Secondary Flows / Common-Path Edge Cases
-
-> These tests cover behaviours that are important but affect narrower scenarios or have a workaround. They should run in CI but are not release-blockers on their own.
-
-| TC | Title | Rationale |
-|----|-------|-----------|
-| TC-105 | Published vacancy is visible on the public job site | **Secondary feature — configuration-dependent.** The `isPublished` toggle only matters when a public job portal is configured. Important for companies using OrangeHRM's public job board, but a workaround exists (manual coordination). Priority rises if public recruitment is in scope for this sprint. |
-| TC-304 | Positions = 0 — inline OXD range validation visible | **Edge case on a common field.** Users occasionally mistype `0`; the inline error must appear. The same constraint is also tested at API (TC-104), so a CI failure here is an indication of an OXD client-side regression rather than a server contract break. |
-| TC-311 | Autocomplete shows "No Records Found" for an unmatched query | **OXD empty-state UX.** Users will type partial names that don't match any employee. Without a "No Records Found" signal, they may not realize their query failed and may submit with an empty field. Workaround: user clears the field and retries. |
-| TC-405 | Special characters in Vacancy Name render correctly in the list | **Internationalization / rendering integrity.** Teams using accented characters (e.g. `C++ Developer & Architect — 2026`) must see their input preserved. If OXD encodes entities, the vacancy name appears garbled. Workaround: avoid special characters — but this is an unacceptable constraint for global teams. |
-| TC-408 | Job Title dropdown shows empty state when no Job Titles exist | **System configuration edge case.** On a fresh install or after all Job Titles are deleted, the dropdown must degrade gracefully (show "No Options") rather than crash or show a JS error. Low user reach but important for first-time setup and clean-state tests. |
-| TC-409 | Hiring Manager autocomplete shows empty state when no employees exist | **System configuration edge case.** Same as TC-408 but for the autocomplete. Low user reach; relevant for clean-install or edge-case teardown states. |
-| TC-502 | Inline "Required" error fires on blur, not only on Save click | **UX quality.** OXD is expected to validate on blur (real-time feedback). If validation only fires on Save, users won't know they missed a field until they try to submit — increasing friction. Workaround: users click Save to discover errors. Not blocking but degrades the authoring experience. |
-| TC-503 | Job Title dropdown lists all currently existing Job Titles | **Data completeness.** If some Job Titles are missing from the dropdown, users cannot create vacancies for those roles. Workaround: recreate the Job Title. Medium user impact; likely a caching or sort-order regression. |
-| TC-509 | Record count in the list increments by 1 after a successful save | **Post-save state verification.** Confirms the vacancy is actually persisted and visible in the list — one step beyond the success toast. Workaround: manually navigate away and back to confirm. Useful as a regression catch for list-refresh bugs. |
+| ID | Description | Rationale |
+|---|---|---|
+| TC-002 | Filter by Job Title returns only matching vacancies | Primary filter — Admins routinely narrow vacancies by role; broken filter returns wrong data |
+| TC-003 | Filter by specific Vacancy name returns exact match | Primary filter — essential for locating a specific vacancy in large lists |
+| TC-004 | Filter by Hiring Manager returns only their vacancies | Primary filter — managers need to see their own vacancies; wrong results are misleading |
+| TC-005 | Status "Active" filter shows only active vacancies | Most frequent filter use case — Admins work exclusively with active postings; closed vacancies add noise |
+| TC-006 | Status "Closed" filter shows only closed vacancies | Common archive review path — Admins regularly audit closed postings |
+| TC-009 | Reset clears all filters and restores full list | Core UX — reset is used after every filtered search; broken reset leaves users stuck in a filtered state |
+| TC-010 | Edit button navigates to the correct Edit Vacancy page | Primary row action — the only UI path to modify an existing vacancy |
+| TC-012 | Add button navigates to Add Vacancy page | Primary creation path — broken Add button prevents any new vacancy creation from the list |
+| TC-018 | Bulk delete selected vacancies removes them | High-frequency admin task for vacancies cleanup; broken bulk delete forces tedious one-by-one deletion |
+| TC-300 | Filter with no match shows "No Records Found" empty state | Critical UX feedback — without this, users cannot distinguish "filter returned nothing" from "page load failed" |
+| TC-302 | Cancel delete confirmation leaves vacancy unchanged | Data safety — if cancel secretly deletes, it is a silent data loss bug with no recovery path |
+| TC-501 | Record count updates after each Search action | Primary UX signal — Admins rely on the count to know how many vacancies match their filter |
+| TC-505 | Closed vacancy shows label "Closed" (not "false" or "Inactive") | Data display correctness — the label must match the status vocabulary used everywhere in the UI |
 
 ---
 
-## P3 — Cosmetic / Rare Edge Cases
+## P2 — Moderate Impact
 
-> Low business impact; behaviour that is unlikely to affect users in practice or where the visual effect is the only consequence. Run in nightly suites; skip in fast PR pipelines.
+> Secondary flows and feature completeness. Failures are noticeable but workarounds exist (e.g. apply filters separately, reload page). High polish / accuracy requirements.
 
-| TC | Title | Rationale |
-|----|-------|-----------|
-| TC-406 | Leading/trailing whitespace is trimmed in the rendered Vacancy Name | **Cosmetic / input normalisation.** Whitespace-padded names are an unusual input. Whether the trim happens client-side or server-side does not affect functionality — the vacancy is created and usable either way. The uniqueness constraint behaviour with whitespace variants (e.g. `"Test"` vs. `" Test "`) is the only non-cosmetic concern, and that is covered at the API layer (TC-404). |
-| TC-500 | Vacancies list shows "No Records Found" empty state | **Cosmetic UI state.** The empty-state node is a DOM element that renders when no vacancies exist. Its absence does not break any functionality — the table is simply blank. Relevant only on clean-install or after all vacancies are deleted; extremely low user reach in a production environment. |
+| ID | Description | Rationale |
+|---|---|---|
+| TC-007 | Job Title + Status combined filter narrows results | Multi-filter is a common power-user scenario; failure forces two separate searches |
+| TC-008 | All four filters combined returns exact match | Advanced filter combination; workaround is to narrow sequentially |
+| TC-013 | Default sort is Vacancy name ASC on page load | Users expect a predictable default order; wrong default causes confusion but workaround (click column) exists |
+| TC-014 | Clicking Vacancy column toggles to DESC | Sort usability; workaround is to manually scan the list |
+| TC-015 | Sort by Job Title reorders rows | Secondary sort option; moderate usability impact |
+| TC-016 | Sort by Status groups Active/Closed rows | Useful for status-based scanning; workaround is Status filter |
+| TC-017 | Select-all header checkbox selects every row | Prerequisite for bulk operations; broken select-all forces row-by-row selection |
+| TC-100 | Vacancy dropdown lists all existing vacancies | Filter data integrity — stale dropdown misleads Admins into thinking a vacancy doesn't exist |
+| TC-101 | Job Title dropdown lists all configured job titles | Filter completeness — missing job titles in the dropdown makes those vacancies unreachable via filter |
+| TC-102 | Hiring Manager dropdown shows only actual managers | Filter accuracy — non-managers in the list produce confusing zero-result searches |
+| TC-105 | Record count matches visible row count | Accuracy — mismatch between counter and rows undermines trust in the page |
+| TC-301 | Search with no filter selected returns full list | Expected no-op behaviour; broken would incorrectly restrict the list |
+| TC-303 | Status "Active" filter when all vacancies are Closed shows empty state | Edge case of primary filter — must show empty state, not crash or show wrong data |
+| TC-304 | Status "Closed" filter when all vacancies are Active shows empty state | Symmetric counterpart to TC-303 |
+| TC-305 | Vacancy filter → Reset → full list restored | Reset completeness — failing only when a specific filter is applied; workaround is page reload |
+| TC-508 | Record count decrements by 1 after single delete | Reactive UI accuracy — stale counter after delete misleads admin about current state |
+| TC-509 | Edit button uses the correct vacancy ID in the URL | If Edit opens the wrong vacancy, edits corrupt wrong record — but only if ID lookup is wrong |
+| TC-510 | Action buttons (Edit, Delete) present on every row | UI structural completeness — missing buttons on some rows blocks actions for those vacancies |
 
 ---
 
-## Implementation Order Recommendation
+## P3 — Low Impact / Cosmetic / Rare Edge Cases
 
-Implement tests in priority order to maximise early signal:
+> Nice-to-have validations, rare scenarios, cosmetic states, or scenarios with easy workarounds. Implement after P0–P2 coverage is solid.
+
+| ID | Description | Rationale |
+|---|---|---|
+| TC-107 | Pagination controls appear when >50 vacancies exist | Rare in practice — few organisations reach 50+ active vacancies; high setup cost |
+| TC-108 | Vacancy dropdown updates immediately after new vacancy created | Dynamic refresh; workaround is a page reload |
+| TC-400 | Zero records — correct empty state with column headers | Valid but rarely encountered system state; cosmetic/structural |
+| TC-401 | Long vacancy name truncates without breaking table layout | Pure cosmetic layout concern; no functional impact |
+| TC-402 | Exactly 50 records — no pagination control shown | ⚠️ **Excluded from automation** — requires seeding exactly 50 vacancies; high setup cost |
+| TC-403 | 51 records — pagination control appears | ⚠️ **Excluded from automation** — requires seeding exactly 51 vacancies; high setup cost |
+| TC-404 | Sort toggle ASC → DESC → ASC on two clicks | Detailed sort correctness; workaround is to reload (returns to default ASC) |
+| TC-405 | Bulk delete all vacancies → empty state | Destructive edge case; overlap with TC-018 (bulk delete) + TC-400 (empty state) |
+| TC-406 | Hiring Manager dropdown has no duplicate entries | Data deduplication edge; functional but low frequency |
+| TC-407 | Deleted vacancy no longer appears in Vacancy dropdown | Dropdown staleness edge; workaround is page reload |
+| TC-500 | Shimmer loader visible while API call is in progress | ⚠️ **Excluded from automation** — flake-prone on fast connections; requires network throttling |
+| TC-502 | All filter dropdowns show "-- Select --" on fresh page load | Cosmetic initial state; if wrong, users notice immediately and can work around it |
+| TC-503 | Reset shows "-- Select --" in all dropdowns | Cosmetic reset state; partial overlap with TC-009 (reset functional behaviour) |
+| TC-504 | Filter panel collapse/expand toggle works | Nice-to-have UI feature; filter panel is open by default, toggle rarely needed |
+| TC-506 | Row checkbox toggles checked/unchecked independently | Low-level UI state detail; covered implicitly by TC-017 and TC-018 |
+| TC-507 | Select-all then deselect-all via header checkbox | Inverse of TC-017; low incremental value once TC-017 is passing |
+
+---
+
+## Recommended Generation Order
+
+Generate and implement in priority order. Stop after P1 for CI gate; add P2/P3 in subsequent sprints.
 
 ```
-Sprint 1 (unblock release):   P0  →  TC-001, TC-007, TC-200, TC-201, TC-205
-Sprint 2 (primary coverage):  P1  →  TC-002, TC-100–103, TC-106, TC-300–303, TC-310, TC-504
-Sprint 3 (secondary/edges):   P2  →  TC-105, TC-304, TC-311, TC-405, TC-408, TC-409, TC-502, TC-503, TC-509
-Sprint 4 (cosmetic):          P3  →  TC-406, TC-500
+P0 (5 tests)  → always run, block merge on failure
+P1 (13 tests) → always run, block merge on failure
+P2 (18 tests) → run on schedule / pre-release
+P3 (13 tests) → run on schedule, non-blocking
+              (TC-402, TC-403, TC-500 excluded from automation)
 ```

@@ -1,5 +1,5 @@
-import type { HolidaySeed } from '../../../test-data/api/holidays';
-import { holidays as holidaysData } from '../../../test-data/api/holidays';
+import type { HolidaySeed } from '../../../test-data/leave/api/holidays';
+import { holidays as holidaysData } from '../../../test-data/leave/api/holidays';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

@@ -1,12 +1,7 @@
-import type { Locator } from '@playwright/test';
-import { auth } from '../../../test-data/frontend/auth';
+import { auth } from '../../../test-data/auth';
 import { BasePage } from '../BasePage';
 
 export class LoginPage extends BasePage {
-  readonly usernameInput: Locator = this.page.locator('input[name="username"]');
-  readonly passwordInput: Locator = this.page.locator('input[name="password"]');
-  readonly loginButton: Locator = this.page.getByRole('button', { name: 'Login' });
-
   async open(): Promise<void> {
     await this.page.goto(auth.routes.login, { waitUntil: 'domcontentloaded' });
   }

@@ -1,5 +1,5 @@
-import type { LocationSeed } from '../../../test-data/api/locations';
-import { locations as locationsData } from '../../../test-data/api/locations';
+import type { LocationSeed } from '../../../test-data/pim/api/locations';
+import { locations as locationsData } from '../../../test-data/pim/api/locations';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

@@ -1,4 +1,4 @@
-import { leave } from '../../../test-data/frontend/leave';
+import { leave } from '../../../test-data/leave/frontend/leave';
 import { BasePage } from '../BasePage';
 
 /**

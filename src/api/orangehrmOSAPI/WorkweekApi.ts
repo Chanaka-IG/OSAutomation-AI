@@ -1,5 +1,5 @@
-import type { WorkweekSeed } from '../../../test-data/api/workweek';
-import { workweek as workweekData } from '../../../test-data/api/workweek';
+import type { WorkweekSeed } from '../../../test-data/time/api/workweek';
+import { workweek as workweekData } from '../../../test-data/time/api/workweek';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

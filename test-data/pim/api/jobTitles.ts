@@ -1,4 +1,4 @@
-import { env } from '../../src/config/env';
+import { env } from '../../../src/config/env';
 
 export type JobTitleSeed = {
   title: string;
@@ -8,7 +8,7 @@ export type JobTitleSeed = {
 
 /**
  * Job titles Admin API v2. The **host** is the same as UI / `BASE_URL` (not `API_BASE_URL`).
- * Playwright resolves `adminPath` against `orangehrmApiContext`’s `baseURL` (`env.baseURL`).
+ * Playwright resolves `adminPath` against `orangehrmApiContext`'s `baseURL` (`env.baseURL`).
  */
 export const jobTitles = {
   /**

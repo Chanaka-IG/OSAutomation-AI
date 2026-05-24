@@ -1,5 +1,5 @@
-import type { LeaveTypeSeed } from '../../../test-data/api/leaveTypes';
-import { leaveTypes as leaveTypesData } from '../../../test-data/api/leaveTypes';
+import type { LeaveTypeSeed } from '../../../test-data/leave/api/leaveTypes';
+import { leaveTypes as leaveTypesData } from '../../../test-data/leave/api/leaveTypes';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

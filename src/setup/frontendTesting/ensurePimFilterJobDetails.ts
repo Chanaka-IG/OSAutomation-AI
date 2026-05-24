@@ -3,7 +3,7 @@ import { EmployeesApi } from '../../api/orangehrmOSAPI/EmployeesApi';
 import { EmploymentStatusesApi } from '../../api/orangehrmOSAPI/EmploymentStatusesApi';
 import { JobTitlesApi } from '../../api/orangehrmOSAPI/JobTitlesApi';
 import { SubunitsApi } from '../../api/orangehrmOSAPI/SubunitsApi';
-import { filterTestJobDetails } from '../../../test-data/frontend-api/pim/employees';
+import { filterTestJobDetails } from '../../../test-data/pim/frontend-api/employees';
 import { createLogger } from '../../lib/logger';
 
 const log = createLogger('ensurePimFilterJobDetails');

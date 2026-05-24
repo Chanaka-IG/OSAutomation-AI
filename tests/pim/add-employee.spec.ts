@@ -2,7 +2,7 @@ import { test, expect } from '../../src/fixtures';
 import { env } from '../../src/config/env';
 import { EmployeesApi } from '../../src/api/orangehrmOSAPI/EmployeesApi';
 import { ensureEmployeeRecords } from '../../src/setup/frontendTesting/ensureEmployeeRecords';
-import { addEmployee } from '../../test-data/frontend/add-employee';
+import { addEmployee } from '../../test-data/pim/frontend/add-employee';
 import { frontend } from '../../test-data';
 
 /**

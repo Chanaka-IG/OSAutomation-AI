@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
-import type { LoginRole } from '../../test-data/frontend/auth';
-import { auth } from '../../test-data/frontend/auth';
+import type { LoginRole } from '../../test-data/auth';
+import { auth } from '../../test-data/auth';
 import { expect } from '@playwright/test';
 
 export abstract class BasePage {

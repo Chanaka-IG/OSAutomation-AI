@@ -2,17 +2,17 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type { APIRequestContext } from '@playwright/test';
 import type { OrangehrmAdminApi } from '../api/orangehrmOSAPI/OrangehrmAdminApi';
-import { adminUsers } from '../../test-data/api/adminUsers';
-import { employees } from '../../test-data/api/employees';
-import { employmentStatuses } from '../../test-data/api/employmentStatuses';
-import { holidays } from '../../test-data/api/holidays';
-import { jobTitles } from '../../test-data/api/jobTitles';
-import { leavePeriod as leavePeriodConfig } from '../../test-data/api/leavePeriod';
-import { leaveTypes } from '../../test-data/api/leaveTypes';
-import { locations } from '../../test-data/api/locations';
-import { payGrades } from '../../test-data/api/payGrades';
-import { subunits } from '../../test-data/api/subunits';
-import { workweek as workweekConfig } from '../../test-data/api/workweek';
+import { adminUsers } from '../../test-data/pim/api/adminUsers';
+import { employees } from '../../test-data/pim/api/employees';
+import { employmentStatuses } from '../../test-data/pim/api/employmentStatuses';
+import { holidays } from '../../test-data/leave/api/holidays';
+import { jobTitles } from '../../test-data/pim/api/jobTitles';
+import { leavePeriod as leavePeriodConfig } from '../../test-data/leave/api/leavePeriod';
+import { leaveTypes } from '../../test-data/leave/api/leaveTypes';
+import { locations } from '../../test-data/pim/api/locations';
+import { payGrades } from '../../test-data/pim/api/payGrades';
+import { subunits } from '../../test-data/pim/api/subunits';
+import { workweek as workweekConfig } from '../../test-data/time/api/workweek';
 
 export type MasterDataStatus = {
   ok: boolean;

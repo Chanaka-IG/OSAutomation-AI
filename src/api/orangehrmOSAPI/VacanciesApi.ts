@@ -1,4 +1,4 @@
-import { recruitment } from '../../../test-data/frontend/recruitment';
+import { recruitment } from '../../../test-data/recruitment/frontend/recruitment';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

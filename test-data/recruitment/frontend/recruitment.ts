@@ -19,4 +19,8 @@ export const recruitment = {
     candidateFirstName: 'Priya',
     candidateLastName: 'Sharma',
   },
+  masterData: {
+    jobTitle: 'QA Engineer',
+    hiringManagerDisplayName: 'Marcus Chen',
+  },
 } as const;

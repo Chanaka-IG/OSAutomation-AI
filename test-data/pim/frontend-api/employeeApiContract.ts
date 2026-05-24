@@ -1,4 +1,4 @@
-import type { EmployeeSeed } from '../../api/employees';
+import type { EmployeeSeed } from '../api/employees';
 
 /**
  * Employees created only for `tests/api/pim-employees.spec.ts`.
