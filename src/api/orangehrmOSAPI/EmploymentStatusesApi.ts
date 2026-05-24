@@ -1,5 +1,5 @@
-import type { EmploymentStatusSeed } from '../../../test-data/api/employmentStatuses';
-import { employmentStatuses as employmentStatusesData } from '../../../test-data/api/employmentStatuses';
+import type { EmploymentStatusSeed } from '../../../test-data/pim/api/employmentStatuses';
+import { employmentStatuses as employmentStatusesData } from '../../../test-data/pim/api/employmentStatuses';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

@@ -1,4 +1,4 @@
-import type { EmployeeSeed } from '../../../test-data/api/employees';
+import type { EmployeeSeed } from '../../../test-data/pim/api/employees';
 import type { OrangehrmAdminApi } from '../../api/orangehrmOSAPI/OrangehrmAdminApi';
 import { EmployeesApi } from '../../api/orangehrmOSAPI/EmployeesApi';
 

@@ -2,8 +2,8 @@ import { test, expect } from '../../src/fixtures';
 import { env } from '../../src/config/env';
 import { ensurePimFilterEmployees } from '../../src/setup/frontendTesting/ensurePimFilterEmployees';
 import { frontend } from '../../test-data';
-import { leave } from '../../test-data/frontend/leave';
-import { pim } from '../../test-data/frontend/pim';
+import { leave } from '../../test-data/leave/frontend/leave';
+import { pim } from '../../test-data/pim/frontend/pim';
 
 /**
  * Automated coverage for `tests/plans/pim-employee-list-test-plan.md`.

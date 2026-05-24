@@ -1,7 +1,7 @@
 import path from 'path';
 import type { EmployeeSeed } from '../api/employees';
 
-const FILES_DIR = path.join(__dirname, '../files');
+const FILES_DIR = path.join(__dirname, '../../files');
 
 export const addEmployee = {
   apiPath: '/web/index.php/api/v2/pim/employees',

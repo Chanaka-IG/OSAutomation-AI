@@ -1,4 +1,4 @@
-import { env } from '../../src/config/env';
+import { env } from '../../../src/config/env';
 
 export type PayGradeSeed = {
   name: string;

@@ -1,5 +1,5 @@
-import type { SubunitSeed } from '../../../test-data/api/subunits';
-import { subunits as subunitsData } from '../../../test-data/api/subunits';
+import type { SubunitSeed } from '../../../test-data/pim/api/subunits';
+import { subunits as subunitsData } from '../../../test-data/pim/api/subunits';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

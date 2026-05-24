@@ -1,4 +1,4 @@
-import { filterTestJobDetails, primaryFilterEmployee, secondaryFilterEmployee } from '../frontend-api/pim/employees';
+import { filterTestJobDetails, primaryFilterEmployee, secondaryFilterEmployee } from '../frontend-api/employees';
 
 /** UI strings, routes, and form values for PIM module tests. */
 
@@ -12,7 +12,7 @@ export const pim = {
     addEmployee: /addEmployee/i,
   },
   samples: {
-    /** Aligned with {@link ../frontend-api/pim/employees} `ensurePimFilterEmployees` seeds. */
+    /** Aligned with {@link ../frontend-api/employees} `ensurePimFilterEmployees` seeds. */
     employeeFirstName: primaryFilterEmployee.firstName,
     employeeLastName: primaryFilterEmployee.lastName,
     seededEmployeeName: primaryFilterEmployee.firstName,

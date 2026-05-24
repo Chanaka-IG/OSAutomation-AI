@@ -1,5 +1,5 @@
-import type { JobTitleSeed } from '../../../test-data/api/jobTitles';
-import { jobTitles as jobTitlesData } from '../../../test-data/api/jobTitles';
+import type { JobTitleSeed } from '../../../test-data/pim/api/jobTitles';
+import { jobTitles as jobTitlesData } from '../../../test-data/pim/api/jobTitles';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

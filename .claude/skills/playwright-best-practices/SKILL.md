@@ -85,6 +85,10 @@ Use for : Any text-based locator. Avoid partial matches to prevent false positiv
 - Complex CSS chains (`.parent > .child:nth-child(3)`)
 - Index-based selectors without filtering
 
+### Locator definition rules
+- Always verify locators exist in the real app using Playwright MCP before using them in tests
+- Locators should be always defined in the page class if you are using POM structure, never define locators directly in the test body, this will make the test more maintainable and reusable.
+
 
 ---
 
@@ -156,7 +160,18 @@ refer automation-framework
 - Use `test.afterEach()` for cleanup if necessary (e.g., logging out, clearing test data).
 
 ### Pass data to Page class from test body
--Dont pass hardcode data to the page class from the test body, if you need to pass data from the test body to the page class, make sure that the data is not hardcoded and it is coming from the test-data files. This will make the test more maintainable and less flaky.
+-Dont pass hardcode data to the page class from the test body, if you need to pass data from the test body to the page class, make sure that the data is not hardcoded and it is coming from the test-data files. This will make the test more maintainable and less flaky. except the loginAs method.
+
+### Handle the loginAs method
+- for the loginAs method, its ok to pass the hard code data since we have only two test users and they are not going to change, but for other methods, always try to avoid hardcoding the data and pass it from the test body to the page class
+
+-Since there can be its ok to manually re-implements loginAs below is an example of how to do it. This is most time will be used with the ESS login. For admin login, you can use loinAs method.
+
+```javascript
+await loginPage.usernameInput.fill(ESS_TEST_USER.username);
+await loginPage.passwordInput.fill(ESS_TEST_USER.password);
+await loginPage.loginButton.click();
+```
 
 
 ### Multi-Step Test with Comments

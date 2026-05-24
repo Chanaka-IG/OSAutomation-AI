@@ -1,5 +1,5 @@
-import type { EmployeeSeed } from '../../../test-data/api/employees';
-import { employees as employeesData } from '../../../test-data/api/employees';
+import type { EmployeeSeed } from '../../../test-data/pim/api/employees';
+import { employees as employeesData } from '../../../test-data/pim/api/employees';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 

@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import { pim } from '../../../test-data/frontend/pim';
+import { pim } from '../../../test-data/pim/frontend/pim';
 import { BasePage } from '../BasePage';
 
 /**

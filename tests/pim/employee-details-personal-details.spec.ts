@@ -1,7 +1,7 @@
 import { test, expect } from '../../src/fixtures';
 import { env } from '../../src/config/env';
 import { EmployeesApi } from '../../src/api/orangehrmOSAPI/EmployeesApi';
-import { employeeDetails } from '../../test-data/frontend/employee-details';
+import { employeeDetails } from '../../test-data/pim/frontend/employee-details';
 import { frontend } from '../../test-data';
 
 /**

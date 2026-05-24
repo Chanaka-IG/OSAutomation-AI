@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { recruitment } from '../../../test-data/frontend/recruitment';
+import { recruitment } from '../../../test-data/recruitment/frontend/recruitment';
 import { BasePage } from '../BasePage';
 
 export class AddVacancyPage extends BasePage {

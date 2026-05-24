@@ -1,5 +1,5 @@
-import type { AdminUserSeed } from '../../../test-data/api/adminUsers';
-import { adminUsers as adminUsersData } from '../../../test-data/api/adminUsers';
+import type { AdminUserSeed } from '../../../test-data/pim/api/adminUsers';
+import { adminUsers as adminUsersData } from '../../../test-data/pim/api/adminUsers';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 
