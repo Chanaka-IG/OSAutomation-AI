@@ -7,6 +7,26 @@ const log = createLogger('AdminUsersApi');
 
 /** OrangeHRM Admin API v2 — users. Requires matching {@link AdminUserSeed.empNumber} employee to exist. */
 export class AdminUsersApi extends BaseApiService {
+  async getAll(): Promise<Array<{ id: number; userName: string }>> {
+    const response = await this.get(adminUsersData.adminPath, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok()) {
+      throw new Error(`AdminUsersApi.getAll failed: HTTP ${response.status()}`);
+    }
+    const json = (await response.json()) as { data: Array<{ id: number; userName: string }> };
+    return json.data ?? [];
+  }
+
+  async createIfAbsent(payload: AdminUserSeed): Promise<void> {
+    const all = await this.getAll();
+    if (all.some((u) => u.userName === payload.username)) {
+      log.info(`User already exists, skipping: ${payload.username}`);
+      return;
+    }
+    await this.create(payload);
+  }
+
   async create(payload: AdminUserSeed): Promise<void> {
     const response = await this.post(adminUsersData.adminPath, {
       data: {

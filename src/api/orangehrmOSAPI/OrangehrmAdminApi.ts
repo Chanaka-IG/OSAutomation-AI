@@ -26,6 +26,12 @@ export class OrangehrmAdminApi extends BaseApiService {
       },
     });
 
+    // Already authenticated — OrangeHRM redirects away from the login page
+    if (!loginPageResponse.url().includes('/auth/login')) {
+      log.info(`Admin session already active: ${env.adminUsername}`);
+      return;
+    }
+
     const html = await loginPageResponse.text();
 
     const match = html.match(/:token="&quot;([^"]+)&quot;"/);

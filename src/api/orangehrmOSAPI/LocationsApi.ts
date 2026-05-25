@@ -11,6 +11,26 @@ const log = createLogger('LocationsApi');
  * (= {@link locationsData.orangehrmBaseURL} / `BASE_URL`). Full URL: {@link locationsData.adminUrl}.
  */
 export class LocationsApi extends BaseApiService {
+  async getAll(): Promise<Array<{ id: number; name: string }>> {
+    const response = await this.get(locationsData.adminPath, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok()) {
+      throw new Error(`LocationsApi.getAll failed: HTTP ${response.status()}`);
+    }
+    const json = (await response.json()) as { data: Array<{ id: number; name: string }> };
+    return json.data ?? [];
+  }
+
+  async createIfAbsent(payload: LocationSeed): Promise<void> {
+    const all = await this.getAll();
+    if (all.some((l) => l.name === payload.name)) {
+      log.info(`Location already exists, skipping: ${payload.name}`);
+      return;
+    }
+    await this.create(payload);
+  }
+
   async create(payload: LocationSeed): Promise<void> {
     const response = await this.post(locationsData.adminPath, {
       data: {

@@ -15,19 +15,18 @@ import { seedWorkweek } from './workweek';
 /**
  * Single entry point for OrangeHRM master data seeding before UI/API tests.
  *
- * Logs in as admin once, then runs domain seeds (`jobTitles.ts`, `locations.ts`, …).
- * Domain helpers assume an authenticated {@link OrangehrmAdminApi} session — call them only
- * after {@link seedAllMasterData}, or call {@link OrangehrmAdminApi.loginAsAdmin} yourself first.
+ * Requires an already-authenticated {@link OrangehrmAdminApi} session — the caller must call
+ * {@link OrangehrmAdminApi.loginAsAdmin} before invoking this function.
  *
  * @example
  * import { seedAllMasterData } from '../../setup/masterData';
  * test.beforeEach(async ({ orangehrmAdminApi }) => {
+ *   await orangehrmAdminApi.loginAsAdmin();
  *   await seedAllMasterData(orangehrmAdminApi);
  * });
  */
 export async function seedAllMasterData(adminApi: OrangehrmAdminApi): Promise<void> {
   logger.info('Master data seeding started');
-  await adminApi.loginAsAdmin();
 
   await seedJobTitles(adminApi);
   await seedEmployees(adminApi);

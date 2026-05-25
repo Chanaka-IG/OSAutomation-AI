@@ -7,6 +7,26 @@ const log = createLogger('LeaveTypesApi');
 
 /** Leave API v2 — leave types. */
 export class LeaveTypesApi extends BaseApiService {
+  async getAll(): Promise<Array<{ id: number; name: string }>> {
+    const response = await this.get(leaveTypesData.adminPath, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok()) {
+      throw new Error(`LeaveTypesApi.getAll failed: HTTP ${response.status()}`);
+    }
+    const json = (await response.json()) as { data: Array<{ id: number; name: string }> };
+    return json.data ?? [];
+  }
+
+  async createIfAbsent(payload: LeaveTypeSeed): Promise<void> {
+    const all = await this.getAll();
+    if (all.some((lt) => lt.name === payload.name)) {
+      log.info(`Leave type already exists, skipping: ${payload.name}`);
+      return;
+    }
+    await this.create(payload);
+  }
+
   async create(payload: LeaveTypeSeed): Promise<void> {
     const response = await this.post(leaveTypesData.adminPath, {
       data: {

@@ -7,6 +7,6 @@ export async function seedPayGrades(adminApi: OrangehrmAdminApi): Promise<void> 
   const payGradesApi = new PayGradesApi(adminApi.request);
 
   for (const row of api.payGrades.seedRecords) {
-    await payGradesApi.create(row);
+    await payGradesApi.createIfAbsent(row);
   }
 }

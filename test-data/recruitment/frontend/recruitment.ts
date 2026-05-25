@@ -11,6 +11,8 @@ export const recruitment = {
     candidates: /viewCandidates/i,
     vacancies: /viewJobVacancy/i,
     addVacancy: /addJobVacancy/i,
+    addCandidate: /addCandidate$/i,
+    candidateProfile: /addCandidate\/\d+/i,
   },
   api: {
     vacanciesPath: '/web/index.php/api/v2/recruitment/vacancies',

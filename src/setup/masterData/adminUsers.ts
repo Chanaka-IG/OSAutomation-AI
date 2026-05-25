@@ -10,6 +10,6 @@ export async function seedAdminUsers(adminApi: OrangehrmAdminApi): Promise<void>
   const adminUsersApi = new AdminUsersApi(adminApi.request);
 
   for (const row of api.adminUsers.seedRecords) {
-    await adminUsersApi.create(row);
+    await adminUsersApi.createIfAbsent(row);
   }
 }
