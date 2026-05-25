@@ -6,5 +6,6 @@ test.describe.configure({ mode: 'serial' });
 
 test('seed master data', async ({ orangehrmAdminApi }) => {
   test.setTimeout(180_000);
+  await orangehrmAdminApi.loginAsAdmin();
   await seedAllMasterData(orangehrmAdminApi);
 });

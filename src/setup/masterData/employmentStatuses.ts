@@ -7,6 +7,6 @@ export async function seedEmploymentStatuses(adminApi: OrangehrmAdminApi): Promi
   const employmentStatusesApi = new EmploymentStatusesApi(adminApi.request);
 
   for (const row of api.employmentStatuses.seedRecords) {
-    await employmentStatusesApi.create(row);
+    await employmentStatusesApi.createIfAbsent(row);
   }
 }

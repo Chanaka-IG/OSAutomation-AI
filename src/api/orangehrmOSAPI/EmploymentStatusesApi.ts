@@ -27,6 +27,15 @@ export class EmploymentStatusesApi extends BaseApiService {
     return all.find((s) => s.name === name)?.id;
   }
 
+  async createIfAbsent(payload: EmploymentStatusSeed): Promise<void> {
+    const all = await this.getAll();
+    if (all.some((s) => s.name === payload.name)) {
+      log.info(`Employment status already exists, skipping: ${payload.name}`);
+      return;
+    }
+    await this.create(payload);
+  }
+
   async create(payload: EmploymentStatusSeed): Promise<void> {
     const response = await this.post(employmentStatusesData.adminPath, {
       data: {

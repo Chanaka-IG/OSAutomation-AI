@@ -7,6 +7,6 @@ export async function seedSubunits(adminApi: OrangehrmAdminApi): Promise<void> {
   const subunitsApi = new SubunitsApi(adminApi.request);
 
   for (const row of api.subunits.seedRecords) {
-    await subunitsApi.create(row);
+    await subunitsApi.createIfAbsent(row);
   }
 }

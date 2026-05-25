@@ -27,11 +27,16 @@ OSAutomationAI/
 │   ├── pages/
 │   │   ├── BasePage.ts           # Abstract base: goto(), waitForSuccessToast(), loginAs()
 │   │   ├── auth/LoginPage.ts
-│   │   └── pim/
-│   │       ├── EmployeeListPage.ts
-│   │       ├── AddEmployeePage.ts
-│   │       ├── PersonalDetailsPage.ts
-│   │       └── PimModulePage.ts
+│   │   ├── pim/
+│   │   │   ├── EmployeeListPage.ts
+│   │   │   ├── AddEmployeePage.ts
+│   │   │   ├── PersonalDetailsPage.ts
+│   │   │   └── PimModulePage.ts
+│   │   ├── leave/LeaveModulePage.ts
+│   │   └── recruitment/
+│   │       ├── RecruitmentModulePage.ts
+│   │       ├── VacanciesListPage.ts
+│   │       └── AddVacancyPage.ts
 │   ├── api/
 │   │   ├── BaseApiService.ts     # Abstract base: get/post/put/patch/delete
 │   │   └── orangehrmOSAPI/
@@ -50,11 +55,19 @@ OSAutomationAI/
 │   │   ├── employee-list.spec.ts
 │   │   ├── add-employee.spec.ts
 │   │   └── employee-details-personal-details.spec.ts
+│   ├── leave/leave.spec.ts
+│   ├── recruitment/
+│   │   ├── recruitment.spec.ts
+│   │   ├── vacancies-list.spec.ts
+│   │   └── add-vacancy.spec.ts
 │   └── api/pim-employees.spec.ts
 └── test-data/
-    ├── api/           # Master data seeds (stable, shared)
-    ├── frontend/      # UI routes, URL patterns, role credentials, file fixtures
-    └── frontend-api/  # Test-owned records (seeded per suite, cleaned in afterAll)
+    ├── index.ts                  # Barrel: re-exports api, frontend, frontendApi namespaces
+    ├── auth/                     # Login credentials and auth routes
+    ├── pim/                      # Module name (Sample)
+    │   ├── api/                  # Master data seeds: employees, jobTitles, locations, …
+    │   ├── frontend/             # UI routes, URL patterns, form sample values
+    │   └── frontend-api/         # Test-owned PIM records (seeded per suite, cleaned in afterAll)
 ```
 
 ---
@@ -241,14 +254,35 @@ await employeesApi.create(payload)
 
 ### Two-Tier Strategy
 
-**Tier 1 — Master Data** (`test-data/api/`): Stable shared records seeded once per environment. Verified by global setup; auto-seeded if missing. Tests reference these by name/ID but do not own them.
+**Tier 1 — Master Data** (`test-data/{module}/api/`): Stable shared records seeded once per environment. Organised by module (e.g. `test-data/pim/api/jobTitles.ts`, `test-data/leave/api/leaveTypes.ts`). Verified by global setup; auto-seeded if missing. Tests reference these by name/ID but do not own them.
 
-**Tier 2 — Frontend Test Data** (`test-data/frontend-api/`): Test-suite-owned records. Seeded in `beforeAll`, cleaned up in `afterAll`. Deterministic and isolated.
+**Tier 2 — Suite-Owned Test Data** (`test-data/{module}/frontend/` and `test-data/{module}/frontend-api/`): Routes, URL patterns, sample values, and test-owned records. Seeded in `beforeAll`, cleaned up in `afterAll`. Deterministic and isolated.
+
+### Barrel Imports
+
+The root `test-data/index.ts` re-exports everything under three namespaces:
+
+```typescript
+import { api, frontend, frontendApi } from '../../test-data'
+
+api.jobTitles.seedRecords        // pim/api/jobTitles.ts
+api.leaveTypes.seedRecords       // leave/api/leaveTypes.ts
+frontend.pim                     // pim/frontend/pim.ts
+frontend.recruitment.routes      // recruitment/frontend/recruitment.ts
+frontendApi.pim                  // pim/frontend-api/index.ts
+```
+
+Direct module imports are also valid:
+
+```typescript
+import { jobTitles } from '../../test-data/pim/api/jobTitles'
+import { recruitment } from '../../test-data/recruitment/frontend/recruitment'
+```
 
 ### Adding Master Data Records
 
 ```typescript
-// test-data/api/jobTitles.ts
+// test-data/pim/api/jobTitles.ts  (or the relevant module folder)
 export const jobTitles = {
   seedRecords: [
     { title: 'New Role', description: '' },
@@ -256,12 +290,12 @@ export const jobTitles = {
 }
 ```
 
-Then add the seed call in `src/setup/masterData/jobTitles.ts` and register it in `src/setup/masterData/index.ts`.
+Then add the seed call in `src/setup/masterData/jobTitles.ts` (using `createIfAbsent`) and register it in `src/setup/masterData/index.ts`.
 
-### Adding Frontend Test Data
+### Adding Suite-Owned Test Data
 
 ```typescript
-// test-data/frontend-api/pim/employees.ts
+// test-data/pim/frontend-api/employees.ts
 export const filterTestRecords = [
   { employeeId: '061004', firstName: 'New', lastName: 'Employee', middleName: '' },
 ] as const
@@ -278,7 +312,7 @@ Seed in `beforeAll` using `ensureEmployeeRecords(orangehrmAdminApi, records)`.
 ```typescript
 import { test, expect } from '../../src/fixtures'
 import { env } from '../../src/config/env'
-import { pim } from '../../test-data/frontend'
+import { frontend } from '../../test-data'
 import { ensurePimFilterEmployees } from '../../src/setup/frontendTesting/ensurePimFilterEmployees'
 
 test.describe.configure({ mode: 'serial', timeout: 120_000 })
@@ -427,9 +461,11 @@ Controlled by `LOG_LEVEL` env var: `silent | error | warn | info | debug`
 ## Adding a New Test Module
 
 1. Create `tests/{module}/{feature}.spec.ts`
-2. Add test data in `test-data/frontend/{module}.ts` (routes, URL patterns, samples)
-3. Add frontend-api test records in `test-data/frontend-api/{module}/` if the suite owns its data
-4. Add a setup function in `src/setup/frontendTesting/` if the module needs per-suite seeding
+2. Add UI routes and sample values in `test-data/{module}/frontend/{module}.ts`
+3. Add master data seeds in `test-data/{module}/api/` if the module needs shared seeded data
+4. Add suite-owned test records in `test-data/{module}/frontend-api/` if the suite creates its own data
+5. Re-export new entries via `test-data/index.ts` under the `api`, `frontend`, or `frontendApi` namespace
+6. Add a setup function in `src/setup/frontendTesting/` if the module needs per-suite seeding
 
 ---
 

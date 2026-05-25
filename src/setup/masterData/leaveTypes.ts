@@ -7,6 +7,6 @@ export async function seedLeaveTypes(adminApi: OrangehrmAdminApi): Promise<void>
   const leaveTypesApi = new LeaveTypesApi(adminApi.request);
 
   for (const row of api.leaveTypes.seedRecords) {
-    await leaveTypesApi.create(row);
+    await leaveTypesApi.createIfAbsent(row);
   }
 }

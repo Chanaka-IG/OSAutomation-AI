@@ -162,6 +162,22 @@ refer automation-framework
 ### Pass data to Page class from test body
 -Dont pass hardcode data to the page class from the test body, if you need to pass data from the test body to the page class, make sure that the data is not hardcoded and it is coming from the test-data files. This will make the test more maintainable and less flaky. except the loginAs method.
 
+
+### Add data via APIs
+-When adding data through APIs, always check whether the data you are adding is already exist or not, if it is already exist, use that data instead of adding new data, this will reduce the test execution time and also reduce the chances of flaky tests.
+
+```javascript
+  async createIfAbsent(payload: AdminUserSeed): Promise<void> {
+    const all = await this.getAll();
+    if (all.some((u) => u.userName === payload.username)) {
+      log.info(`User already exists, skipping: ${payload.username}`);
+      return;
+    }
+    await this.create(payload);
+  }
+```
+
+
 ### Handle the loginAs method
 - for the loginAs method, its ok to pass the hard code data since we have only two test users and they are not going to change, but for other methods, always try to avoid hardcoding the data and pass it from the test body to the page class
 

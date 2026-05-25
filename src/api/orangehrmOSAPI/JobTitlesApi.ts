@@ -27,6 +27,15 @@ export class JobTitlesApi extends BaseApiService {
     return all.find((jt) => jt.title === title)?.id;
   }
 
+  async createIfAbsent(payload: JobTitleSeed): Promise<void> {
+    const all = await this.getAll();
+    if (all.some((jt) => jt.title === payload.title)) {
+      log.info(`Job title already exists, skipping: ${payload.title}`);
+      return;
+    }
+    await this.create(payload);
+  }
+
   async create(payload: JobTitleSeed): Promise<void> {
     const response = await this.post(jobTitlesData.adminPath, {
       data: {

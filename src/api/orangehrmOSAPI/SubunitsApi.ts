@@ -23,6 +23,15 @@ export class SubunitsApi extends BaseApiService {
     return all.find((s) => s.name === name)?.id;
   }
 
+  async createIfAbsent(payload: SubunitSeed): Promise<void> {
+    const all = await this.getAll();
+    if (all.some((s) => s.name === payload.name)) {
+      log.info(`Subunit already exists, skipping: ${payload.name}`);
+      return;
+    }
+    await this.create(payload);
+  }
+
   async create(payload: SubunitSeed): Promise<void> {
     const response = await this.post(subunitsData.adminPath, {
       data: {

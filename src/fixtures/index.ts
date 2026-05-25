@@ -16,6 +16,9 @@ import { PersonalDetailsPage } from '../pages/pim/PersonalDetailsPage';
 import { PimModulePage } from '../pages/pim/PimModulePage';
 import { RecruitmentModulePage } from '../pages/recruitment/RecruitmentModulePage';
 import { AddVacancyPage } from '../pages/recruitment/AddVacancyPage';
+import { AddCandidatePage } from '../pages/recruitment/AddCandidatePage';
+import { CandidatesListPage } from '../pages/recruitment/CandidatesListPage';
+import { CandidateProfilePage } from '../pages/recruitment/CandidateProfilePage';
 import { VacanciesListPage } from '../pages/recruitment/VacanciesListPage';
 
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
@@ -28,6 +31,9 @@ export type OrangehrmFixtures = {
   leaveModulePage: LeaveModulePage;
   recruitmentModulePage: RecruitmentModulePage;
   addVacancyPage: AddVacancyPage;
+  addCandidatePage: AddCandidatePage;
+  candidatesListPage: CandidatesListPage;
+  candidateProfilePage: CandidateProfilePage;
   vacanciesListPage: VacanciesListPage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
   orangehrmApiContext: APIRequestContext;
@@ -74,6 +80,18 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
 
   addVacancyPage: async ({ page }, use) => {
     await use(new AddVacancyPage(page));
+  },
+
+  addCandidatePage: async ({ page }, use) => {
+    await use(new AddCandidatePage(page));
+  },
+
+  candidatesListPage: async ({ page }, use) => {
+    await use(new CandidatesListPage(page));
+  },
+
+  candidateProfilePage: async ({ page }, use) => {
+    await use(new CandidateProfilePage(page));
   },
 
   vacanciesListPage: async ({ page }, use) => {
