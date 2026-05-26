@@ -316,12 +316,6 @@ await page.goto(`${BASE_URL}/bookings/${id}`, { waitUntil: 'networkidle' });
 await page.getByRole('button', { name: 'Book Event' }).waitFor({ state: 'visible' });
 ```
 
-### DO: Use loader dissapear options
-- use `waitUntilTableLoaderDissapear` for table loading
-- use `waitUntilFormLoaderDissapear` for form loading
-- These are predefined in BasePage and should be used whenever applicable to ensure the page is fully loaded before interacting or asserting.
-
-
 ### DON'T: Use arbitrary sleeps
 ```javascript
 // BAD - Never do this
