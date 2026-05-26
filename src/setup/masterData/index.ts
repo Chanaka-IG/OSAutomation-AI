@@ -1,4 +1,4 @@
-import type { OrangehrmAdminApi } from '../../api/orangehrmOSAPI/OrangehrmAdminApi';
+import { OrangehrmAdminApi } from '../../api/orangehrmOSAPI/OrangehrmAdminApi';
 import { logger } from '../../lib/logger';
 import { seedAdminUsers } from './adminUsers';
 import { seedEmployees } from './employees';
@@ -14,9 +14,6 @@ import { seedWorkweek } from './workweek';
 
 /**
  * Single entry point for OrangeHRM master data seeding before UI/API tests.
- *
- * Requires an already-authenticated {@link OrangehrmAdminApi} session — the caller must call
- * {@link OrangehrmAdminApi.loginAsAdmin} before invoking this function.
  *
  * @example
  * import { seedAllMasterData } from '../../setup/masterData';

@@ -14,6 +14,7 @@ import { AddEmployeePage } from '../pages/pim/AddEmployeePage';
 import { EmployeeListPage } from '../pages/pim/EmployeeListPage';
 import { PersonalDetailsPage } from '../pages/pim/PersonalDetailsPage';
 import { PimModulePage } from '../pages/pim/PimModulePage';
+import { PimReportsPage } from '../pages/pim/PimReportsPage';
 import { RecruitmentModulePage } from '../pages/recruitment/RecruitmentModulePage';
 import { AddVacancyPage } from '../pages/recruitment/AddVacancyPage';
 import { AddCandidatePage } from '../pages/recruitment/AddCandidatePage';
@@ -26,6 +27,7 @@ export type OrangehrmFixtures = {
   loginPage: LoginPage;
   addEmployeePage: AddEmployeePage;
   pimModulePage: PimModulePage;
+  pimReportsPage: PimReportsPage;
   employeeListPage: EmployeeListPage;
   personalDetailsPage: PersonalDetailsPage;
   leaveModulePage: LeaveModulePage;
@@ -60,6 +62,10 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
 
   pimModulePage: async ({ page }, use) => {
     await use(new PimModulePage(page));
+  },
+
+  pimReportsPage: async ({ page }, use) => {
+    await use(new PimReportsPage(page));
   },
 
   employeeListPage: async ({ page }, use) => {

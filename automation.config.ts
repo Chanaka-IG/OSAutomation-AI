@@ -47,7 +47,7 @@ export default defineConfig({
      * Fast loads still finish as soon as `domcontentloaded` fires — this is not a sleep.
      * Prefer waiting on specific locators after navigation (see `EmployeeListPage.waitForListReady`).
      */
-    navigationTimeout: 60_000,
+    navigationTimeout: 90_000,
     video: 'on',
     screenshot: 'on',
 

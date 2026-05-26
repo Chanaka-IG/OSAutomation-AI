@@ -26,6 +26,10 @@
   - Are preserved as FK references in historical leave, timesheets, and reviews.
 - **Purge** (Admin only, from PIM) permanently anonymizes personal data but retains aggregate counts.
 - **Employee details update** Can pick an employee from the employee list. It will be redirected to the Employee details update section. There user can update employee's data based on multiple sections from the left side bar.
+- **Report - PIM** By default there is a report called "PIM Sample Report". 
+  - Can add new report using Add button. 
+  - Following are the fields when adding a report. **Report Name** - required. **Selection Criteria** - non required dropdown. Once select a option from the dropdown its needed to click on Add icon to add. **Include** - non required. **Select Display Field Group** - non required dropdown. **Select Display Field** - non required dropdown. Once select a option from the dropdown its needed to click on Add icon to add.
+  - In order to view report data, Need to click on the file text icon.
 
 ## 4. Leave Workflow
 - A leave request flows: **Pending Approval → Scheduled → Taken** (with **Rejected** and **Cancelled** as terminal off-ramps).

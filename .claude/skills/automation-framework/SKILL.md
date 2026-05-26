@@ -168,7 +168,13 @@ export class MyModulePage extends BasePage {
   async fillAndSave(value: string): Promise<void> {
     await this.someInput.fill(value)
     await this.saveButton.click()
-    await this.waitForSuccessToast()
+    await this.waitUntilFormLoaderDissapear()
+  }
+
+  async saveAndGoToList(): Promise<void> {
+    await this.saveButton.click()
+    await this.waitUntilFormLoaderDissapear()
+    await this.gotoMyList()
   }
 }
 ```
@@ -176,10 +182,51 @@ export class MyModulePage extends BasePage {
 ### BasePage API
 
 ```typescript
-await this.goto(urlOrPath)               // Navigate; prepends baseURL for relative paths
-await this.waitForSuccessToast()         // Waits for .oxd-toast--success, returns its text
-await this.loginAs('admin')              // Logs in using configured credentials for the role
-this.locator(selector)                   // Thin wrapper around page.locator()
+await this.goto(urlOrPath)                      // Navigate; prepends baseURL for relative paths
+await this.waitForSuccessToast()                // Waits for .oxd-toast--success, returns its text
+await this.loginAs('admin')                     // Logs in using configured credentials for the role
+await this.waitUntilFormLoaderDissapear()       // Waits for .oxd-loading-spinner to disappear after form submit
+await this.waitUntilTableLoaderDissapear()      // Waits for .oxd-table-loader to disappear after search/load
+await this.waitUntilMultipleTableLoaderDissapear() // Waits for all table loaders to disappear
+this.locator(selector)                          // Thin wrapper around page.locator()
+```
+
+#### Post-Save Navigation Pattern
+
+After clicking Save on a form, always use `waitUntilFormLoaderDissapear()` then explicitly navigate:
+
+```typescript
+// ✅ Correct — framework pattern
+async saveAndGoToList(): Promise<void> {
+  await this.saveButton.click();
+  await this.waitUntilFormLoaderDissapear();
+  await this.gotoMyList();  // explicit navigation back to list
+}
+
+// ❌ Avoid — brittle; breaks if redirect timing changes
+async saveAndGoToList(): Promise<void> {
+  await Promise.all([
+    this.page.waitForURL(/some-redirect-url\/\d+/, { timeout: 60_000 }),
+    this.saveButton.click(),
+  ]);
+}
+```
+
+#### Post-Search Pattern
+
+After clicking Search or Reset on a list page, use `waitUntilTableLoaderDissapear()`:
+
+```typescript
+async searchByName(name: string): Promise<void> {
+  await this.searchInput.fill(name);
+  await this.searchButton.click();
+  await this.waitUntilTableLoaderDissapear();
+}
+
+async resetSearch(): Promise<void> {
+  await this.resetButton.click();
+  await this.waitUntilTableLoaderDissapear();
+}
 ```
 
 ### Rules
@@ -410,8 +457,15 @@ expect(text).toMatch(/successfully/i)
 
 ### Form Loader
 
+Always use the BasePage method — it handles the case where the spinner doesn't appear (e.g., fast responses) silently:
+
 ```typescript
-await page.locator('.oxd-form-loader').waitFor({ state: 'hidden', timeout: 10_000 })
+// ✅ Use BasePage method
+await this.waitUntilFormLoaderDissapear()   // after form save
+await this.waitUntilTableLoaderDissapear()  // after search / list load
+
+// ❌ Avoid raw locator waits — will fail if spinner never appears
+await page.locator('.oxd-loading-spinner').waitFor({ state: 'hidden', timeout: 10_000 })
 ```
 
 ### Table Rows
