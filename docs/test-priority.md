@@ -1,91 +1,67 @@
-# Test Priority: PIM Reports (E2E Only)
+# Test Priority: Add Entitlements (E2E Only)
 
-**Input**: `docs/test-strategy.md`  
-**Scope**: E2E tests only (26 scenarios)  
-**Layer**: Playwright, `tests/pim/pim-reports.spec.ts`
+> Input: docs/test-strategy.md
+> Scope: E2E tests only (22 scenarios)
+> Layer: Playwright, tests/leave/leave-entitlements.spec.ts
+> Generated: 2026-05-26
 
 ---
 
 ## P0 — Release Blocking
 
-Core business flows, security, and data integrity. A failure here blocks release.
+These tests cover core business flows with no workaround. A failure here means the feature is broken.
 
-| TC ID  | Title                                                         | Rationale                                                                                        |
-|--------|---------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| TC-003 | Add minimal report (Report Name only) → saves and appears in list | Core create flow. If add is broken, the entire Reports feature is unusable.                |
-| TC-007 | View report data via document icon                            | Core read flow. Viewing report data is the primary purpose of the feature.                       |
-| TC-100 | Save without Report Name shows "Required" error               | Required field not enforced → users can create nameless reports, breaking list rendering.        |
-| TC-201 | Unauthenticated access to reports list redirects to login     | Auth guard failure = PII data (employee reports) exposed without login. Security release blocker. |
-| TC-200 | ESS user cannot access PIM Reports                            | Role bypass = ESS can see all employee data. Compliance and security release blocker.            |
-
-**P0 Count: 5**
+| TC     | Title                                              | Rationale                                                                                       |
+|--------|----------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| TC-001 | Add entitlement to single employee (Individual)    | The primary happy path for the entire feature. If this fails, no entitlement can be assigned at all — every leave request would fail with "Leave balance exceeded". Release blocker. |
+| TC-002 | Bulk Assign by Sub Unit                            | The bulk assign flow is used by HR admins to push annual entitlements to entire departments. Failure here would require manual entry for every employee — operationally infeasible. |
+| TC-200 | ESS user cannot access Add Entitlements page       | Security / compliance. If an ESS user can assign their own entitlements, it's a data integrity and compliance failure. No workaround. |
+| TC-300 | Submit with no employee selected                   | Required field guard. If this validation is absent, malformed API calls can be submitted, causing backend errors or silent data corruption. |
+| TC-301 | Submit with no leave type selected                 | Same as TC-300 — required field guard for leave type. Missing validation means null leave type in DB. |
 
 ---
 
 ## P1 — High Business Impact
 
-Primary feature paths and major integrations. High user reach; failures significantly degrade the feature.
+These tests cover significant features with high user reach. Failures degrade the product materially.
 
-| TC ID  | Title                                                         | Rationale                                                                                        |
-|--------|---------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| TC-001 | Navigate to PIM Reports via top menu                          | Navigation entry point — if the menu link is broken, no user can reach Reports.                 |
-| TC-002 | Default PIM Sample Report exists on fresh install             | Default report is a core product expectation; regression here is immediately visible to all users.|
-| TC-005 | Add report with one Display Field (group → field → Add)       | Display Fields are the primary value of custom reports. Must work correctly.                    |
-| TC-006 | Add full report (Selection Criteria + Include + Display Fields) | Full form save — validates all three sections together.                                         |
-| TC-008 | Edit existing report name                                     | Update flow — users regularly rename and refine reports.                                        |
-| TC-009 | Delete a user-created report                                  | List management — builds up stale reports without delete.                                       |
-| TC-101 | Selection Criteria not committed without Add click            | Non-obvious two-step UX — if silently broken, users think they've filtered but haven't.         |
-| TC-102 | Display Field not committed without Add click                 | Same two-step UX. Silent data loss in report configuration.                                     |
-| TC-300 | Cancel returns to list without saving                         | Cancel must not persist data. A broken Cancel creates phantom reports.                          |
-| TC-402 | Duplicate report name shows error                             | Without this, two reports with the same name cause list confusion.                              |
-
-**P1 Count: 10**
+| TC     | Title                                              | Rationale                                                                                       |
+|--------|----------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| TC-005 | Added entitlement reflects in employee leave balance | Cross-module integration: entitlement assigned → balance updated. If the balance doesn't reflect, employees cannot successfully apply leave. High reach. |
+| TC-102 | Bulk confirm modal shows employee count            | Users need to confirm the scope of bulk changes. If the count is wrong, admins may unknowingly over- or under-assign entitlements. High business impact. |
+| TC-104 | Cancel on bulk modal aborts save                   | If cancel doesn't actually abort the save, the admin loses control of the bulk operation. High data integrity risk. |
+| TC-302 | Submit with entitlement = 0                        | If 0 is accepted as valid, employees are assigned 0 days, which has the same visible effect as no entitlement but silently looks "assigned". Confusing and impactful. |
+| TC-303 | Submit with negative entitlement                   | Negative entitlement would produce a negative leave balance — likely causes calculation errors downstream in leave requests. Data integrity risk. |
+| TC-307 | Submit all fields blank                            | All-required-fields smoke test. If the form submits with empty data, backend errors or null-pointer exceptions may follow. |
+| TC-500 | Toggle Individual/Multiple mode changes fields     | If the toggle doesn't properly show/hide fields, admins see the wrong form — they may submit individual-mode data when trying to bulk assign, causing data issues. |
 
 ---
 
 ## P2 — Moderate Impact
 
-Secondary flows and edge cases on common paths. A workaround exists or user reach is moderate.
+Secondary flows, edge cases on common paths, or cases where a workaround exists.
 
-| TC ID  | Title                                                         | Rationale                                                                                        |
-|--------|---------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| TC-004 | Add report with one Selection Criteria (Add icon flow)        | Valid path but covered implicitly by TC-006; lower standalone priority.                         |
-| TC-010 | Search by name returns matching report                        | Search is a convenience feature; workaround is manual scroll.                                   |
-| TC-011 | Search with no match returns empty state                      | Empty state rendering — UX regression but not data integrity.                                   |
-| TC-012 | Reset search restores full list                               | Reset UX — low risk regression.                                                                 |
-| TC-103 | Include dropdown defaults to "Current Employees Only"         | Default value regression — visible but not blocking.                                            |
-| TC-105 | Multiple selection criteria added and persisted               | Edge of primary flow; secondary use case.                                                       |
-| TC-106 | Multiple display fields from different groups                 | Common usage pattern for advanced reports; high value but not blocking.                         |
-| TC-107 | Remove display field via × button                             | Edit-in-place interaction; regression is a nuisance, not blocking.                             |
-| TC-505 | View report shows heading + data rows                         | Detailed rendering assertion; partially covered by TC-007 (P0).                                |
-
-**P2 Count: 9**
+| TC     | Title                                              | Rationale                                                                                       |
+|--------|----------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| TC-003 | Bulk Assign by Location                            | Same bulk flow as TC-002 but with a different filter dimension. TC-002 already validates the core bulk path; this adds coverage for Location filter specifically. Workaround: use Sub Unit filter. |
+| TC-004 | Bulk Assign by Job Title                           | Similar to TC-003 — additional filter coverage. Workaround exists (use Sub Unit). |
+| TC-006 | Add entitlement with decimal days (0.5)            | Fractional entitlement is valid but less common. If broken, workaround is integer days. |
+| TC-100 | Without entitlement, balance is 0.00               | Validation of the default state (no entitlement = 0 balance). Important for understanding the system, but not a "feature" being exercised. |
+| TC-101 | Leave Period auto-populates with current period    | UX convenience. If the auto-populate is broken, admin must manually select the period — annoying but not blocking. |
+| TC-103 | Entitlement is per employee per leave type/period  | Duplicate-entry behavior. Important to define but a workaround (navigate to employee entitlements and edit) exists. |
+| TC-304 | Submit with non-numeric entitlement                | Type validation. OXD input likely prevents typing non-numeric characters; this is a safety net. Low probability of user reaching this state. |
+| TC-502 | Employee autocomplete filters correctly            | Autocomplete UX. A broken autocomplete still allows searching — just less convenient. Moderate impact. |
+| TC-503 | Success toast appears                              | Feedback UX. If the toast is absent but the save succeeded, the only impact is the user is uncertain whether the save worked. |
 
 ---
 
-## P3 — Low / Cosmetic
+## P3 — Low Impact / Cosmetic
 
-Rare edge cases, cosmetic issues, or easily bypassed. Nice-to-have validations.
+Rare edge cases, cosmetic UI states, or scenarios with easy workarounds.
 
-| TC ID  | Title                                                         | Rationale                                                                                        |
-|--------|---------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| TC-404 | XSS probe in Report Name does not execute                     | Security edge case — important but OrangeHRM's general XSS mitigation covers this globally.     |
-| TC-302 | Display Field Add without selecting a field is a no-op        | Boundary of UX robustness; no data loss risk.                                                   |
-| TC-303 | Selection Criteria Add without selecting is a no-op           | Same pattern as TC-302; cosmetic guard.                                                         |
-| TC-503 | Add Report page heading is "Add Report"                       | Heading text assertion — cosmetic regression.                                                   |
-| TC-504 | Edit Report page heading is "Edit Report" and pre-fills name  | Heading text assertion — cosmetic regression.                                                   |
-| TC-506 | Loading spinner shows while list loads                        | Timing-sensitive UI state; flaky risk outweighs benefit.                                        |
-
-**P3 Count: 6**
-
----
-
-## Summary
-
-| Priority | Count | Generate Tests? |
-|----------|-------|-----------------|
-| P0       | 5     | YES             |
-| P1       | 10    | YES             |
-| P2       | 9     | NO (future)     |
-| P3       | 6     | NO              |
-| **Total E2E** | **30** | **15 tests generated** |
+| TC     | Title                                              | Rationale                                                                                       |
+|--------|----------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| TC-202 | Admin cannot select non-existent leave type        | OXD dropdown inherently prevents free-text input; this is defensive. Very unlikely regression. |
+| TC-400 | Entitlement = 1 day (boundary)                     | Boundary value already covered by TC-001 (happy path accepts any positive integer). Minimal additional value. |
+| TC-401 | Entitlement = 365 days (large value)               | Extreme upper boundary. No documented max constraint — likely works fine. Rare use case. |
+| TC-501 | Leave Period dropdown lists available periods      | Read-only UI state check. If a period is missing from the dropdown, it's an admin config issue, not a code bug. Low automation value. |

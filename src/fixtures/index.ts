@@ -10,6 +10,8 @@ import {
 } from '../setup/masterDataVerification';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { LeaveModulePage } from '../pages/leave/LeaveModulePage';
+import { LeaveEntitlementsPage } from '../pages/leave/LeaveEntitlementsPage';
+import { LeaveEntitlementListPage } from '../pages/leave/LeaveEntitlementListPage';
 import { AddEmployeePage } from '../pages/pim/AddEmployeePage';
 import { EmployeeListPage } from '../pages/pim/EmployeeListPage';
 import { PersonalDetailsPage } from '../pages/pim/PersonalDetailsPage';
@@ -31,6 +33,8 @@ export type OrangehrmFixtures = {
   employeeListPage: EmployeeListPage;
   personalDetailsPage: PersonalDetailsPage;
   leaveModulePage: LeaveModulePage;
+  leaveEntitlementsPage: LeaveEntitlementsPage;
+  leaveEntitlementListPage: LeaveEntitlementListPage;
   recruitmentModulePage: RecruitmentModulePage;
   addVacancyPage: AddVacancyPage;
   addCandidatePage: AddCandidatePage;
@@ -78,6 +82,14 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
 
   leaveModulePage: async ({ page }, use) => {
     await use(new LeaveModulePage(page));
+  },
+
+  leaveEntitlementsPage: async ({ page }, use) => {
+    await use(new LeaveEntitlementsPage(page));
+  },
+
+  leaveEntitlementListPage: async ({ page }, use) => {
+    await use(new LeaveEntitlementListPage(page));
   },
 
   recruitmentModulePage: async ({ page }, use) => {

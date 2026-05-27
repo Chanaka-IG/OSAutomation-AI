@@ -1,88 +1,95 @@
-# Test Strategy: PIM Reports
+# Test Strategy: Add Entitlements
 
-**Input**: `docs/test-scenarios.md`  
-**Module**: PIM → Employee Reports  
-**Framework**: Playwright + TypeScript (E2E), Playwright APIRequestContext (API)
+> Feature: Leave → Entitlements → Add Entitlements
+> Generated: 2026-05-26
+> Source: docs/test-scenarios.md
 
 ---
 
 ## Distribution Table
 
-| Layer      | Count | Focus                                          | Avg Time |
-|------------|-------|------------------------------------------------|----------|
-| E2E        | 26    | Full user flows, navigation, form interactions | 10–30s   |
-| API        | 4     | Auth enforcement, idempotent CRUD contracts    | <2s      |
-| Component  | 0     | OXD component logic covered by E2E             | –        |
-| Unit       | 0     | No pure functions in PIM Reports feature       | –        |
+| Layer     | Count | Focus                                          | Avg Time  |
+|-----------|-------|------------------------------------------------|-----------|
+| E2E       | 22    | Full user journeys, UI state, role access      | 15–30 s   |
+| API       | 3     | Security enforcement, contract validation      | < 1 s     |
+| Component | 0     | N/A (OXD components are third-party)           | —         |
+| Unit      | 0     | No pure business logic in frontend             | —         |
 
-**Total**: 30 test cases
+**Total: 25 scenarios**
 
 ---
 
 ## Layer Assignments
 
-### E2E Tests (Playwright, `tests/pim/`)
+### E2E Tests
 
-| TC ID    | Title                                                            | Rationale                                                         |
-|----------|------------------------------------------------------------------|-------------------------------------------------------------------|
-| TC-001   | Navigate to PIM Reports via top menu                            | Full-stack nav flow — must verify menu wiring and URL routing     |
-| TC-002   | Default PIM Sample Report exists                                | Data integrity check visible only via rendered UI                 |
-| TC-003   | Add minimal report (name only)                                  | Core create happy path — submit form, verify toast + list         |
-| TC-004   | Add report with one Selection Criteria                          | Verifies Add icon commit behaviour for criteria                   |
-| TC-005   | Add report with one Display Field                               | Verifies group → field → Add icon flow                            |
-| TC-006   | Add full report (all sections)                                  | Complete form happy path                                          |
-| TC-007   | View report data via document icon                              | Multi-page flow: list → view → assert data rendered               |
-| TC-008   | Edit existing report name                                       | Update flow with redirect and toast verification                  |
-| TC-009   | Delete a user-created report                                    | Delete flow with count assertion                                  |
-| TC-010   | Search by name returns matching report                          | Filter + search flow                                              |
-| TC-011   | Search with no match returns empty state                        | Empty state UI assertion                                          |
-| TC-012   | Reset search restores full list                                 | Reset interaction                                                 |
-| TC-100   | Report Name is mandatory (save without name shows Required)     | Client-side validation — must see inline error in rendered DOM    |
-| TC-101   | Selection Criteria not committed without Add click              | Non-obvious two-step UX — only verifiable via round-trip edit     |
-| TC-102   | Display Field not committed without Add click                   | Same two-step UX pattern                                          |
-| TC-103   | Include dropdown defaults to "Current Employees Only"           | Default state assertion on rendered OXD dropdown                  |
-| TC-105   | Multiple selection criteria added and persisted                 | Repeated interaction pattern + edit round-trip                    |
-| TC-106   | Multiple display fields from different groups                   | Cross-group field selection + report view column assertion        |
-| TC-107   | Remove display field via × button                               | In-place DOM removal interaction                                  |
-| TC-200   | ESS user cannot access PIM Reports                              | Role-based access — full login + nav required                     |
-| TC-201   | Unauthenticated access to list redirects to login               | Session guard on server-rendered redirect                         |
-| TC-300   | Save with blank Report Name shows "Required" error              | Required-field validation                                         |
-| TC-301   | Cancel returns to list without saving                           | Navigation guard — no side effect                                 |
-| TC-402   | Duplicate report name shows error                               | Unique constraint — surfaced as toast or inline error             |
-| TC-404   | XSS probe in Report Name does not execute                       | Security — must observe rendered DOM and dialog events            |
-| TC-505   | View report shows name heading + employee data rows             | Report output rendering — requires real browser DOM               |
+| TC     | Title                                              | Rationale                                                                                       |
+|--------|----------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| TC-001 | Add entitlement to single employee (Individual)    | Full-stack journey: form fill → API call → DB write → toast feedback. Must verify end-to-end.  |
+| TC-002 | Bulk Assign by Sub Unit                            | Multi-step flow: toggle mode → filter → save → modal → confirm → verify affected employees.    |
+| TC-003 | Bulk Assign by Location                            | Same bulk flow pattern with different filter dimension.                                         |
+| TC-004 | Bulk Assign by Job Title                           | Same bulk flow; different filter. Keeps modal confirmation verified across filter types.         |
+| TC-005 | Entitlement reflects in employee leave balance     | Cross-page verification: Add → navigate to Employee Entitlements → assert balance. Needs E2E.  |
+| TC-006 | Add entitlement with decimal days                  | Decimal precision involves DB storage and UI display — needs full stack verification.           |
+| TC-100 | Without entitlement, balance is 0.00               | Business rule verification via UI read; requires navigation to entitlements list.               |
+| TC-101 | Leave Period auto-populates with current period    | UI default state — rendered by Vue component binding. E2E is appropriate.                       |
+| TC-102 | Bulk confirm modal shows employee count            | Involves API query for employee count + Vue modal rendering. Needs E2E.                         |
+| TC-103 | Entitlement is per employee per leave type/period  | Duplicate-entry behavior must be observed through the full save cycle.                          |
+| TC-104 | Cancel on bulk modal aborts save                   | Interaction test: modal dismiss → verify no API call committed. E2E with network assertion.     |
+| TC-200 | ESS user cannot access Add Entitlements page       | Role-based UI rendering + redirect behavior. E2E verifies both menu and direct URL access.     |
+| TC-202 | Admin cannot select non-existent leave type        | OXD dropdown enforces options client-side. Component-level; E2E confirms it in context.         |
+| TC-300 | Submit with no employee selected                   | Required field validation (client-side on OXD). Pushed down rationale below. *(see note)*      |
+| TC-301 | Submit with no leave type selected                 | Required field validation — OXD input-group error message. *(see note)*                        |
+| TC-302 | Submit with entitlement = 0                        | Boundary + validation. *(see note)*                                                             |
+| TC-303 | Submit with negative entitlement                   | Boundary validation. *(see note)*                                                               |
+| TC-304 | Submit with non-numeric entitlement                | Type validation rendered by OXD. *(see note)*                                                   |
+| TC-307 | Submit all fields blank                            | All-required-fields smoke test; single E2E covers the whole form.                               |
+| TC-400 | Entitlement = 1 day                                | Boundary value; confirmed by DB persistence + UI read-back. Needs E2E.                         |
+| TC-401 | Entitlement = 365 days                             | Upper boundary; needs DB save + display verification.                                           |
+| TC-500 | Toggle Individual/Multiple mode changes fields     | Vue reactive form field visibility. E2E confirms the toggle works in real browser.              |
+| TC-501 | Leave Period dropdown lists available periods      | Dropdown options sourced from API; E2E verifies the full cycle.                                 |
+| TC-502 | Employee autocomplete filters correctly            | OXD autocomplete + API `/pim/employees` call. E2E verifies dropdown behavior.                  |
+| TC-503 | Success toast appears                              | OXD toast component + reactive state. E2E confirms full success flow.                          |
 
-### API Tests (Playwright APIRequestContext, `tests/api/`)
-
-| TC ID    | Title                                                            | Rationale                                                         |
-|----------|------------------------------------------------------------------|-------------------------------------------------------------------|
-| TC-202   | Unauthenticated GET reports list returns 401/403                | HTTP contract — faster at API layer; no browser needed            |
-| TC-203   | Unauthenticated GET view report returns 401/403                 | PII data guard — API layer is the right enforcement point         |
-| TC-204   | ESS session cannot GET report list (403)                        | Cross-role API access — verifiable via status code alone          |
-| TC-402-a | Duplicate report name via API POST returns 422 "Already exists" | Unique constraint — API contract test; faster than UI round-trip  |
+> **Note on TC-300–304 (validation at E2E):** These ARE input validation tests, which the test pyramid normally pushes to unit/API. However, in OrangeHRM/OXD, required-field and type validation is implemented in Vue component validators and rendered by the OXD input-group error message — there is no separate unit-testable function exposed. The backend also validates these and returns 400 (covered by TC-201 API test). The E2E tests here catch regressions in the Vue-layer validation and are fast (single-page, no navigation) — acceptable as a pragmatic tradeoff.
 
 ---
 
-## Decision Rationale for Contested Assignments
+### API Tests
 
-**TC-101 / TC-102 — "Add icon not clicked" → E2E (not API)**  
-The two-step UX (select from dropdown, then click Add to commit) is a frontend Vue component state management behaviour. There is no API-level concept of "uncommitted selections" — the backend only sees the final POST payload. The correct test layer is E2E to verify that selections not confirmed via Add are silently dropped.
-
-**TC-104 — "Include filter affects record count" → Dropped from E2E priority**  
-This requires a terminated employee in the test environment. It is better covered as an API test against `GET /pim/employees?includeEmployees=onlyCurrent` vs `currentAndPast`. Excluded from the E2E layer to avoid environment dependency; added as a note for future API coverage.
-
-**TC-108 — "Include Header checkbox" → Dropped to P3**  
-The Include Header checkbox affects report visual output but does not change data integrity. Low business risk; cosmetic. Kept as P3 edge case.
-
-**TC-400 / TC-401 — Character limit** → E2E (boundary)  
-The exact max length for Report Name is not documented in the domain skill. Browser testing is required to discover the real limit via OXD input behaviour. Assigned E2E + noted for discovery.
+| TC     | Title                                        | Rationale                                                                                 | Endpoint                              |
+|--------|----------------------------------------------|-------------------------------------------------------------------------------------------|---------------------------------------|
+| TC-201 | ESS user cannot call Add Entitlement API     | Security rule must be enforced at the API layer independently of the UI. Pure API test.  | `POST /api/v2/leave/leave-entitlements` |
+| TC-305 | Bulk assign with no filter (all employees)   | Confirming behavior boundary — API contract for empty filter payload.                    | Bulk assign API endpoint              |
+| TC-306 | Bulk assign matching 0 employees             | Edge state in API response when filter returns empty set. API contract test.              | Bulk assign API endpoint              |
 
 ---
 
-## Anti-Patterns Identified in Existing Tests
+### Downgraded / Deferred Scenarios
 
-None of the existing PIM tests (`add-employee.spec.ts`, `employee-list.spec.ts`) cover the Reports sub-page. No anti-patterns inherited. New tests must follow the established patterns:
-- Import `test`, `expect` from `../../src/fixtures`
-- Use `test.describe.configure({ mode: 'serial' })`
-- Clean up created data in `afterAll`
-- Use `loginPage.loginAs('admin')` in `beforeEach`
+| TC     | Original Layer | Decision | Reason |
+|--------|---------------|----------|--------|
+| TC-402 | E2E           | Deferred | Past leave period assignment is a historical data-entry edge case. Low risk; can be manual. |
+| TC-403 | E2E           | Deferred | Decimal precision beyond 0.5 is cosmetic; TC-006 covers the fractional path. |
+| TC-404 | E2E           | Deferred | Combined filter (AND logic) is best verified via API payload inspection, not yet in scope. |
+| TC-504 | E2E           | Deferred | Post-save form reset is a UX polish item; not a functional regression risk. |
+| TC-505 | E2E           | Deferred | Modal dismiss is covered by TC-104; duplicate not needed. |
+
+---
+
+## Anti-Patterns Flagged
+
+1. **TC-300–304 at E2E** — acknowledged tradeoff above. Acceptable given OXD encapsulation.
+2. **TC-201 at API only** — UI-layer security (TC-200) AND API-layer security (TC-201) both needed for defense-in-depth. Not a pyramid violation — intentional multi-layer coverage.
+3. No pure unit tests — consistent with OrangeHRM's architecture (business logic is in PHP/Symfony backend, not in the Vue frontend).
+
+---
+
+## Defense-in-Depth Matrix
+
+| Business Rule             | E2E | API | Unit |
+|--------------------------|-----|-----|------|
+| ESS cannot add entitlement | TC-200 | TC-201 | — |
+| Required fields enforced  | TC-300/301/307 | (400 on bad payload) | — |
+| Positive value only       | TC-302/303 | — | — |
+| Bulk confirm before commit | TC-102/TC-104 | — | — |
