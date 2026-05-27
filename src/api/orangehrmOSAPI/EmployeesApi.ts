@@ -69,6 +69,19 @@ export class EmployeesApi extends BaseApiService {
     return json.data?.[0]?.empNumber;
   }
 
+  async getEmpNumberByFullName(firstName: string, lastName: string): Promise<number | undefined> {
+    const search = encodeURIComponent(`${firstName} ${lastName}`);
+    const response = await this.get(
+      `${employeesData.adminPath}?nameOrId=${search}&limit=50`,
+      { headers: { Accept: 'application/json' } },
+    );
+    if (!response.ok()) return undefined;
+    const json = (await response.json()) as {
+      data: Array<{ empNumber: number; firstName: string; lastName: string }>;
+    };
+    return json.data?.find((e) => e.firstName === firstName && e.lastName === lastName)?.empNumber;
+  }
+
   async updateJobDetails(
     empNumber: number,
     details: { jobTitleId?: number; empStatusId?: number; subunitId?: number },

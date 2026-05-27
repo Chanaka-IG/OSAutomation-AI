@@ -45,7 +45,7 @@ Generate Playwright tests for: `$ARGUMENTS`
   - If the source code contradicts the domain skill -> it's a **potential app bug** -> report it, don't silently adapt the test
 - **Fix the test** based on your diagnosis
 - After fixing, **re-run from the failed test** from where you left off, only re-run the failed test file until it passes. Do not run the entire suite again, as it may cause other tests to fail and create confusion.
-- **Re-run** — repeat until all tests pass
+- If the test still fails after your fix, repeat the three-way check. Do not make more than 3 attempts to fix the test. If it still fails after 3 attempts, report it to the end user with all your findings and ask for further instructions.
 
 Do NOT stop after writing. The test is only done when it **passes in a real browser**.
 

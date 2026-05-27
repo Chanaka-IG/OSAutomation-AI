@@ -1,538 +1,442 @@
-# Test Scenarios: PIM Reports
+# Test Scenarios: Add Entitlements
 
-**Module**: PIM → Reports  
-**URLs**:
-- List: `/web/index.php/pim/viewDefinedPredefinedReports`
-- Add: `/web/index.php/pim/definePredefinedReport`
-- Edit: `/web/index.php/pim/definePredefinedReport/{id}`
-- View: `/web/index.php/pim/displayPredefinedReport/{id}`
+> Feature: Leave → Entitlements → Add Entitlements
+> Generated: 2026-05-26
 
 ---
 
-## Happy Path (TC-001–TC-099)
+## Happy Path
 
-### TC-001: Navigate to PIM Reports via top menu
-**Category**: Happy Path  
-**Preconditions**: Logged in as Admin  
+### TC-001: Add entitlement to a single employee (Individual mode)
+**Category**: Happy Path
+**Preconditions**: Admin logged in; at least one employee exists; at least one leave type exists; a leave period is active
 **Steps**:
-1. Navigate to `/pim/viewEmployeeList`
-2. Click "Reports" in the PIM top navigation bar
-**Expected Results**: Page loads at `/pim/viewDefinedPredefinedReports`; heading "Employee Reports" is visible; "PIM Sample Report" row is present in the table  
-**Business Rule**: Admin has access to PIM module and its sub-pages  
+1. Navigate to `Leave → Entitlements → Add Entitlements`
+2. Confirm the form defaults to **Individual** employee mode
+3. Select an employee from the **Employee Name** autocomplete
+4. Select a **Leave Type** from the dropdown
+5. Confirm **Leave Period** is auto-populated with the current period
+6. Enter **Entitlement** = `10`
+7. Click **Save**
+**Expected Results**: Success toast `"Successfully Saved"` appears; entitlement row is visible on the employee's leave entitlements page with 10 days assigned
+**Business Rule**: Entitlement must be assigned per employee per leave type per leave period (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-002: Default PIM Sample Report exists on fresh install
-**Category**: Happy Path  
-**Preconditions**: Logged in as Admin; standard seeded environment  
+### TC-002: Add entitlement via Bulk Assign (Multiple Employees mode)
+**Category**: Happy Path
+**Preconditions**: Admin logged in; multiple employees assigned to the same Sub Unit exist
 **Steps**:
-1. Navigate to `/pim/viewDefinedPredefinedReports`
-2. Observe the records table
-**Expected Results**: Exactly "(1) Record Found"; table row shows "PIM Sample Report"; all three action buttons (delete, edit, view) are present  
-**Business Rule**: "By default there is a report called PIM Sample Report"  
+1. Navigate to `Leave → Entitlements → Add Entitlements`
+2. Select **Multiple Employees** radio/toggle
+3. Select **Leave Type** from the dropdown
+4. Select **Leave Period**
+5. Enter **Entitlement** = `14`
+6. Set **Sub Unit** filter to an existing sub unit (e.g., Engineering)
+7. Click **Save**
+8. A confirmation modal appears showing the number of affected employees
+9. Click **Confirm** on the modal
+**Expected Results**: Toast `"Successfully Saved"`; all employees in the selected sub unit now have 14 days of that leave type
+**Business Rule**: Bulk Assign pushes the same entitlement to multiple employees by Location / Sub Unit / Job Title filter (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-003: Add a minimal report (Report Name only)
-**Category**: Happy Path  
-**Preconditions**: Logged in as Admin  
+### TC-003: Add entitlement filtered by Location (Bulk mode)
+**Category**: Happy Path
+**Preconditions**: Admin logged in; multiple employees share the same Location
 **Steps**:
-1. Navigate to `/pim/viewDefinedPredefinedReports`
-2. Click "+ Add"
-3. Fill Report Name with a unique value (e.g. "TC003 Minimal Report")
-4. Leave Selection Criteria, Include, and Display Fields at defaults
-5. Click "Save"
-**Expected Results**: Toast "Successfully Saved"; redirected to `/pim/viewDefinedPredefinedReports`; new report row appears in the list  
-**Business Rule**: Report Name is the only required field  
+1. Navigate to Add Entitlements; toggle **Multiple Employees**
+2. Select **Leave Type**, **Leave Period**, and enter **Entitlement** = `7`
+3. Set **Location** filter to a configured location
+4. Click **Save** → confirm modal → click **Confirm**
+**Expected Results**: Toast `"Successfully Saved"`; all employees at that location gain the entitlement
+**Business Rule**: Bulk assign supports Location filter (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-004: Add report with one Selection Criteria
-**Category**: Happy Path  
-**Preconditions**: Logged in as Admin  
+### TC-004: Add entitlement filtered by Job Title (Bulk mode)
+**Category**: Happy Path
+**Preconditions**: Admin logged in; employees with a specific Job Title exist
 **Steps**:
-1. Click "+ Add" from the Reports list
-2. Enter a unique Report Name
-3. Under Selection Criteria, select "Job Title" from the dropdown
-4. Click the Add (+) icon next to Selection Criteria
-5. Click "Save"
-**Expected Results**: "Successfully Saved" toast; report created with the Job Title criterion  
-**Business Rule**: Selection Criteria requires clicking Add icon to register the selection  
+1. Navigate to Add Entitlements; toggle **Multiple Employees**
+2. Select **Leave Type**, **Leave Period**, enter **Entitlement** = `5`
+3. Set **Job Title** filter to an existing job title
+4. Click **Save** → confirm modal → **Confirm**
+**Expected Results**: Toast `"Successfully Saved"`; only employees with that job title receive the entitlement
+**Business Rule**: Bulk assign supports Job Title filter (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-005: Add report with one Display Field
-**Category**: Happy Path  
-**Preconditions**: Logged in as Admin  
+### TC-005: Added entitlement reflects in employee leave balance
+**Category**: Happy Path
+**Preconditions**: An employee has just been assigned 10 days of Annual Leave
 **Steps**:
-1. Click "+ Add" from Reports list
-2. Enter unique Report Name
-3. Under Display Fields, select "Personal" from "Select Display Field Group"
-4. Select "Employee First Name" from "Select Display Field"
-5. Click the Add (+) icon
-6. Click "Save"
-**Expected Results**: "Successfully Saved" toast; report persisted with Employee First Name field  
-**Business Rule**: Display Field requires group selection → field selection → Add button click  
+1. Navigate to `Leave → Entitlements → Employee Entitlements`
+2. Search for the employee
+3. Find the row for the assigned leave type in the current leave period
+**Expected Results**: Balance column shows `10.00`; Used = `0.00`; Scheduled = `0.00`; Pending = `0.00`
+**Business Rule**: Balance = entitlement − (scheduled + taken + pending) (§4)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-006: Add report with Selection Criteria + Include + Display Fields (full form)
-**Category**: Happy Path  
-**Preconditions**: Logged in as Admin  
+### TC-006: Add entitlement with decimal days (Individual mode)
+**Category**: Happy Path
+**Preconditions**: Admin logged in
 **Steps**:
-1. Click "+ Add"
-2. Enter unique Report Name (e.g. "TC006 Full Report")
-3. Select "Sub Unit" as Selection Criteria → click Add
-4. Change Include to "Current and Past Employees"
-5. Select "Job" field group → "Job Title" field → click Add
-6. Click "Save"
-**Expected Results**: "Successfully Saved"; report appears in list; editing the report shows all saved criteria and fields  
-**Business Rule**: All sections are optional except Report Name; all fields persist correctly  
+1. Navigate to Add Entitlements (Individual mode)
+2. Select employee, leave type, leave period
+3. Enter **Entitlement** = `0.5`
+4. Click **Save**
+**Expected Results**: Toast `"Successfully Saved"`; entitlement shows `0.50` days on the employee's entitlements page
+**Business Rule**: Half-day leave is supported; entitlement can be fractional (§4)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-007: View report data via document icon
-**Category**: Happy Path  
-**Preconditions**: "PIM Sample Report" exists; at least one employee record exists  
+## Business Rules
+
+### TC-100: Without entitlement, leave balance is 0.00
+**Category**: Business Rule
+**Preconditions**: A leave type exists; a specific employee has NO entitlement assigned for that leave type in the current period
 **Steps**:
-1. Navigate to reports list
-2. Click the document (view) icon on "PIM Sample Report"
-**Expected Results**: Navigated to `/pim/displayPredefinedReport/{id}`; heading shows "PIM Sample Report"; "(N) Records Found" count is visible; employee data rows are displayed with column groups (Personal, Contact Details, etc.)  
-**Business Rule**: "In order to view report data, need to click on the file text icon"  
+1. Navigate to `Leave → Entitlements → Employee Entitlements`
+2. Search for the employee
+3. Verify the leave type row (if present) shows balance `0.00`, OR the leave type does not appear in the list
+**Expected Results**: No positive balance exists for that leave type; if the employee tries to apply leave of that type, they receive "Leave balance exceeded"
+**Business Rule**: Without an entitlement, balance is 0.00 and leave is rejected (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-008: Edit an existing report name
-**Category**: Happy Path  
-**Preconditions**: A user-created report exists  
+### TC-101: Leave Period auto-populates with the current period
+**Category**: Business Rule
+**Preconditions**: Admin on Add Entitlements page
 **Steps**:
-1. Click the pencil (edit) icon on the report
-2. Clear Report Name and enter a new unique name
-3. Click "Save"
-**Expected Results**: "Successfully Saved" toast; report list shows the updated name  
-**Business Rule**: Report Name is editable; must be unique  
+1. Navigate to Add Entitlements
+2. Observe the **Leave Period** field without touching it
+**Expected Results**: Leave Period is auto-filled with the current annual leave period (e.g., 2025-01-01 to 2025-12-31)
+**Business Rule**: Leave Period is annual by default (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-009: Delete a user-created report
-**Category**: Happy Path  
-**Preconditions**: A user-created report exists (not "PIM Sample Report")  
+### TC-102: Bulk assign confirmation modal shows employee count
+**Category**: Business Rule
+**Preconditions**: Multiple Employees mode; Sub Unit filter set to a sub unit with N employees
 **Steps**:
-1. Click the trash (delete) icon on the report row
-2. Confirm the deletion dialog if prompted
-**Expected Results**: Report row removed from list; record count decrements by 1; "Successfully Deleted" toast  
-**Business Rule**: Hard delete — report is removed permanently  
+1. Fill in bulk assign form (leave type, period, entitlement, sub unit)
+2. Click **Save**
+3. Observe the confirmation dialog
+**Expected Results**: Modal text indicates the number of employees who will receive the entitlement (e.g., "Assign leave entitlement for N employee(s)")
+**Business Rule**: Bulk Assign shows confirmation with affected employee count before committing (§5, Flow 10)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-010: Search reports list by name
-**Category**: Happy Path  
-**Preconditions**: Multiple reports exist (at least PIM Sample Report + 1 user-created)  
+### TC-103: Entitlement is per employee per leave type per period
+**Category**: Business Rule
+**Preconditions**: Employee already has an entitlement for Annual Leave in the current period
 **Steps**:
-1. Navigate to reports list
-2. Type "PIM Sample" in the Report Name search box
-3. Click "Search"
-**Expected Results**: Only "PIM Sample Report" appears; record count shows "(1) Record Found"  
-**Business Rule**: Search filters the list by partial name match  
+1. Navigate to Add Entitlements (Individual mode)
+2. Select the same employee, same leave type, same leave period
+3. Enter a different entitlement value (e.g., 20)
+4. Click **Save**
+**Expected Results**: Either the entitlement is updated to the new value, or an "Already exists" error is shown — the system does not silently create a duplicate row
+**Business Rule**: Entitlement is per employee per leave type per period (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-011: Search with no matching name returns no results
-**Category**: Happy Path  
-**Preconditions**: Logged in as Admin  
+### TC-104: Cancel on bulk confirmation modal aborts the save
+**Category**: Business Rule
+**Preconditions**: Bulk assign form fully filled; confirmation modal open
 **Steps**:
-1. Type a non-existent report name in the search box
-2. Click "Search"
-**Expected Results**: "(0) Records Found"; table body is empty or shows "No Records Found" message  
-**Business Rule**: Empty search result state  
+1. Click **Save** → confirmation modal appears
+2. Click **Cancel** on the modal
+**Expected Results**: No toast appears; no entitlements are created; the form retains its values so admin can review and try again
+**Business Rule**: Confirmation modal is a guard before bulk commit (§10)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-012: Reset search restores full list
-**Category**: Happy Path  
-**Preconditions**: A search filter is active  
+## Security
+
+### TC-200: ESS user cannot access Add Entitlements page
+**Category**: Security
+**Preconditions**: An ESS (non-admin) user account exists and is enabled
 **Steps**:
-1. Enter a search term → click "Search"
-2. Click "Reset"
-**Expected Results**: Search field cleared; full report list reloaded  
-**Business Rule**: Reset clears all filter inputs  
+1. Login as ESS user
+2. Observe the left navigation menu
+3. Attempt to navigate directly to `/web/index.php/leave/addLeaveEntitlement`
+**Expected Results**: The "Leave → Entitlements" menu item is not visible to ESS users; direct URL navigation either redirects to dashboard or shows an "Access Denied" / empty page — never renders the entitlement form
+**Business Rule**: ESS users see only My Info, Leave (own), Time, Performance, Directory, Dashboard, Buzz — not admin entitlement management (§2)
 **Suggested Layer**: E2E
 
 ---
 
-## Business Rules (TC-100–TC-199)
-
-### TC-100: Report Name is mandatory
-**Category**: Business Rule  
-**Preconditions**: Logged in as Admin; on Add Report page  
+### TC-201: ESS user cannot call Add Entitlement API
+**Category**: Security
+**Preconditions**: ESS user session active
 **Steps**:
-1. Leave Report Name blank
-2. Click "Save"
-**Expected Results**: Inline validation error "Required" appears under Report Name; page does not navigate away; no toast  
-**Business Rule**: "Report Name — required"  
+1. With an ESS session, attempt `POST /api/v2/leave/leave-entitlements` with valid payload
+**Expected Results**: API returns `403 Unauthorized`; no entitlement is created
+**Business Rule**: Permissions enforced at API layer — not just UI (§2, §9)
+**Suggested Layer**: API
+
+---
+
+### TC-202: Admin cannot select a non-existent leave type via UI
+**Category**: Security
+**Preconditions**: Admin on Add Entitlements page
+**Steps**:
+1. Attempt to type a leave type name not in the dropdown
+**Expected Results**: No option is selectable; the field only accepts values from the dropdown; injected values are rejected
+**Business Rule**: UI restricts input to valid leave types (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-101: Selection Criteria must use Add icon to register
-**Category**: Business Rule  
-**Preconditions**: On Add Report page  
+## Negative / Error
+
+### TC-300: Submit Individual form with no employee selected
+**Category**: Negative
+**Preconditions**: Admin on Add Entitlements page (Individual mode)
 **Steps**:
-1. Select "Gender" from Selection Criteria dropdown
-2. Do NOT click the Add (+) icon
-3. Click "Save"
-4. Re-open the saved report in Edit mode
-**Expected Results**: Report saves successfully but Selection Criteria shows no criteria (the selection was not committed without clicking Add)  
-**Business Rule**: "Once select an option from the dropdown its needed to click on Add icon to add"  
+1. Leave **Employee Name** blank
+2. Fill in Leave Type, Leave Period, Entitlement = 10
+3. Click **Save**
+**Expected Results**: Inline validation error `"Required"` appears below the Employee Name field; form is not submitted
+**Business Rule**: Required field validation (§9)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-102: Display Field must use Add icon to register
-**Category**: Business Rule  
-**Preconditions**: On Add Report page  
+### TC-301: Submit Individual form with no leave type selected
+**Category**: Negative
+**Preconditions**: Admin on Add Entitlements page (Individual mode)
 **Steps**:
-1. Select "Personal" Display Field Group → "Employee Id" field
-2. Do NOT click the Add (+) icon
-3. Click "Save"
-4. Re-open the saved report in Edit mode
-**Expected Results**: Report saves successfully but Display Fields section shows no field (not committed without Add)  
-**Business Rule**: "Once select an option from the dropdown its needed to click on Add icon to add"  
+1. Select an employee
+2. Leave **Leave Type** blank
+3. Enter Entitlement = 10
+4. Click **Save**
+**Expected Results**: Inline validation error `"Required"` below Leave Type; no submission
+**Business Rule**: Required field validation (§9)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-103: Include dropdown defaults to "Current Employees Only"
-**Category**: Business Rule  
-**Preconditions**: On Add Report page  
+### TC-302: Submit with entitlement value = 0
+**Category**: Negative
+**Preconditions**: Admin on Add Entitlements page
 **Steps**:
-1. Open Add Report page without changing Include
-2. Observe the Include dropdown default value
-**Expected Results**: Default value is "Current Employees Only"  
-**Business Rule**: The Include filter defaults to current employees  
+1. Fill all required fields
+2. Enter **Entitlement** = `0`
+3. Click **Save**
+**Expected Results**: Validation error such as `"Should be greater than 0"` or `"Required"`; form not submitted
+**Business Rule**: Entitlement must be a positive value (§9)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-104: Include "Current Employees Only" filters out terminated employees
-**Category**: Business Rule  
-**Preconditions**: At least one terminated employee exists  
+### TC-303: Submit with negative entitlement value
+**Category**: Negative
+**Preconditions**: Admin on Add Entitlements page
 **Steps**:
-1. Add report with Include = "Current Employees Only" and some display fields
-2. View the report
-3. Edit the same report, change Include = "Current and Past Employees"
-4. View again
-**Expected Results**: "Current Employees Only" does not show terminated employees; "Current and Past Employees" includes them; record counts differ  
-**Business Rule**: Terminated employees disappear from default filters (business-rules.md §3)  
+1. Fill all required fields
+2. Enter **Entitlement** = `-5`
+3. Click **Save**
+**Expected Results**: Validation error; form not submitted; no entitlement created
+**Business Rule**: Numeric field must be greater than 0 (§9)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-105: Multiple selection criteria can be added
-**Category**: Business Rule  
-**Preconditions**: On Add Report page  
+### TC-304: Submit with non-numeric entitlement value
+**Category**: Negative
+**Preconditions**: Admin on Add Entitlements page
 **Steps**:
-1. Select "Job Title" → click Add
-2. Select "Sub Unit" → click Add
-3. Click "Save"
-**Expected Results**: Report saved; in Edit view both "Job Title" and "Sub Unit" appear as added selection criteria  
-**Business Rule**: Multiple criteria are supported  
+1. Fill all required fields
+2. Enter **Entitlement** = `abc`
+3. Click **Save**
+**Expected Results**: Validation error `"Should be a number"`; form not submitted
+**Business Rule**: Numeric field validation (§9)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-106: Multiple display fields from different groups
-**Category**: Business Rule  
-**Preconditions**: On Add Report page  
+### TC-305: Bulk assign with no filter set (all employees)
+**Category**: Negative
+**Preconditions**: Admin on Add Entitlements (Multiple Employees mode); many employees exist
 **Steps**:
-1. Select "Personal" group → "Employee First Name" → click Add
-2. Select "Job" group → "Job Title" → click Add
-3. Save report; view it
-**Expected Results**: Report view shows both "Personal" and "Job" as column group headers with their respective fields  
-**Business Rule**: Display fields from multiple groups are all shown in the report output  
+1. Select Leave Type, Leave Period, enter Entitlement = 5
+2. Leave ALL filters (Sub Unit, Location, Job Title) blank
+3. Click **Save**
+**Expected Results**: Confirmation modal shows total employee count (all employees); admin must explicitly confirm before the broad assignment goes through
+**Business Rule**: Bulk assign with no filter affects all employees — modal is a safeguard (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-107: Remove a display field via × button in Edit mode
-**Category**: Business Rule  
-**Preconditions**: A report with multiple display fields exists  
+### TC-306: Bulk assign with filter matching 0 employees
+**Category**: Negative
+**Preconditions**: A Sub Unit filter is configured but no employees belong to that sub unit
 **Steps**:
-1. Open report in Edit mode
-2. Click the × button next to one of the display fields
-3. Save
-4. View the report
-**Expected Results**: The removed field no longer appears in the report view  
-**Business Rule**: Fields can be individually removed from a report  
+1. Multiple Employees mode; set Sub Unit to a unit with no employees
+2. Fill in Leave Type, Leave Period, Entitlement = 5
+3. Click **Save**
+**Expected Results**: Confirmation modal shows 0 employees, or a validation message indicates no employees match the filter; save with 0 affected employees is blocked or warned
+**Business Rule**: Bulk assign should not silently succeed with 0 affected employees (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-108: Include Header checkbox controls column group header display
-**Category**: Business Rule  
-**Preconditions**: A report with display fields exists; in Edit mode  
+### TC-307: Submit Individual form with all fields blank
+**Category**: Negative
+**Preconditions**: Admin on Add Entitlements page (Individual mode)
 **Steps**:
-1. Open a report in Edit mode
-2. Observe "Include Header" checkbox (checked by default for each group)
-3. Uncheck "Include Header" for one group
-4. Save and view the report
-**Expected Results**: The unchecked group header does not appear as a section header in the report output  
-**Business Rule**: Include Header checkbox controls whether the group header row is shown  
+1. Click **Save** without filling any field
+**Expected Results**: Multiple inline `"Required"` errors appear; no submission
+**Business Rule**: Required field validation (§9)
 **Suggested Layer**: E2E
 
 ---
 
-## Security (TC-200–TC-299)
+## Edge Cases
 
-### TC-200: ESS user cannot access PIM Reports
-**Category**: Security  
-**Preconditions**: An ESS user account exists  
+### TC-400: Entitlement value of exactly 1 day
+**Category**: Edge Case
+**Preconditions**: Admin on Add Entitlements page (Individual mode)
 **Steps**:
-1. Log in as ESS user
-2. Attempt to navigate directly to `/pim/viewDefinedPredefinedReports`
-**Expected Results**: Access denied — either redirected to dashboard or an unauthorized/forbidden page; PIM Reports are not visible in the ESS side menu  
-**Business Rule**: ESS users do not have PIM module access (business-rules.md §2)  
+1. Fill in all required fields; enter **Entitlement** = `1`
+2. Click **Save**
+**Expected Results**: Toast `"Successfully Saved"`; entitlement shows `1.00` day in employee's balance
+**Business Rule**: Minimum valid positive value (§9)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-201: Unauthenticated access to reports list redirects to login
-**Category**: Security  
-**Preconditions**: No active session  
+### TC-401: Very large entitlement value (e.g., 365 days)
+**Category**: Edge Case
+**Preconditions**: Admin on Add Entitlements page (Individual mode)
 **Steps**:
-1. Without logging in, navigate to `/pim/viewDefinedPredefinedReports`
-**Expected Results**: Redirect to `/auth/login?next=...`; reports list is not shown  
-**Business Rule**: All PIM pages require authentication (business-rules.md §1)  
+1. Enter **Entitlement** = `365`
+2. Click **Save**
+**Expected Results**: Entitlement is saved successfully; balance shows 365.00 days; no application-level cap enforced
+**Business Rule**: System should handle large values without error unless a max is configured (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-202: Unauthenticated access to Add Report redirects to login
-**Category**: Security  
-**Preconditions**: No active session  
+### TC-402: Past leave period entitlement assignment
+**Category**: Edge Case
+**Preconditions**: A past leave period exists in the system
 **Steps**:
-1. Without logging in, navigate to `/pim/definePredefinedReport`
-**Expected Results**: Redirect to `/auth/login`  
-**Business Rule**: Authentication required for all state-changing PIM actions  
+1. Individual mode; select employee, leave type
+2. Change **Leave Period** to a past period
+3. Enter Entitlement = 10
+4. Click **Save**
+**Expected Results**: Either saves successfully (historical data entry allowed) or shows a validation warning; no unhandled error
+**Business Rule**: Leave Period selection must be handled gracefully (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-203: Unauthenticated access to view report redirects to login
-**Category**: Security  
-**Preconditions**: No active session  
+### TC-403: Entitlement decimal precision (e.g., 10.25 days)
+**Category**: Edge Case
+**Preconditions**: Admin on Add Entitlements page (Individual mode)
 **Steps**:
-1. Navigate to `/pim/displayPredefinedReport/5`
-**Expected Results**: Redirect to `/auth/login`  
-**Business Rule**: Report data (which contains employee PII) must never be exposed without authentication  
+1. Enter **Entitlement** = `10.25`
+2. Click **Save**
+**Expected Results**: Either saves as `10.25` (2 decimal places) or rounds; no error; balance reflects assigned value accurately
+**Business Rule**: Half-day leave support implies decimal precision (§4)
 **Suggested Layer**: E2E
 
 ---
 
-## Negative / Error (TC-300–TC-399)
-
-### TC-300: Save report with blank Report Name shows Required error
-**Category**: Negative  
-**Preconditions**: On Add Report page  
+### TC-404: Bulk assign with combined filters (Sub Unit + Job Title)
+**Category**: Edge Case
+**Preconditions**: Some employees match BOTH filters; some match only one
 **Steps**:
-1. Leave Report Name empty
-2. Click Save
-**Expected Results**: Inline "Required" error below Report Name; URL stays at `/pim/definePredefinedReport`; no record created  
-**Business Rule**: Report Name is required  
+1. Multiple Employees mode; set both Sub Unit and Job Title filters
+2. Click **Save** → observe confirmation modal employee count
+**Expected Results**: Only employees matching BOTH filters appear in the count; count is less than or equal to either filter alone
+**Business Rule**: Filters are AND-combined in bulk assign (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-301: Cancel returns to reports list without saving
-**Category**: Negative  
-**Preconditions**: On Add Report page; Report Name field has been filled  
+## UI State
+
+### TC-500: Toggle between Individual and Multiple Employees changes visible fields
+**Category**: UI State
+**Preconditions**: Admin on Add Entitlements page
 **Steps**:
-1. Type a report name
-2. Click "Cancel"
-**Expected Results**: Navigated back to `/pim/viewDefinedPredefinedReports`; no new report appears in the list  
-**Business Rule**: Cancel discards unsaved changes  
+1. Observe default state (Individual mode): **Employee Name** field visible; Location/Sub Unit/Job Title filters NOT visible
+2. Switch to **Multiple Employees** mode
+3. Observe form changes
+**Expected Results**: Employee Name field disappears; Location, Sub Unit, Job Title filter fields appear; Leave Type, Leave Period, Entitlement remain visible
+**Business Rule**: Mode toggle controls which form fields are rendered (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-302: Display Field Add button without selecting a field
-**Category**: Negative  
-**Preconditions**: On Add Report page  
+### TC-501: Leave Period dropdown lists available periods
+**Category**: UI State
+**Preconditions**: Admin on Add Entitlements page
 **Steps**:
-1. Select Display Field Group "Personal"
-2. Leave Select Display Field as "-- Select --"
-3. Click the Add (+) icon
-**Expected Results**: No field is added to the selected fields list; possibly a validation indicator or the Add action is a no-op  
-**Business Rule**: A field must be selected before clicking Add  
+1. Click the **Leave Period** dropdown
+2. Observe available options
+**Expected Results**: At least the current annual leave period is present; no blank or malformed period entries
+**Business Rule**: Leave Period is annual by default (§5)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-303: Selection Criteria Add without selecting a criterion
-**Category**: Negative  
-**Preconditions**: On Add Report page  
+### TC-502: Employee Name autocomplete filters correctly
+**Category**: UI State
+**Preconditions**: Admin on Add Entitlements page (Individual mode)
 **Steps**:
-1. Leave Selection Criteria as "-- Select --"
-2. Click the Add (+) icon
-**Expected Results**: No criterion is added; action is a no-op or shows validation  
-**Business Rule**: A criterion must be selected before clicking Add  
+1. Click **Employee Name** field and type 3+ characters of an employee's name
+2. Wait for autocomplete dropdown
+3. Type a name that does not match any employee
+**Expected Results**: Dropdown lists matching employees; selecting one commits the value; typing a non-existent name shows "No Records Found"
+**Business Rule**: Employee autocomplete is standard OXD pattern (§9)
 **Suggested Layer**: E2E
 
 ---
 
-## Edge Cases (TC-400–TC-499)
-
-### TC-400: Report Name at maximum character boundary
-**Category**: Edge Case  
-**Preconditions**: On Add Report page  
+### TC-503: Success toast appears after saving
+**Category**: UI State
+**Preconditions**: All required fields filled in Add Entitlements form
 **Steps**:
-1. Enter a Report Name of exactly the maximum allowed length (test 100 chars)
-2. Click Save
-**Expected Results**: Report saved successfully; name appears (possibly truncated in table display but stored correctly)  
-**Business Rule**: Required field with length limit  
+1. Click **Save** (Individual mode)
+**Expected Results**: Green success toast `"Successfully Saved"` appears in bottom-right corner and auto-dismisses
+**Business Rule**: Every state-changing action triggers a toast (§10)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-401: Report Name exceeds maximum length
-**Category**: Edge Case  
-**Preconditions**: On Add Report page  
+### TC-504: Form state after successful save
+**Category**: UI State
+**Preconditions**: Individual entitlement just saved
 **Steps**:
-1. Enter a Report Name exceeding the maximum length
-2. Click Save
-**Expected Results**: Validation error "Should be less than N characters" (or field caps input); report not saved  
-**Business Rule**: Length validation on all text fields  
+1. Observe the page state after the save toast appears
+**Expected Results**: Either the form resets to blank (allowing another entry) OR the page navigates to the entitlements list — no lingering stale data in the form
+**Business Rule**: Post-save navigation/reset is a UX state to verify (§10)
 **Suggested Layer**: E2E
 
 ---
 
-### TC-402: Duplicate report name validation
-**Category**: Edge Case  
-**Preconditions**: "PIM Sample Report" exists  
+### TC-505: Confirmation modal in Bulk mode is dismissible
+**Category**: UI State
+**Preconditions**: Bulk assign form filled; Save clicked → confirmation modal open
 **Steps**:
-1. Click Add; enter "PIM Sample Report" as the name
-2. Click Save
-**Expected Results**: Error shown — either inline "Already exists" or a toast indicating the name is taken; no duplicate report created  
-**Business Rule**: Report names must be unique (unique violation → "Already exists")  
-**Suggested Layer**: E2E
-
----
-
-### TC-403: Add display fields from all available groups
-**Category**: Edge Case  
-**Preconditions**: On Add Report page  
-**Steps**:
-1. Add at least one display field from each available group (Personal, Job, Contact Details, etc.)
-2. Save the report
-3. View the report
-**Expected Results**: Report saved successfully; report view shows all selected field groups as column sections  
-**Business Rule**: No restriction on number of display field groups  
-**Suggested Layer**: E2E
-
----
-
-### TC-404: Report Name with special characters (XSS probe)
-**Category**: Edge Case  
-**Preconditions**: On Add Report page  
-**Steps**:
-1. Enter `<script>alert(1)</script>` as Report Name
-2. Click Save (or attempt to)
-**Expected Results**: If saved, the name is rendered as escaped text — no alert dialog fires; the `<script>` tag does not execute  
-**Business Rule**: All user input must be sanitized against XSS (OWASP Top 10)  
-**Suggested Layer**: E2E
-
----
-
-## UI State (TC-500–TC-599)
-
-### TC-500: Reports list shows correct record count badge
-**Category**: UI State  
-**Preconditions**: Known number of reports exist  
-**Steps**:
-1. Navigate to `/pim/viewDefinedPredefinedReports`
-2. Wait for loading to complete
-**Expected Results**: "(N) Records Found" badge matches the actual number of visible rows  
-**Business Rule**: Record count badge reflects real-time data  
-**Suggested Layer**: E2E
-
----
-
-### TC-501: Report list updates after adding a new report
-**Category**: UI State  
-**Preconditions**: Known count of existing reports  
-**Steps**:
-1. Note current record count
-2. Add a new report and save
-3. Return to the reports list
-**Expected Results**: Record count increments by 1; new report name appears in the table  
-**Business Rule**: List reflects current data state  
-**Suggested Layer**: E2E
-
----
-
-### TC-502: Report list updates after deleting a report
-**Category**: UI State  
-**Preconditions**: A user-created report exists  
-**Steps**:
-1. Note current count
-2. Delete the user-created report
-3. Observe the list
-**Expected Results**: Record count decrements by 1; deleted report row is no longer present  
-**Business Rule**: Deletion is immediate and reflected in the list  
-**Suggested Layer**: E2E
-
----
-
-### TC-503: Add Report form page heading is "Add Report"
-**Category**: UI State  
-**Preconditions**: Logged in as Admin  
-**Steps**:
-1. Navigate to Add Report form
-**Expected Results**: Page heading reads "Add Report"; Save and Cancel buttons are visible; Report Name field is empty  
-**Business Rule**: Consistent page titles across add/edit flows  
-**Suggested Layer**: E2E
-
----
-
-### TC-504: Edit Report form page heading is "Edit Report" and pre-fills name
-**Category**: UI State  
-**Preconditions**: A report exists  
-**Steps**:
-1. Click edit icon on an existing report
-**Expected Results**: URL is `/pim/definePredefinedReport/{id}`; heading reads "Edit Report"; Report Name field shows existing name  
-**Business Rule**: Edit mode pre-populates all existing values  
-**Suggested Layer**: E2E
-
----
-
-### TC-505: View report page shows report name as heading and employee data
-**Category**: UI State  
-**Preconditions**: A report with display fields and matching employee data exists  
-**Steps**:
-1. Click view (document) icon
-**Expected Results**: URL `/pim/displayPredefinedReport/{id}`; heading matches report name; record count shown; display fields appear as columns; employee rows rendered  
-**Business Rule**: Report output renders all configured display fields  
-**Suggested Layer**: E2E
-
----
-
-### TC-506: Loading spinner shows while report list is loading
-**Category**: UI State  
-**Preconditions**: Logged in as Admin  
-**Steps**:
-1. Navigate to the reports list
-2. Observe for `.oxd-loading-spinner` during load
-**Expected Results**: Spinner is visible briefly then disappears; table appears after spinner is gone  
-**Business Rule**: Tables load asynchronously with spinner (business-rules.md §10)  
+1. Click outside the modal or click the **Cancel** / close button
+**Expected Results**: Modal closes; user is returned to the form; no save has occurred; form data is preserved
+**Business Rule**: Modal cancel should not lose form data (§10)
 **Suggested Layer**: E2E
