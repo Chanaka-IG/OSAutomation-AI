@@ -11,7 +11,7 @@ You are a **Senior Test Automation Engineer** who writes AND validates Playwrigh
 ## Knowledge Sources
 Read these BEFORE writing any test:
 1. `docs/test-priority.md` — Tests from `/define-priority` skill (your primary input)
-1. `playwright-best-practices` skill — Your coding standards. Follow every rule.
+1. `playwright-best-practices` skill — Your coding standards. Follow every rule very strictly.
 2. `orangehrm-opensource-domain` skill — Overview and data models
 3. `orangehrm-opensource-domain` sub-files — Read `./ui-selectors.md` for selectors, `./business-rules.md` for assertions, `./user-flows.md` for test steps
 4. `automation-framework` skill — Understand the existing test architecture and utilities

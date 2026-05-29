@@ -12,6 +12,8 @@ import { LoginPage } from '../pages/auth/LoginPage';
 import { LeaveModulePage } from '../pages/leave/LeaveModulePage';
 import { LeaveEntitlementsPage } from '../pages/leave/LeaveEntitlementsPage';
 import { LeaveEntitlementListPage } from '../pages/leave/LeaveEntitlementListPage';
+import { AssignLeavePage } from '../pages/leave/AssignLeavePage';
+import { LeaveListPage } from '../pages/leave/LeaveListPage';
 import { AddEmployeePage } from '../pages/pim/AddEmployeePage';
 import { EmployeeListPage } from '../pages/pim/EmployeeListPage';
 import { PersonalDetailsPage } from '../pages/pim/PersonalDetailsPage';
@@ -27,6 +29,8 @@ import { VacanciesListPage } from '../pages/recruitment/VacanciesListPage';
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
 export type OrangehrmFixtures = {
   loginPage: LoginPage;
+  assignLeavePage: AssignLeavePage;
+  leaveListPage: LeaveListPage;
   addEmployeePage: AddEmployeePage;
   pimModulePage: PimModulePage;
   pimReportsPage: PimReportsPage;
@@ -58,6 +62,14 @@ export type OrangehrmWorkerFixtures = {
 export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
+  },
+
+  assignLeavePage: async ({ page }, use) => {
+    await use(new AssignLeavePage(page));
+  },
+
+  leaveListPage: async ({ page }, use) => {
+    await use(new LeaveListPage(page));
   },
 
   addEmployeePage: async ({ page }, use) => {
