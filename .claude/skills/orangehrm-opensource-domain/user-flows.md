@@ -39,6 +39,18 @@
 9. Find the request → row Action dropdown → select **Approve** → status changes to **Scheduled**
 10. **Negative case**: re-apply the same dates → expect `"Overlapping leave requests found"` validation toast
 
+## Flow 5: Assign leaves for employees as admin and supervisor
+1. **Admin**: navigate to `/leave/assign-leave`
+2. Select the employee from the suggestion dropdown
+3. Pick the leave type
+4. **Assertion**: live `Balance` widget updates to show the requested days
+5. Pick **From Date** and **To Date** (To Date >= From Date)
+6. Pick the **Duration**
+7. If the **Duration** is Specify Time, Pick **From** and **To** times.
+8. **Assertion**: `Duration` will be shown in hours
+9. Add optional **Comment** → click **Assign** → toast `"Successfully Saved"`
+10. Verify: navigate to `leave/LeaveList` → 
+
 ## Flow 5: Submit & Approve a Timesheet
 1. **ESS user**: navigate to `/time/viewMyTimesheet`
 2. Use period navigation `<` / `>` to choose the right week (default: current week)

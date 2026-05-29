@@ -30,7 +30,7 @@ export class LeaveEntitlementsPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    this.pageHeading = page.getByText('Add Leave Entitlement');
+    this.pageHeading = page.getByRole('heading', { name: 'Add Leave Entitlement', exact: true });
 
     this.individualRadio = page.locator('.oxd-radio-wrapper').filter({ hasText: 'Individual Employee' });
     this.multipleRadio = page.locator('.oxd-radio-wrapper').filter({ hasText: 'Multiple Employees' });

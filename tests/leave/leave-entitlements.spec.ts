@@ -113,6 +113,7 @@ test.describe('Authenticated — Add Leave Entitlement', () => {
 
   test('TC-LVE-ENT-001 — Add 10 days Annual Leave to individual employee', async ({
     leaveEntitlementsPage,
+    leaveEntitlementListPage,
     page,
   }) => {
     const fullName = `${entEmployee.firstName} ${entEmployee.lastName}`;
@@ -127,9 +128,9 @@ test.describe('Authenticated — Add Leave Entitlement', () => {
 
     // After individual-mode save, OrangeHRM redirects to the employee's entitlement list
     await page.waitForURL(/viewLeaveEntitlements/, { timeout: 15_000 });
-    const row = page.locator('.oxd-table-card').filter({ hasText: 'Annual Leave' });
+    const row = leaveEntitlementListPage.getEntitlementRow('Annual Leave');
     await expect(row).toBeVisible({ timeout: 10_000 });
-    await expect(row).toContainText('10');
+    await expect(leaveEntitlementListPage.getDaysCell('Annual Leave')).toContainText('10');
   });
 
   // ── P1: TC-005 — Verify entitlement reflected in employee balance ──────────
@@ -211,11 +212,7 @@ test.describe('Authenticated — Add Leave Entitlement', () => {
 
     // Modal should close; no success toast
     await expect(modal).not.toBeVisible({ timeout: 3_000 });
-    const toastVisible = await page
-      .locator('.oxd-toast--success')
-      .isVisible({ timeout: 2_000 })
-      .catch(() => false);
-    expect(toastVisible).toBe(false);
+    await expect(page.locator('.oxd-toast--success')).not.toBeVisible({ timeout: 2_000 });
   });
 
   // ── P0: TC-200 — ESS user cannot access Add Entitlements ─────────────────
@@ -236,10 +233,7 @@ test.describe('Authenticated — Add Leave Entitlement', () => {
 
     await page.goto('/web/index.php/leave/addLeaveEntitlement', { waitUntil: 'domcontentloaded' });
 
-    const isFormVisible = await leaveEntitlementsPage.pageHeading
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
-    expect(isFormVisible, 'ESS user should not see Add Leave Entitlement form').toBe(false);
+    await expect(leaveEntitlementsPage.pageHeading).not.toBeVisible({ timeout: 5_000 });
   });
 
   // ── P0: TC-300 — Required: no employee selected ───────────────────────────

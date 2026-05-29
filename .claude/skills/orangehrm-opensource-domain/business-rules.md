@@ -46,6 +46,13 @@
 - **Bulk Assign** lets Admin push the same entitlement to multiple employees by Location / Subunit / Job Title filter.
 - Leave Period is annual by default. Roll-over (carry-forward) is OFF by default in Open Source — leftover balance evaporates at period end unless the leave type is configured otherwise.
 
+## 6. Assign leaves for employees
+- Only Admin and the supervisors can assign leaves for employees. Admin can assign leave for every employees. Suprvisors can only assign leaves for their respective subordinates.
+- In order to assign leaves, Particular employee should have positive entitlements for the relevant leave type.
+- Can assign leaves with different type of Durations. **Full day** **Half day - Morning** **Half day - Afternoon** **Specify time**
+- For the **Specify time** **From** and **To** times also need to be added
+
+
 ## 6. Timesheet Workflow
 - One timesheet per employee per week. The week-start day is configurable (default: Monday) via Admin → Configuration → ... actually via the `Start Day` of the timesheet definition.
 - States: `NOT_SUBMITTED → SUBMITTED → APPROVED | REJECTED`. Only `SUBMITTED` and `APPROVED` count toward project/activity reports.

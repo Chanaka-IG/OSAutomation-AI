@@ -1,67 +1,84 @@
-# Test Priority: Add Entitlements (E2E Only)
+# Test Priority: Assign Leave (E2E Only)
 
 > Input: docs/test-strategy.md
-> Scope: E2E tests only (22 scenarios)
-> Layer: Playwright, tests/leave/leave-entitlements.spec.ts
-> Generated: 2026-05-26
+> Scope: E2E tests only (30 scenarios assigned to E2E layer)
+> Layer: Playwright, tests/leave/assign-leave.spec.ts
+> Generated: 2026-05-28
 
 ---
 
-## P0 — Release Blocking
+## P0 — Release-Blocking (Core business flow, data integrity, no workaround)
 
-These tests cover core business flows with no workaround. A failure here means the feature is broken.
-
-| TC     | Title                                              | Rationale                                                                                       |
-|--------|----------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| TC-001 | Add entitlement to single employee (Individual)    | The primary happy path for the entire feature. If this fails, no entitlement can be assigned at all — every leave request would fail with "Leave balance exceeded". Release blocker. |
-| TC-002 | Bulk Assign by Sub Unit                            | The bulk assign flow is used by HR admins to push annual entitlements to entire departments. Failure here would require manual entry for every employee — operationally infeasible. |
-| TC-200 | ESS user cannot access Add Entitlements page       | Security / compliance. If an ESS user can assign their own entitlements, it's a data integrity and compliance failure. No workaround. |
-| TC-300 | Submit with no employee selected                   | Required field guard. If this validation is absent, malformed API calls can be submitted, causing backend errors or silent data corruption. |
-| TC-301 | Submit with no leave type selected                 | Same as TC-300 — required field guard for leave type. Missing validation means null leave type in DB. |
-
----
-
-## P1 — High Business Impact
-
-These tests cover significant features with high user reach. Failures degrade the product materially.
-
-| TC     | Title                                              | Rationale                                                                                       |
-|--------|----------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| TC-005 | Added entitlement reflects in employee leave balance | Cross-module integration: entitlement assigned → balance updated. If the balance doesn't reflect, employees cannot successfully apply leave. High reach. |
-| TC-102 | Bulk confirm modal shows employee count            | Users need to confirm the scope of bulk changes. If the count is wrong, admins may unknowingly over- or under-assign entitlements. High business impact. |
-| TC-104 | Cancel on bulk modal aborts save                   | If cancel doesn't actually abort the save, the admin loses control of the bulk operation. High data integrity risk. |
-| TC-302 | Submit with entitlement = 0                        | If 0 is accepted as valid, employees are assigned 0 days, which has the same visible effect as no entitlement but silently looks "assigned". Confusing and impactful. |
-| TC-303 | Submit with negative entitlement                   | Negative entitlement would produce a negative leave balance — likely causes calculation errors downstream in leave requests. Data integrity risk. |
-| TC-307 | Submit all fields blank                            | All-required-fields smoke test. If the form submits with empty data, backend errors or null-pointer exceptions may follow. |
-| TC-500 | Toggle Individual/Multiple mode changes fields     | If the toggle doesn't properly show/hide fields, admins see the wrong form — they may submit individual-mode data when trying to bulk assign, causing data issues. |
+| ID     | Title                                                               | Rationale |
+|--------|---------------------------------------------------------------------|-----------|
+| TC-001 | Admin assigns a full-day leave with sufficient entitlement          | Core assign-leave happy path — the entire feature is untestable if this fails |
+| TC-105 | Admin-assigned leave status is immediately "Scheduled"              | Data integrity — wrong status means leave workflow is broken; downstream approvals and reports would be wrong |
+| TC-201 | ESS user cannot access the Assign Leave page                        | Security/compliance — unauthorized role must not be able to assign leave; no workaround acceptable |
+| TC-203 | Unauthenticated user redirected to login                            | Security — unauthenticated access to any leave action is a release blocker |
+| TC-301 | Missing employee field shows "Required" validation                  | Blocks submit with incomplete data; if this fails, any malformed request could reach the backend |
+| TC-302 | Missing leave type field shows "Required" validation                | Same — required field gate must be enforced before submission |
 
 ---
 
-## P2 — Moderate Impact
+## P1 — High Business Impact (High user reach, primary feature paths, major integrations)
 
-Secondary flows, edge cases on common paths, or cases where a workaround exists.
-
-| TC     | Title                                              | Rationale                                                                                       |
-|--------|----------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| TC-003 | Bulk Assign by Location                            | Same bulk flow as TC-002 but with a different filter dimension. TC-002 already validates the core bulk path; this adds coverage for Location filter specifically. Workaround: use Sub Unit filter. |
-| TC-004 | Bulk Assign by Job Title                           | Similar to TC-003 — additional filter coverage. Workaround exists (use Sub Unit). |
-| TC-006 | Add entitlement with decimal days (0.5)            | Fractional entitlement is valid but less common. If broken, workaround is integer days. |
-| TC-100 | Without entitlement, balance is 0.00               | Validation of the default state (no entitlement = 0 balance). Important for understanding the system, but not a "feature" being exercised. |
-| TC-101 | Leave Period auto-populates with current period    | UX convenience. If the auto-populate is broken, admin must manually select the period — annoying but not blocking. |
-| TC-103 | Entitlement is per employee per leave type/period  | Duplicate-entry behavior. Important to define but a workaround (navigate to employee entitlements and edit) exists. |
-| TC-304 | Submit with non-numeric entitlement                | Type validation. OXD input likely prevents typing non-numeric characters; this is a safety net. Low probability of user reaching this state. |
-| TC-502 | Employee autocomplete filters correctly            | Autocomplete UX. A broken autocomplete still allows searching — just less convenient. Moderate impact. |
-| TC-503 | Success toast appears                              | Feedback UX. If the toast is absent but the save succeeded, the only impact is the user is uncertain whether the save worked. |
+| ID     | Title                                                               | Rationale |
+|--------|---------------------------------------------------------------------|-----------|
+| TC-002 | Admin assigns multi-day leave                                       | Most real-world leave assignments span multiple days; high usage frequency |
+| TC-003 | Admin assigns half-day morning leave                                | Half-day is a commonly used duration option; important for accurate balance tracking |
+| TC-004 | Admin assigns half-day afternoon leave                              | Same as TC-003; separate duration option with distinct impact |
+| TC-005 | Admin assigns leave with "Specify Time" duration                    | Supports precise time tracking use cases; affects how duration is recorded in hours |
+| TC-007 | Supervisor assigns leave for a subordinate employee                 | Supervisors are a primary actor for this feature; high user-reach |
+| TC-104 | Leave spanning weekends counts only working days                    | Incorrect day count directly impacts leave balance — major data integrity risk |
+| TC-202 | Supervisor cannot assign leave for a non-subordinate employee       | Access control for supervisor role — critical for data isolation |
+| TC-303 | Missing From Date shows "Required" validation                       | Prevents malformed date range from being submitted; blocks submission correctly |
+| TC-304 | Missing To Date shows "Required" validation                         | Same; to-date is required for any leave computation |
+| TC-401 | Holiday excluded from day count                                     | Holiday awareness is a core payroll-adjacent concern; wrong count = wrong deduction |
+| TC-402 | Assign exactly remaining balance (boundary)                         | Boundary behavior at exactly 0 remaining balance — important edge case for balance integrity |
+| TC-502 | Leave Type dropdown populated only after employee selected          | Primary UX flow — if the dropdown doesn't load, the form cannot be completed |
+| TC-507 | Success toast appears after assign                                  | User feedback for the action completing; without this, users cannot confirm success |
 
 ---
 
-## P3 — Low Impact / Cosmetic
+## P2 — Moderate Impact (Secondary flows, edge cases on common paths, workaround exists)
 
-Rare edge cases, cosmetic UI states, or scenarios with easy workarounds.
+| ID     | Title                                                               | Rationale |
+|--------|---------------------------------------------------------------------|-----------|
+| TC-006 | Admin assigns leave with a comment                                  | Comment is optional; workaround is to omit it; but commonly used in practice |
+| TC-008 | Balance widget updates when leave type changes                      | UX feedback; workaround is to check balance separately; not blocking |
+| TC-107 | Specify Time requires From/To Time fields                           | Validation for a secondary duration option; moderate reach |
+| TC-108 | Half-day duration auto-computes 0.5 days in balance widget          | Widget accuracy; moderate impact; balance is confirmed on save |
+| TC-306 | Weekend-only date range results in 0 working days                   | Edge case on common path; workaround is correct date selection |
+| TC-307 | Terminated employee not in autocomplete                             | Prevents assigning leave to inactive employees; workaround exists (system blocks if submitted) |
+| TC-403 | Mix of pending and approved leave — balance partially consumed      | Tests escrow mechanism; important for data accuracy but workaround exists via balance check |
+| TC-501 | Page renders correctly for Admin                                    | Page structure test; not blocking but important for regression |
+| TC-503 | Duration dropdown shows correct options                             | Option availability check; secondary to functional flow |
+| TC-504 | Time fields appear only when "Specify Time" selected                | Conditional rendering; secondary UX concern |
+| TC-505 | Balance widget updates when date range changes                      | Reactive UI; workaround is to check balance manually |
+| TC-506 | Employee autocomplete shows suggestions on typing                   | Autocomplete UX; workaround is typing more characters or using exact name |
+| TC-508 | "Assign Leave" menu visible only for Admin/Supervisor               | Role-based menu; caught by TC-201 for ESS access — this is a separate rendering check |
 
-| TC     | Title                                              | Rationale                                                                                       |
-|--------|----------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| TC-202 | Admin cannot select non-existent leave type        | OXD dropdown inherently prevents free-text input; this is defensive. Very unlikely regression. |
-| TC-400 | Entitlement = 1 day (boundary)                     | Boundary value already covered by TC-001 (happy path accepts any positive integer). Minimal additional value. |
-| TC-401 | Entitlement = 365 days (large value)               | Extreme upper boundary. No documented max constraint — likely works fine. Rare use case. |
-| TC-501 | Leave Period dropdown lists available periods      | Read-only UI state check. If a period is missing from the dropdown, it's an admin config issue, not a code bug. Low automation value. |
+---
+
+## P3 — Low / Cosmetic (Rare edge cases, nice-to-have, easily bypassed)
+
+| ID     | Title                                                               | Rationale |
+|--------|---------------------------------------------------------------------|-----------|
+| TC-106 | From Date must be ≤ To Date validation                              | Date pickers usually prevent reverse ranges; low risk since UI and API both validate |
+| TC-305 | Invalid date format                                                 | Date pickers prevent invalid input in most browsers; low risk in real usage |
+| TC-308 | Specify Time — To Time before From Time                             | Rare input scenario; limited real-world occurrence; UX provides time pickers |
+| TC-404 | Assign leave for PIM-only employee (no login account)               | Niche scenario; most tested employees have accounts; low user reach |
+
+---
+
+## Summary
+
+| Priority | Count | IDs |
+|----------|-------|-----|
+| P0       | 6     | TC-001, TC-105, TC-201, TC-203, TC-301, TC-302 |
+| P1       | 13    | TC-002, TC-003, TC-004, TC-005, TC-007, TC-104, TC-202, TC-303, TC-304, TC-401, TC-402, TC-502, TC-507 |
+| P2       | 13    | TC-006, TC-008, TC-107, TC-108, TC-306, TC-307, TC-403, TC-501, TC-503, TC-504, TC-505, TC-506, TC-508 |
+| P3       | 4     | TC-106, TC-305, TC-308, TC-404 |
+| **Total E2E** | **36** | |
+
+> **Tests to implement**: P0 (6) + P1 (13) = **19 E2E tests** in `tests/leave/assign-leave.spec.ts`
