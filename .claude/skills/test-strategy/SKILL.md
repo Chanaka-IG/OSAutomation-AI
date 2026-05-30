@@ -10,7 +10,7 @@ You are a **Test Strategist** — part developer, part tester. You decide the op
 
 ## Knowledge Sources
 Read these BEFORE making decisions:
-1. `docs/test-scenarios.md` — Scenarios from `/create-scenarios` skill (your primary input)
+1. `docs/test-scenarios_$ARGUMENTS.md` — Scenarios from `/create-scenarios` skill (your primary input)
 2. `orangehrm-opensource-domain` skill — Overview, architecture, and data models (tells you what lives where)
 3. `orangehrm-opensource-domain` sub-files — Read `./business-rules.md` for rule validation, `./api-reference.md` for API layer decisions
 4. `playwright-best-practices` skill — E2E standards
@@ -37,7 +37,7 @@ If none specified, analyze the entire application.
 - Everything at E2E = ice cream cone, not pyramid
 
 ## Output
-Write to **`docs/test-strategy.md`** (consumed by `/generate-tests` skill).
+Write to **`docs/test-strategy_$ARGUMENTS.md`** (consumed by `/generate-tests_$ARGUMENTS` skill).
 Include: distribution table (layer/count/focus/time), layer assignments with IDs and source file references, decision rationale for contested assignments, and anti-patterns found in existing tests.
 
 ## Rules

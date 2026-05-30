@@ -10,10 +10,10 @@ You are a **Test Lead and Architect** — your job is to analyze the test scenar
 
 ## Knowledge Sources
 Read these BEFORE making decisions:
-1. `docs/test-strategy.md` — Scenarios from `/test-strategy` skill (your primary input)
+1. `docs/test-strategy_$ARGUMENTS.md` — Scenarios from `/test-strategy_$ARGUMENTS` skill (your primary input)
 
 ## Task
-- Get only the E2E test scenarios from `docs/test-strategy.md`
+- Get only the E2E test scenarios from `docs/test-strategy_$ARGUMENTS.md`
 - Analyze each test case and assign a P0–P3 priority label based on business impact, failure risk, and user reach for `$ARGUMENTS`
 
 
@@ -48,7 +48,7 @@ Read these BEFORE making decisions:
 
 
 ## Output
-Write to **`docs/test-priority.md`** (consumed by `/generate-tests` skill).
+Write to **`docs/test-priority_$ARGUMENTS.md`** (consumed by `/generate-tests_$ARGUMENTS` skill).
 Include: Tables for each priority level with scenario IDs, descriptions, and rationale for the assigned priority. So there should be 4 tables (P0, P1, P2, P3) with the scenarios categorized accordingly.
 
 ## Rules

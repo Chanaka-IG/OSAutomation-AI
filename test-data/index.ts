@@ -16,6 +16,7 @@ import { holidays } from './leave/api/holidays';
 import { leavePeriod } from './leave/api/leavePeriod';
 import { leaveTypes } from './leave/api/leaveTypes';
 import { workweek } from './time/api/workweek';
+import { skills } from './pim/api/skills';
 
 import { auth } from './auth';
 import { addEmployee } from './pim/frontend/add-employee';
@@ -38,6 +39,7 @@ export const api = {
   leavePeriod,
   leaveTypes,
   workweek,
+  skills,
 };
 
 /** UI routes, URL patterns, and form sample values, grouped by module. */

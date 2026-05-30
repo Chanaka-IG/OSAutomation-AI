@@ -101,7 +101,7 @@ export class EmployeesApi extends BaseApiService {
         `EmployeesApi.updateJobDetails failed: HTTP ${response.status()} empNumber=${empNumber}\n${text.slice(0, 600)}`,
       );
     }
-    log.info(`Job details updated for empNumber=${empNumber}`);
+    log.info(`Job details updated for 1empNumber=${empNumber}`);
   }
 
   async getSupervisorEmpNumbers(empNumber: number): Promise<number[]> {
