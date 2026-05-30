@@ -17,7 +17,7 @@ Execute each step below **IN ORDER**. Each step produces a file that the next st
 
 Invoke the `create-scenarios` skill, passing `$ARGUMENTS` as the argument.
 
-Wait until `docs/test-scenarios.md` exists and is non-empty before continuing.
+Wait until `docs/test-scenarios_$ARGUMENTS.md` exists and is non-empty before continuing.
 
 ---
 
@@ -25,7 +25,7 @@ Wait until `docs/test-scenarios.md` exists and is non-empty before continuing.
 
 Invoke the `test-strategy` skill, passing `$ARGUMENTS` as the argument.
 
-Wait until `docs/test-strategy.md` exists and is non-empty before continuing.
+Wait until `docs/test-strategy_$ARGUMENTS.md` exists and is non-empty before continuing.
 
 ---
 
@@ -33,7 +33,7 @@ Wait until `docs/test-strategy.md` exists and is non-empty before continuing.
 
 Invoke the `define-priority` skill, passing `$ARGUMENTS` as the argument.
 
-Wait until `docs/test-priority.md` exists and is non-empty before continuing.
+Wait until `docs/test-priority_$ARGUMENTS.md` exists and is non-empty before continuing.
 
 ---
 
@@ -52,15 +52,15 @@ After all four steps complete successfully, output a structured summary:
 ```
 ## Pipeline Complete: $ARGUMENTS
 
-### Scenarios (docs/test-scenarios.md)
+### Scenarios (docs/test-scenarios_$ARGUMENTS.md)
 - Total: N
 - Happy Path: N | Business Rules: N | Security: N
 - Negative: N | Edge Cases: N | UI State: N
 
-### Test Strategy (docs/test-strategy.md)
+### Test Strategy (docs/test-strategy_$ARGUMENTS.md)
 - E2E: N | API: N | Component: N | Unit: N
 
-### Priority (docs/test-priority.md)
+### Priority (docs/test-priority_$ARGUMENTS.md)
 - P0 (release-blocking): N
 - P1 (high impact):      N
 - P2 (moderate):         N
