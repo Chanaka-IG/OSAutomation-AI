@@ -18,4 +18,5 @@ export {
   seedWorkweek,
   seedHolidays,
   seedAdminUsers,
+  seedSkills
 } from './masterData';
