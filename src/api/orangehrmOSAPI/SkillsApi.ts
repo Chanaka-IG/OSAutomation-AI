@@ -20,7 +20,7 @@ export class SkillsApi extends BaseApiService {
 
     async createIfAbsent(payload: skillSeed): Promise<void> {
         const all = await this.getAll();
-        if (!all.some((skill) => skill.name === payload.name)) {
+        if (all.some((p) => p.name === payload.name)) {
             log.info(`Skill already exists, skipping: ${payload.name}`);
             return;
         }
@@ -29,15 +29,25 @@ export class SkillsApi extends BaseApiService {
 
     async create(payload: skillSeed): Promise<void> {
         const response = await this.post(skillsData.adminPath, {
-            data : {
-                name : payload.name,
-                description : payload.description
+            data: {
+                name: payload.name,
+                description: payload.description
             },
             headers: {
-                Accept : 'application/json',
-                'Content-Type' : 'application/json'
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
             }
         })
+        if (!response.ok()) {
+            const text = await response.text();
+            log.error(`Failed to add skill: ${payload.name}`, {
+                status: response.status(),
+                body: text.slice(0, 400)
+            });
+            throw new Error(`SkillsApi.create failed: HTTP ${response.status()} ${payload.name}\n${text.slice(0, 600)}`);
+        }
+
+        log.info(`Skill successfully added: ${payload.name}`);
     }
 
 }

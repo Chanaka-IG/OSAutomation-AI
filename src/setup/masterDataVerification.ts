@@ -12,6 +12,7 @@ import { leaveTypes } from '../../test-data/leave/api/leaveTypes';
 import { locations } from '../../test-data/pim/api/locations';
 import { payGrades } from '../../test-data/pim/api/payGrades';
 import { subunits } from '../../test-data/pim/api/subunits';
+import { skills } from '../../test-data/pim/api/skills';
 import { workweek as workweekConfig } from '../../test-data/time/api/workweek';
 
 export type MasterDataStatus = {
@@ -70,11 +71,13 @@ export async function verifyMasterData(adminApi: OrangehrmAdminApi): Promise<Mas
   await expectListByField(request, locations.adminPath, locations.seedRecords, 'name', 'location', missing);
   await expectListByField(request, leaveTypes.adminPath, leaveTypes.seedRecords, 'name', 'leave type', missing);
   await expectListByField(request, subunits.adminPath, subunits.seedRecords, 'name', 'subunit', missing);
+  await expectListByField(request, skills.adminPath, skills.seedRecords, 'name', 'skill', missing);
 
   await expectAdminUsers(request, missing);
   await expectLeavePeriod(request, missing);
   await expectWorkweek(request, missing);
-  await expectHolidays(request, missing);
+  await expectSkills(request, missing);
+
 
   return {
     ok: missing.length === 0,
@@ -219,6 +222,26 @@ async function expectWorkweek(request: APIRequestContext, missing: string[]): Pr
     missing.push(`work week (${mismatches.join('; ')})`);
   }
 }
+
+async function expectSkills(request: APIRequestContext, missing: string[]): Promise<void> {
+  const res = await request.get(skills.adminPath, {
+    headers: { Accept: 'application/json' },
+  });
+  const body = await res.json().catch(() => ({}));
+  const rows = extractRows(body);
+
+  for (const seed of skills.seedRecords) {
+    const expected = String(seed.name ?? '');
+    if (!expected) continue;
+
+    const found =
+      rows.some((r) => String(r.name ?? '') === expected) || jsonIncludes(body, expected);
+
+    if (!found) {
+      missing.push(`skill "${expected}"`);
+    }
+  }
+};
 
 function normalizeHolidayName(value: unknown): string {
   return String(value ?? '')
