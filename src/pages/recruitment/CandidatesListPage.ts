@@ -27,6 +27,8 @@ export class CandidatesListPage extends BasePage {
   readonly recordCountText: Locator;
   readonly noRecordsText: Locator;
   readonly selectAllCheckbox: Locator;
+  /** All per-row action icons (view/delete) across the table — admin-only controls. */
+  readonly rowActionIcons: Locator;
 
   // ── Delete confirmation dialog ─────────────────────────────────────────────
   readonly confirmDeleteButton: Locator;
@@ -60,6 +62,7 @@ export class CandidatesListPage extends BasePage {
     this.recordCountText = page.locator('.oxd-text--span').filter({ hasText: /Records? Found/ });
     this.noRecordsText = page.locator('span.oxd-text--span').filter({ hasText: /^No Records Found$/ });
     this.selectAllCheckbox = page.locator('.oxd-table-header .oxd-checkbox-input');
+    this.rowActionIcons = page.locator('.oxd-table-card .oxd-icon-button');
 
     this.confirmDeleteButton = page.getByRole('button', { name: 'Yes, Delete' });
     this.cancelDeleteButton = page.getByRole('button', { name: 'No, Cancel' });
@@ -81,6 +84,21 @@ export class CandidatesListPage extends BasePage {
 
   async selectVacancyFilter(name: string): Promise<void> {
     await this.selectFromGroup(this.vacancyFilterGroup, name);
+  }
+
+  /** Opens the Vacancy filter dropdown without selecting (e.g. to inspect its options). */
+  async openVacancyFilterDropdown(): Promise<void> {
+    await this.vacancyFilterGroup.locator('.oxd-select-text').click();
+  }
+
+  /** Returns an option locator within an open OXD dropdown by its exact label. */
+  filterOption(name: string): Locator {
+    return this.page.getByRole('option', { name, exact: true });
+  }
+
+  /** Closes an open OXD dropdown. */
+  async closeDropdown(): Promise<void> {
+    await this.page.keyboard.press('Escape');
   }
 
   async selectStatusFilter(status: string): Promise<void> {

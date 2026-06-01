@@ -55,6 +55,32 @@ export class CandidatesApi extends BaseApiService {
     return json.data.id;
   }
 
+  /** Looks up a candidate id by full name via the server-side `candidateName` filter. */
+  async findIdByName(firstName: string, lastName: string): Promise<number | undefined> {
+    const qs = new URLSearchParams({
+      candidateName: `${firstName} ${lastName}`,
+      limit: '1',
+    });
+    const res = await this.get(`${CANDIDATES_PATH}?${qs.toString()}`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok()) return undefined;
+    const json = (await res.json()) as { data: Array<{ id: number }> };
+    return json.data?.[0]?.id;
+  }
+
+  /** Idempotent create: reuses an existing candidate with the same name instead of duplicating. */
+  async createIfAbsent(payload: CandidateSeed): Promise<number> {
+    const existing = await this.findIdByName(payload.firstName, payload.lastName);
+    if (existing) {
+      log.info(
+        `Candidate already exists, skipping: "${payload.firstName} ${payload.lastName}" (id=${existing})`,
+      );
+      return existing;
+    }
+    return this.create(payload);
+  }
+
   async shortlist(candidateId: number, note = ''): Promise<void> {
     const res = await this.put(`${CANDIDATES_PATH}/${candidateId}/shortlist`, {
       data: { note },

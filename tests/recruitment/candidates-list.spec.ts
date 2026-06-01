@@ -8,7 +8,7 @@ import { EmployeesApi } from '../../src/api/orangehrmOSAPI/EmployeesApi';
 
 /**
  * E2E coverage for Candidates List & Filters — P0 (release-blocking) and P1 (high business impact).
- * Covers: TC-001, 002, 003, 004, 005, 006, 007, 100, 102, 104, 105,
+ * Covers: TC-REC-CL-001, 002, 003, 004, 005, 006, 007, 100, 102, 104, 105,
  *         200, 201, 202, 300, 301, 504, 505, 506
  *
  * Run:
@@ -29,9 +29,13 @@ const DATE_CANDIDATE = { firstName: 'CLDateRange', lastName: 'Test' };
 const DELETE_CANDIDATE = { firstName: 'CLDelete', lastName: 'Candidate' };
 
 const TEST_KEYWORD = 'cl-automation-filter';
-const SPECIFIC_DATE = '2024-06-15';
+const NO_MATCH_KEYWORD = 'no-match-guaranteed-xyz-123';
+/** The date candidate's application date and the month window that must contain it (TC-100). */
+const DATE_RANGE = { applied: '2024-06-15', from: '2024-06-01', to: '2024-06-30' };
+const APPLICATION_INITIATED = frontend.recruitment.candidateStatuses.applicationInitiated;
 
-const ESS_TEST_USER = { username: 'marcus.chen', password: 'admin@OHRM123' };
+/** Env-overridable seeded ESS user (centralized in test-data/auth). */
+const ESS_TEST_USER = frontend.auth.essTestUser;
 const JOB_TITLE = frontend.recruitment.masterData.jobTitle;
 
 let activeVacancyId = 0;
@@ -83,7 +87,7 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness }) => {
   const today = new Date().toISOString().split('T')[0];
 
   // Keyword candidate — for TC-004 keyword filter
-  const kwId = await candidatesApi.create({
+  const kwId = await candidatesApi.createIfAbsent({
     firstName: KEYWORD_CANDIDATE.firstName,
     lastName: KEYWORD_CANDIDATE.lastName,
     email: `cl.keyword.${Date.now()}@example.com`,
@@ -95,18 +99,18 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness }) => {
   createdCandidateIds.push(kwId);
 
   // Date-range candidate — for TC-100
-  const drId = await candidatesApi.create({
+  const drId = await candidatesApi.createIfAbsent({
     firstName: DATE_CANDIDATE.firstName,
     lastName: DATE_CANDIDATE.lastName,
     email: `cl.daterange.${Date.now()}@example.com`,
     vacancyId: activeVacancyId,
-    dateOfApplication: SPECIFIC_DATE,
+    dateOfApplication: DATE_RANGE.applied,
     consentToKeepData: true,
   });
   createdCandidateIds.push(drId);
 
   // Delete candidate — for TC-504, TC-505, TC-506
-  deleteCandidateId = await candidatesApi.create({
+  deleteCandidateId = await candidatesApi.createIfAbsent({
     firstName: DELETE_CANDIDATE.firstName,
     lastName: DELETE_CANDIDATE.lastName,
     email: `cl.delete.${Date.now()}@example.com`,
@@ -158,12 +162,7 @@ test.describe('Admin — Candidates List', () => {
     });
 
     if (page.url().includes('/auth/login')) {
-      await loginPage.usernameInput.fill('admin');
-      await loginPage.passwordInput.fill('admin@OHRM123');
-      await loginPage.loginButton.click();
-      await page.waitForURL((url) => !url.pathname.includes('/auth/login'), {
-        waitUntil: 'domcontentloaded',
-      });
+      await loginPage.loginAs('admin');
       await candidatesListPage.gotoCandidatesList();
     } else {
       await candidatesListPage.waitUntilTableLoaderDissapear();
@@ -231,14 +230,14 @@ test.describe('Admin — Candidates List', () => {
   test('TC-REC-CL-003 — Filter by Status returns only candidates with that status', async ({
     candidatesListPage,
   }) => {
-    await candidatesListPage.selectStatusFilter('Application Initiated');
+    await candidatesListPage.selectStatusFilter(APPLICATION_INITIATED);
     await candidatesListPage.search();
 
     await expect(candidatesListPage.tableRows.first()).toBeVisible();
     const rows = candidatesListPage.tableRows;
     const count = await rows.count();
     for (let i = 0; i < count; i++) {
-      await expect(candidatesListPage.getStatusCell(rows.nth(i))).toContainText('Application Initiated');
+      await expect(candidatesListPage.getStatusCell(rows.nth(i))).toContainText(APPLICATION_INITIATED);
     }
   });
 
@@ -285,8 +284,8 @@ test.describe('Admin — Candidates List', () => {
   test('TC-REC-CL-100 — Date range filter returns candidates within the specified range', async ({
     candidatesListPage,
   }) => {
-    // Only CLDateRange Test has dateOfApplication = 2024-06-15 — others were created today
-    await candidatesListPage.fillDateRange('2024-06-01', '2024-06-30');
+    // Only the date candidate applied on DATE_RANGE.applied — others were created today
+    await candidatesListPage.fillDateRange(DATE_RANGE.from, DATE_RANGE.to);
     await candidatesListPage.search();
 
     const dateCandidateFullName = `${DATE_CANDIDATE.firstName} ${DATE_CANDIDATE.lastName}`;
@@ -304,20 +303,13 @@ test.describe('Admin — Candidates List', () => {
 
   test('TC-REC-CL-102 — Vacancy filter dropdown shows active vacancy but not closed vacancy', async ({
     candidatesListPage,
-    page,
   }) => {
-    await candidatesListPage.vacancyFilterGroup.locator('.oxd-select-text').click();
+    await candidatesListPage.openVacancyFilterDropdown();
 
-    await expect(
-      page.getByRole('option', { name: ACTIVE_VACANCY_NAME, exact: true }),
-    ).toBeVisible();
+    await expect(candidatesListPage.filterOption(ACTIVE_VACANCY_NAME)).toBeVisible();
+    await expect(candidatesListPage.filterOption(CLOSED_VACANCY_NAME)).not.toBeVisible();
 
-    await expect(
-      page.getByRole('option', { name: CLOSED_VACANCY_NAME, exact: true }),
-    ).not.toBeVisible();
-
-    // Close dropdown
-    await page.keyboard.press('Escape');
+    await candidatesListPage.closeDropdown();
   });
 
   // ── P1: Combined filters ──────────────────────────────────────────────────
@@ -326,7 +318,7 @@ test.describe('Admin — Candidates List', () => {
     candidatesListPage,
   }) => {
     await candidatesListPage.selectVacancyFilter(ACTIVE_VACANCY_NAME);
-    await candidatesListPage.selectStatusFilter('Application Initiated');
+    await candidatesListPage.selectStatusFilter(APPLICATION_INITIATED);
     await candidatesListPage.search();
 
     await expect(candidatesListPage.tableRows.first()).toBeVisible();
@@ -334,7 +326,7 @@ test.describe('Admin — Candidates List', () => {
     const count = await rows.count();
     for (let i = 0; i < count; i++) {
       await expect(candidatesListPage.getVacancyCell(rows.nth(i))).toContainText(ACTIVE_VACANCY_NAME);
-      await expect(candidatesListPage.getStatusCell(rows.nth(i))).toContainText('Application Initiated');
+      await expect(candidatesListPage.getStatusCell(rows.nth(i))).toContainText(APPLICATION_INITIATED);
     }
   });
 
@@ -358,7 +350,7 @@ test.describe('Admin — Candidates List', () => {
   test('TC-REC-CL-300 — No-match filter shows "No Records Found" empty state', async ({
     candidatesListPage,
   }) => {
-    await candidatesListPage.fillKeywordsFilter('no-match-guaranteed-xyz-123');
+    await candidatesListPage.fillKeywordsFilter(NO_MATCH_KEYWORD);
     await candidatesListPage.search();
 
     await expect(candidatesListPage.noRecordsText).toBeVisible();
@@ -436,21 +428,18 @@ test.describe('Security — ESS user cannot access Recruitment', () => {
       waitUntil: 'domcontentloaded',
       timeout: 120_000,
     });
-    await loginPage.usernameInput.fill(ESS_TEST_USER.username);
-    await loginPage.passwordInput.fill(ESS_TEST_USER.password);
-    await loginPage.loginButton.click();
+    // Logout redirects to the login form; fill it via the POM rather than raw inputs.
+    await loginPage.login(ESS_TEST_USER.username, ESS_TEST_USER.password);
     await page.waitForURL((url) => !url.pathname.includes('/auth/login'), {
       waitUntil: 'domcontentloaded',
     });
   });
 
-  test('TC-REC-CL-201 — ESS user has no Recruitment item in side navigation', async ({ page }) => {
-    await expect(
-      page.locator('.oxd-main-menu-item').filter({ hasText: 'Recruitment' }),
-    ).toHaveCount(0);
+  test('TC-REC-CL-201 — ESS user has no Recruitment item in side navigation', async ({ loginPage }) => {
+    await expect(loginPage.mainMenuItem('Recruitment')).toHaveCount(0);
   });
 
-  test('TC-REC-CL-202 — ESS user accessing candidates URL directly sees no Add/Edit/Delete controls', async ({
+  test('TC-REC-CL-202 — ESS user accessing candidates URL directly sees no management controls', async ({
     candidatesListPage,
     page,
   }) => {
@@ -459,12 +448,11 @@ test.describe('Security — ESS user cannot access Recruitment', () => {
       timeout: 120_000,
     });
 
-    await expect(page.getByRole('button', { name: 'Add' })).not.toBeVisible({ timeout: 5_000 });
-
-    const rows = candidatesListPage.tableRows;
-    const rowCount = await rows.count();
-    if (rowCount > 0) {
-      await expect(rows.first().locator('.oxd-icon-button')).toHaveCount(0);
-    }
+    // ESS has no Recruitment data-group access (business-rules: ESS menu excludes
+    // Recruitment). Whether the app redirects away or renders a forbidden page,
+    // neither the admin "Add" control nor any per-row action icons may exist —
+    // asserted unconditionally so zero rows cannot produce a silent pass.
+    await expect(candidatesListPage.addButton).toHaveCount(0);
+    await expect(candidatesListPage.rowActionIcons).toHaveCount(0);
   });
 });

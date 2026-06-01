@@ -25,7 +25,8 @@ const DELETE_VACANCY_NAME = 'VL Test Suite Delete';
 const BULK_A_VACANCY_NAME = 'VL Test Suite Bulk A';
 const BULK_B_VACANCY_NAME = 'VL Test Suite Bulk B';
 
-const ESS_TEST_USER = { username: 'marcus.chen', password: 'admin@OHRM123' };
+/** Env-overridable seeded ESS user (centralized in test-data/auth). */
+const ESS_TEST_USER = frontend.auth.essTestUser;
 const JOB_TITLE = frontend.recruitment.masterData.jobTitle;
 /** Display name shown in the Hiring Manager filter dropdown on the vacancies list page. */
 const HIRING_MANAGER_FILTER_NAME = frontend.recruitment.masterData.hiringManagerDisplayName;
@@ -85,42 +86,37 @@ test.afterAll(async ({ orangehrmAdminApi }) => {
 test.describe('TC-200 — Unauthenticated access', () => {
   test('TC-200 — Unauthenticated user accessing vacancies URL is redirected to login', async ({ page }) => {
     await page.goto(frontend.recruitment.routes.vacancies, { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/auth\/login/i);
+    await expect(page).toHaveURL(frontend.auth.urlPatterns.login);
   });
 });
 
 // ─── P0: Security — ESS role ──────────────────────────────────────────────
 test.describe('Security — ESS user cannot access Recruitment', () => {
   test.beforeEach(async ({ loginPage }) => {
-    await loginPage.goto('/web/index.php/auth/login');
-    await loginPage.usernameInput.fill(ESS_TEST_USER.username);
-    await loginPage.passwordInput.fill(ESS_TEST_USER.password);
-    await loginPage.loginButton.click();
+    await loginPage.open();
+    await loginPage.login(ESS_TEST_USER.username, ESS_TEST_USER.password);
     await loginPage.page.waitForURL((url) => !url.pathname.includes('/auth/login'), {
       waitUntil: 'domcontentloaded',
     });
   });
 
-  test('TC-201 — ESS user has no Recruitment item in side navigation', async ({ page }) => {
-    await expect(
-      page.locator('.oxd-main-menu-item').filter({ hasText: 'Recruitment' }),
-    ).toHaveCount(0);
+  test('TC-201 — ESS user has no Recruitment item in side navigation', async ({ loginPage }) => {
+    await expect(loginPage.mainMenuItem('Recruitment')).toHaveCount(0);
   });
 
-  test('TC-202 — ESS user accessing vacancies URL directly sees no Add/Edit/Delete controls', async ({
+  test('TC-202 — ESS user accessing vacancies URL directly sees no management controls', async ({
     page,
+    vacanciesListPage,
   }) => {
     await page.goto(frontend.recruitment.routes.vacancies, { waitUntil: 'domcontentloaded' });
 
-    // Add button must not be visible
-    await expect(page.getByRole('button', { name: 'Add' })).not.toBeVisible({ timeout: 5_000 });
-
-    // Per-row action buttons (Edit/Delete) must not be visible
-    const rows = page.locator('.oxd-table-card');
-    const rowCount = await rows.count();
-    if (rowCount > 0) {
-      await expect(rows.first().getByRole('button')).toHaveCount(0);
-    }
+    // ESS has no Recruitment data-group access (business-rules: ESS sees only
+    // My Info/Leave/Time/Performance/Directory/Dashboard/Buzz). Whether the app
+    // redirects away or renders a forbidden page, neither the admin "Add" control
+    // nor any per-row Edit/Delete icons may exist. Asserted unconditionally with
+    // toHaveCount(0) so the test cannot pass by silently matching zero rows.
+    await expect(vacanciesListPage.addButton).toHaveCount(0);
+    await expect(vacanciesListPage.rowActionIcons).toHaveCount(0);
   });
 });
 
@@ -245,7 +241,7 @@ test.describe('Admin — Vacancies List', () => {
     page,
   }) => {
     await vacanciesListPage.clickEditForRow(ACTIVE_VACANCY_NAME);
-    await expect(page).toHaveURL(/addJobVacancy\/\d+/);
+    await expect(page).toHaveURL(frontend.recruitment.urlPatterns.editVacancy);
   });
 
   // ── P1: No-match empty state ───────────────────────────────────────────
