@@ -44,6 +44,16 @@ export const auth = {
       return resolveCredentials('admin').password;
     },
   },
+  /**
+   * Known seeded ESS user for suites that must always exercise ESS access control
+   * (e.g. recruitment) rather than skip when `OHRM_ESS_*` env vars are unset.
+   * Override via `OHRM_ESS_USERNAME` / `OHRM_ESS_PASSWORD`. Centralized here so no
+   * spec carries a plaintext credential literal.
+   */
+  essTestUser: {
+    username: process.env.OHRM_ESS_USERNAME || 'marcus.chen',
+    password: process.env.OHRM_ESS_PASSWORD || 'admin@OHRM123',
+  },
   getCredentials: resolveCredentials,
   /** True when both username and password are non-empty for the role (env-configured). */
   hasLoginCredentials(role: LoginRole): boolean {

@@ -20,6 +20,8 @@ export class VacanciesListPage extends BasePage {
   readonly recordCountText: Locator;
   readonly noRecordsText: Locator;
   readonly selectAllCheckbox: Locator;
+  /** All per-row Edit/Delete action icons across the table (admin-only controls). */
+  readonly rowActionIcons: Locator;
 
   // ── Delete confirmation dialog ─────────────────────────────────────────────
   readonly confirmDeleteButton: Locator;
@@ -42,6 +44,7 @@ export class VacanciesListPage extends BasePage {
     this.recordCountText = page.locator('.oxd-text--span').filter({ hasText: /Records? Found/ });
     this.noRecordsText = page.locator('span.oxd-text--span').filter({ hasText: /^No Records Found$/ });
     this.selectAllCheckbox = page.locator('.oxd-table-header .oxd-checkbox-input');
+    this.rowActionIcons = page.locator('.oxd-table-card .oxd-icon-button');
 
     this.confirmDeleteButton = page.getByRole('button', { name: 'Yes, Delete' });
     this.cancelDeleteButton = page.getByRole('button', { name: 'No, Cancel' });
@@ -116,7 +119,11 @@ export class VacanciesListPage extends BasePage {
     return match ? parseInt(match[1], 10) : 0;
   }
 
-  /** Returns the status cell (index 4) locator for a given row. */
+  /**
+   * Returns the Status cell for a given row.
+   * Row column map (positional — keep in sync if columns change):
+   * 0=select checkbox, 1=Vacancy, 2=Job Title, 3=Hiring Manager, 4=Status, 5=Actions.
+   */
   getStatusCell(row: Locator): Locator {
     return row.getByRole('cell').nth(4);
   }

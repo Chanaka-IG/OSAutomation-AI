@@ -28,6 +28,11 @@ export abstract class BasePage {
     return this.page.locator(selector);
   }
 
+  /** Left side-nav (OXD main menu) item matched by its visible label. */
+  mainMenuItem(name: string): Locator {
+    return this.page.locator('.oxd-main-menu-item').filter({ hasText: name });
+  }
+
   async waitForSuccessToast(timeout = 10_000): Promise<string> {
     const toast = this.page.locator('.oxd-toast--success');
     await toast.waitFor({ state: 'visible', timeout });

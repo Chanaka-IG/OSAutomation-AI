@@ -11,6 +11,7 @@ export const recruitment = {
     candidates: /viewCandidates/i,
     vacancies: /viewJobVacancy/i,
     addVacancy: /addJobVacancy/i,
+    editVacancy: /addJobVacancy\/\d+/i,
     addCandidate: /addCandidate$/i,
     candidateProfile: /addCandidate\/\d+/i,
   },
@@ -20,6 +21,10 @@ export const recruitment = {
   samples: {
     candidateFirstName: 'Priya',
     candidateLastName: 'Sharma',
+  },
+  /** Candidate pipeline status labels as rendered in the list/filter UI. */
+  candidateStatuses: {
+    applicationInitiated: 'Application Initiated',
   },
   masterData: {
     jobTitle: 'QA Engineer',

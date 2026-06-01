@@ -26,17 +26,17 @@ import { seedSkills } from './skills';
 export async function seedAllMasterData(adminApi: OrangehrmAdminApi): Promise<void> {
   logger.info('Master data seeding started');
 
-  // await seedJobTitles(adminApi);
-  // await seedEmployees(adminApi);
-  // await seedEmploymentStatuses(adminApi);
-  // await seedLocations(adminApi);
-  // await seedPayGrades(adminApi);
-  // await seedLeavePeriod(adminApi);
-  // await seedSubunits(adminApi);
-  // await seedLeaveTypes(adminApi);
-  // await seedWorkweek(adminApi);
-  // await seedHolidays(adminApi);
-  // await seedAdminUsers(adminApi);
+  await seedJobTitles(adminApi);
+  await seedEmployees(adminApi);
+  await seedEmploymentStatuses(adminApi);
+  await seedLocations(adminApi);
+  await seedPayGrades(adminApi);
+  await seedLeavePeriod(adminApi);
+  await seedSubunits(adminApi);
+  await seedLeaveTypes(adminApi);
+  await seedWorkweek(adminApi);
+  await seedHolidays(adminApi);
+  await seedAdminUsers(adminApi);
   await seedSkills(adminApi);
 
   logger.info('Master data seeding finished');
