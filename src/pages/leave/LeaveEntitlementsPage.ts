@@ -92,13 +92,6 @@ export class LeaveEntitlementsPage extends BasePage {
     await option.click();
   }
 
-  // ── Shared actions ─────────────────────────────────────────────────────────
-
-  private async selectOxdOption(dropdown: Locator, optionText: string): Promise<void> {
-    await dropdown.click();
-    await this.page.getByRole('option', { name: optionText, exact: true }).click();
-  }
-
   async selectLeaveType(type: string): Promise<void> {
     await this.selectOxdOption(this.leaveTypeDropdown, type);
   }
