@@ -22,7 +22,15 @@ export const performance = {
       lastName: 'Little',
       middleName: 'Petea',
     },
-  ]
+  ],
+  validKpi: {
+    name: 'Test KPI',
+    description: 'This is a test KPI created for automation testing.',
+    jobTitle: 'Software Engineer',
+    minimumRating: '1',
+    maximumRating: '5',
+    makeDefault: true,
+  },
     
    
 } as const;

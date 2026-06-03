@@ -14,6 +14,7 @@ import { LeaveEntitlementsPage } from '../pages/leave/LeaveEntitlementsPage';
 import { LeaveEntitlementListPage } from '../pages/leave/LeaveEntitlementListPage';
 import { AssignLeavePage } from '../pages/leave/AssignLeavePage';
 import { LeaveListPage } from '../pages/leave/LeaveListPage';
+import { MyLeavePage } from '../pages/leave/MyLeavePage';
 import { ApplyLeavePage } from '../pages/leave/ApplyLeavePage';
 import { AddEmployeePage } from '../pages/pim/AddEmployeePage';
 import { EmployeeListPage } from '../pages/pim/EmployeeListPage';
@@ -34,6 +35,7 @@ export type OrangehrmFixtures = {
   assignLeavePage: AssignLeavePage;
   applyLeavePage: ApplyLeavePage;
   leaveListPage: LeaveListPage;
+  myLeavePage: MyLeavePage;
   addEmployeePage: AddEmployeePage;
   pimModulePage: PimModulePage;
   pimReportsPage: PimReportsPage;
@@ -74,6 +76,10 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
 
   leaveListPage: async ({ page }, use) => {
     await use(new LeaveListPage(page));
+  },
+
+  myLeavePage: async ({ page }, use) => {
+    await use(new MyLeavePage(page));
   },
 
   applyLeavePage: async ({ page }, use) => {

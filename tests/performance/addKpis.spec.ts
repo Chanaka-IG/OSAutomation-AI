@@ -11,7 +11,7 @@ test.beforeEach(() => {
   test.skip(!env.baseURL, 'Set BASE_URL to run this suite.');
 });
 
-test.beforeAll(async ({orangehrmAdminApi, masterDataReadiness}) => {
+test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness }) => {
 
   void masterDataReadiness;
 
@@ -22,19 +22,23 @@ test.beforeAll(async ({orangehrmAdminApi, masterDataReadiness}) => {
   }
 })
 
-test.beforeAll(async ({ orangehrmAdminApi,addKpisPage }) => {
-  await orangehrmAdminApi.loginAsAdmin();
+test.beforeEach(async ({ orangehrmAdminApi, addKpisPage }) => {
+  await addKpisPage.loginAs('admin');
   await addKpisPage.navigateToAddKpisPage();
   // Implement any setup logic needed before all tests, such as creating necessary data or configurations
 });
 
 test.describe('Add KPIs', () => {
-  test('should add KPIs successfully', async ({ orangehrmAdminApi }) => {
-    // Implement the logic to add KPIs using the orangehrmAdminApi
-    // Example:
-    // await orangehrmAdminApi.addKpi({ name: 'KPI Name', description: 'KPI Description' });
-    
-    // For demonstration, we'll just assert true
-    expect(true).toBe(true);
+
+  test('TC-001 | List loads with correct columns/records', async ({ addKpisPage }) => {
+    const isVisible = await addKpisPage.validateFieldVisibility();
+    expect(isVisible).toBe(true);
   });
-});
+
+  test.only('TC-005 | Add a KPI with all valid fields', async ({ addKpisPage }) => {
+    await addKpisPage.fillKeyIndicator(frontend.performance.validKpi);
+    await addKpisPage.clickOnSave();
+    const toastMessage = await addKpisPage.waitForSuccessToast();
+    expect(toastMessage).toContain('Successfully Saved');
+  });
+});     

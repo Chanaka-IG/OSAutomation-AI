@@ -46,12 +46,26 @@ export abstract class BasePage {
         `Missing credentials for role "${role}". Configure the OHRM_* / ADMIN_* environment variables.`,
       );
     }
+    await this.loginWithCredentials(username, password);
+  }
+
+  /**
+   * Log in with explicit credentials (for dynamically-seeded users not covered by the
+   * env-configured roles, e.g. a per-suite ESS account). Clears existing cookies first so
+   * it can switch users mid-test, and waits until the app navigates off the login page.
+   */
+  async loginWithCredentials(username: string, password: string): Promise<void> {
+    if (!username || !password) {
+      throw new Error('loginWithCredentials requires a non-empty username and password.');
+    }
+    await this.page.context().clearCookies();
     await this.page.goto(auth.routes.login, { waitUntil: 'domcontentloaded' });
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
     await this.page.waitForURL((url) => !url.pathname.includes('/auth/login'), {
       waitUntil: 'domcontentloaded',
+      timeout: 30_000,
     });
   }
 
@@ -81,7 +95,10 @@ export abstract class BasePage {
       }
 
   }
-
+  async selectOxdOption(dropdown: Locator, optionText: string): Promise<void> {
+    await dropdown.click();
+    await this.page.getByRole('option', { name: optionText, exact: true }).click();
+  }
   
 }
 
