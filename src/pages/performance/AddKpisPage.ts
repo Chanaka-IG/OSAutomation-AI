@@ -12,6 +12,10 @@ export class AddKpisPage extends BasePage {
     readonly makeDefaultCheckbox: Locator;
     readonly saveButton: Locator;
     readonly cancelButton: Locator;
+    readonly selectAllCheckbox: Locator;
+    readonly deleteSelectedButton: Locator;
+    readonly yesDeleteButton: Locator;
+    readonly deleteModal: Locator;
 
     constructor(page: Page) {
         super(page);
@@ -23,6 +27,10 @@ export class AddKpisPage extends BasePage {
         this.makeDefaultCheckbox = page.locator('.orangehrm-module-field-row').filter({ hasText: /Make Default Scale/ }).locator('.oxd-switch-wrapper');
         this.saveButton = page.getByRole('button', { name: 'Save' });
         this.cancelButton = page.getByRole('button', { name: 'Cancel' });
+        this.selectAllCheckbox = page.locator('.oxd-table-header .oxd-checkbox-wrapper');
+        this.deleteSelectedButton = page.getByRole('button', { name: 'Delete Selected' });
+        this.yesDeleteButton = page.getByRole('button', { name: 'Yes, Delete' });
+        this.deleteModal = page.locator('.orangehrm-dialog-popup');
     }
 
     async navigateToAddKpisPage(): Promise<void> {
@@ -72,7 +80,12 @@ export class AddKpisPage extends BasePage {
         await this.saveButton.click();
     }
 
+    async deleteAllKpis(): Promise<void> {
+        // Implement logic to delete all KPIs, e.g., by navigating to the KPI list page and deleting entries one by one
+        await this.selectAllCheckbox.click();
+        await this.deleteSelectedButton.click();
+        await this.deleteModal.waitFor({ state: 'visible' });
+        await this.yesDeleteButton.click();
+    }
+
 }
-
-
-

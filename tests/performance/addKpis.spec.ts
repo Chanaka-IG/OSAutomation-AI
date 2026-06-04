@@ -22,10 +22,15 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness }) => {
   }
 })
 
-test.beforeEach(async ({ orangehrmAdminApi, addKpisPage }) => {
+test.beforeEach(async ({ addKpisPage }) => {
   await addKpisPage.loginAs('admin');
   await addKpisPage.navigateToAddKpisPage();
   // Implement any setup logic needed before all tests, such as creating necessary data or configurations
+});
+
+test.afterAll(async ({ addKpisPage }) => {
+  // Implement any cleanup logic needed after all tests, such as deleting test data or resetting configurations
+  await addKpisPage.deleteAllKpis();
 });
 
 test.describe('Add KPIs', () => {
