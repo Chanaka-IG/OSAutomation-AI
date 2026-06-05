@@ -2,7 +2,8 @@ import { test, expect } from '../../src/fixtures';
 import { env } from '../../src/config/env';
 import { frontend } from '../../test-data';
 import { EmployeesApi } from '../../src/api/orangehrmOSAPI/EmployeesApi';
-
+import { KpisApi } from '../../src/api/orangehrmOSAPI/KpisApi'
+import { kpis as kpiAPIdata } from '../../test-data/performance/api/kpis'
 
 
 test.describe.configure({ mode: 'serial', timeout: 180_000 });
@@ -11,15 +12,21 @@ test.beforeEach(() => {
   test.skip(!env.baseURL, 'Set BASE_URL to run this suite.');
 });
 
-test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness }) => {
+test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, orangehrmApiContext }) => {
 
   void masterDataReadiness;
+
+  const kpi = new KpisApi(orangehrmApiContext);
 
   await orangehrmAdminApi.loginAsAdmin();
   const emploee = new EmployeesApi(orangehrmAdminApi.request)
   for (const employee of frontend.performance.employees) {
     await emploee.createIfAbsent(employee)
   }
+  for (const kpiData of kpiAPIdata.seedRecords) {
+    await kpi.createIfAbsent(kpiData)
+  }
+  await kpi.deleteAllKpis();
 })
 
 test.beforeEach(async ({ addKpisPage }) => {
@@ -28,10 +35,11 @@ test.beforeEach(async ({ addKpisPage }) => {
   // Implement any setup logic needed before all tests, such as creating necessary data or configurations
 });
 
-test.afterAll(async ({ addKpisPage }) => {
-  // Implement any cleanup logic needed after all tests, such as deleting test data or resetting configurations
-  await addKpisPage.deleteAllKpis();
-});
+// test.afterAll(async ({ orangehrmApiContext }) => {
+//   // Implement any cleanup logic needed after all tests, such as deleting test data or resetting configurations
+//   const kpi = new KpisApi(orangehrmApiContext);
+//   await kpi.deleteAllKpis();
+// });
 
 test.describe('Add KPIs', () => {
 
