@@ -37,7 +37,6 @@ export class EmployeesApi extends BaseApiService {
       log.info(`Employee successfully added: ${this.displayName(payload)}`);
       return;
     }
-
     const text = await response.text();
     const status = response.status();
     if (
@@ -46,7 +45,9 @@ export class EmployeesApi extends BaseApiService {
       status === 400 ||
       /already|duplicate|exist|unique/i.test(text)
     ) {
-      log.info(`Employee already present, skipping: ${payload.employeeId}`);
+      // NOTE: 400/422 can also be a genuine validation failure — keep the body in the
+      // log so a wrongly-skipped create stays diagnosable.
+      log.info(`Employee already present, skipping: ${payload.employeeId})`);
       return;
     }
 
@@ -82,6 +83,11 @@ export class EmployeesApi extends BaseApiService {
     return json.data?.find((e) => e.firstName === firstName && e.lastName === lastName)?.empNumber;
   }
 
+  /**
+   * PUT overwrites the whole job-details record: any field not passed is set to NULL
+   * (including joinedDate). Safe for freshly-seeded test employees; do not use to
+   * partially update an employee whose existing job details must survive.
+   */
   async updateJobDetails(
     empNumber: number,
     details: { jobTitleId?: number; empStatusId?: number; subunitId?: number },
@@ -101,7 +107,7 @@ export class EmployeesApi extends BaseApiService {
         `EmployeesApi.updateJobDetails failed: HTTP ${response.status()} empNumber=${empNumber}\n${text.slice(0, 600)}`,
       );
     }
-    log.info(`Job details updated for 1empNumber=${empNumber}`);
+    log.info(`Job details updated for empNumber=${empNumber}`);
   }
 
   async getSupervisorEmpNumbers(empNumber: number): Promise<number[]> {

@@ -140,7 +140,7 @@ export class MyLeavePage extends BasePage {
 
   /** The inline "Cancel" button within a specific row. */
   cancelButton(rowText: string): Locator {
-    return this.rowByText(rowText).getByRole('button', { name: 'Cancel' });
+    return this.rowByText(rowText).getByRole('button', { name: 'Cancel', exact: true });
   }
 
   /** "Number of Days" cell value for a row (6th cell: ☐·Date·Emp·Type·Balance·Days·…). */

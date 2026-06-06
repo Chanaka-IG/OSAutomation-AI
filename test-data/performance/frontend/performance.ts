@@ -31,6 +31,19 @@ export const performance = {
     maximumRating: '5',
     makeDefault: true,
   },
-    
+  updateKpi: {
+    name: 'Test KPI Update',
+    description: 'This is updated',
+    jobTitle: 'QA Engineer',
+    minimumRating: '2',
+    maximumRating: '9',
+    makeDefault: false,
+  },
+  userData: {
+    username: 'UserForKpiTest',
+      password: 'admin@OHRM123',
+      status: true,
+      userRoleId: 2,
+  }
    
 } as const;

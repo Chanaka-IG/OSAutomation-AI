@@ -370,3 +370,6 @@ npx playwright show-report
 | Testing implementation details | Breaks on refactor | Test user-visible behavior |
 
 
+## 12. Comment add
+- Dont add comment every actions. If the action is straight forward and clear to end user no need to add comment for that action, but if the action is not straight forward and it needs some explanation to understand why we are doing that action, then we should add comment for that action.
+

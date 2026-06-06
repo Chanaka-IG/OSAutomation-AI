@@ -105,6 +105,34 @@ export class ApplyLeavePage extends BasePage {
     await this.waitUntilFormLoaderDissapear();
   }
 
+  /**
+   * Click Apply for a failure-path attempt (over-balance, invalid dates, overlap).
+   * The button may be disabled or the submit may be rejected — neither fails the
+   * action; callers assert the outcome (no toast / conflict panel / API delta).
+   */
+  async attemptApply(): Promise<void> {
+    await this.applyButton.click({ timeout: 5_000 }).catch(() => {});
+    await this.waitUntilFormLoaderDissapear();
+  }
+
+  /**
+   * A row of the inline "(N) Record Found" overlap-conflict table that OrangeHRM
+   * renders above the form instead of saving an overlapping request (no toast fires).
+   */
+  overlapConflictRow(text: string): Locator {
+    return this.page.locator('.oxd-table-card').filter({ hasText: text });
+  }
+
+  /** A Leave Type option by label — only ENTITLED types are listed for ESS users. */
+  leaveTypeOption(label: string): Locator {
+    return this.page.getByRole('option', { name: label, exact: true });
+  }
+
+  /** Open the Leave Type dropdown (e.g. to assert which options are offered). */
+  async openLeaveTypeDropdown(): Promise<void> {
+    await this.leaveTypeDropdown.click();
+  }
+
   async getLeaveBalance(): Promise<string> {
     return ((await this.leaveBalanceText.textContent()) ?? '').trim();
   }

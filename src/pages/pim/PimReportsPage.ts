@@ -132,11 +132,6 @@ export class PimReportsPage extends BasePage {
 
   // ── Form interactions ──────────────────────────────────────────────────────
 
-  private async selectOxdOption(dropdown: Locator, optionText: string): Promise<void> {
-    await dropdown.click();
-    await this.page.getByRole('option', { name: optionText, exact: true }).click();
-  }
-
   async fillReportName(name: string): Promise<void> {
     await this.reportNameInput.fill(name);
   }
