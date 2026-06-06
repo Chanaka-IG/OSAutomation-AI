@@ -139,7 +139,7 @@ test.describe('Authenticated — Add Leave Entitlement', () => {
     leaveEntitlementListPage,
   }) => {
     const fullName = `${entEmployee.firstName} ${entEmployee.lastName}`;
-    await leaveEntitlementListPage.goto();
+    await leaveEntitlementListPage.gotoEntitlementList();
     await leaveEntitlementListPage.searchByEmployee(fullName);
 
     const row = leaveEntitlementListPage.getEntitlementRow('Annual Leave');

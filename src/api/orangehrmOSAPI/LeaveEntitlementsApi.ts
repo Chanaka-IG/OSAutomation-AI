@@ -20,15 +20,17 @@ export class LeaveEntitlementsApi extends BaseApiService {
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
     });
     if (!res.ok()) {
+      // Fail fast: a silently-missing entitlement surfaces much later as an obscure
+      // UI failure (e.g. the leave type absent from the Apply dropdown).
       const text = await res.text();
-      log.warn(
-        `createOrUpdateEntitlement HTTP ${res.status()} for empNumber=${payload.empNumber}: ${text.slice(0, 200)}`,
-      );
-    } else {
-      log.info(
-        `Entitlement set: empNumber=${payload.empNumber} leaveTypeId=${payload.leaveTypeId} days=${payload.entitlement}`,
+      throw new Error(
+        `LeaveEntitlementsApi.createOrUpdateEntitlement failed: HTTP ${res.status()} ` +
+          `empNumber=${payload.empNumber} leaveTypeId=${payload.leaveTypeId}\n${text.slice(0, 400)}`,
       );
     }
+    log.info(
+      `Entitlement set: empNumber=${payload.empNumber} leaveTypeId=${payload.leaveTypeId} days=${payload.entitlement}`,
+    );
   }
 
   async getEntitlementBalance(empNumber: number, leaveTypeId: number): Promise<number> {

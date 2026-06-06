@@ -11,8 +11,9 @@ export class LeaveEntitlementListPage extends BasePage {
     this.searchButton = page.getByRole('button', { name: 'Search' });
   }
 
-  async goto(): Promise<void> {
-    await this.page.goto('/web/index.php/leave/viewLeaveEntitlements', { waitUntil: 'domcontentloaded' });
+  /** Named per POM convention — must not shadow `BasePage.goto(urlOrPath)`. */
+  async gotoEntitlementList(): Promise<void> {
+    await this.goto('/web/index.php/leave/viewLeaveEntitlements');
   }
 
   async searchByEmployee(name: string): Promise<void> {

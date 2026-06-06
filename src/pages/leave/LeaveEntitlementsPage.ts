@@ -30,7 +30,11 @@ export class LeaveEntitlementsPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    this.pageHeading = page.getByRole('heading', { name: 'Add Leave Entitlement', exact: true });
+    // The page main title is rendered as <p class="orangehrm-main-title"> in the current
+    // build (previously an <h6>) — match the title class, not the heading role.
+    this.pageHeading = page
+      .locator('.orangehrm-main-title')
+      .filter({ hasText: 'Add Leave Entitlement' });
 
     this.individualRadio = page.locator('.oxd-radio-wrapper').filter({ hasText: 'Individual Employee' });
     this.multipleRadio = page.locator('.oxd-radio-wrapper').filter({ hasText: 'Multiple Employees' });

@@ -60,16 +60,15 @@ export class KpisApi extends BaseApiService {
             });
             throw new Error(`KpisApi.create failed: HTTP ${response.status()} ${payload.title}\n${text.slice(0, 600)}`);
         }
+        log.info(`KPI successfully added : ${payload.title}`);
     }
 
     async getAllId(): Promise<Array<{ id: number, title: string }>> {
-
-        
-
         const response = await this.get(kpisData.adminPath, {
             headers: { Accept: 'application/json' },
         })
         if (!response.ok()) {
+            log.info((await response.text()))
             throw new Error('Kpis.getAllId failed: HTTP ${response.status()}')
         }
         const json = (await response.json()) as { data: Array<{ id: number, title: string }> };
@@ -77,27 +76,28 @@ export class KpisApi extends BaseApiService {
 
     }
     async deleteAllKpis(): Promise<void> {
-        let idList : Array<{ id: number }> = []
+        let idList : Array<number> = []
         const allKpis = await this.getAllId();
         for (const kpi of allKpis) {
-            idList.push({id: kpi.id})
+            idList.push(kpi.id)
         }
-        console.log(idList)
+        await this.deleteExistKpis(idList)
+
     }
 
-    async deleteExistKpis(id: number): Promise<void>{
+    async deleteExistKpis(idList: Array<number>): Promise<void>{
 
         const response = await this.delete(kpisData.adminPath, {
             data: {
-                ids: id
+                ids: idList
             }
         })
         if (!response.ok()){
-            console.log((await response.text()))
+            log.error((await response.text()))
             throw new Error(`Failed to delete KPI`)
             return
         }
-        log.info(`KPI successfully deleted. ID: ${id}`)
+        log.info(`KPI successfully deleted. IDs: ${JSON.stringify(idList)}`)
     }
 }
 

@@ -8,7 +8,9 @@ const log = createLogger('AdminUsersApi');
 /** OrangeHRM Admin API v2 — users. Requires matching {@link AdminUserSeed.empNumber} employee to exist. */
 export class AdminUsersApi extends BaseApiService {
   async getAll(): Promise<Array<{ id: number; userName: string }>> {
-    const response = await this.get(adminUsersData.adminPath, {
+    // limit=0 → all records; the default page size (50) would hide existing users
+    // from createIfAbsent once enough suites have seeded accounts.
+    const response = await this.get(`${adminUsersData.adminPath}?limit=0`, {
       headers: { Accept: 'application/json' },
     });
     if (!response.ok()) {
