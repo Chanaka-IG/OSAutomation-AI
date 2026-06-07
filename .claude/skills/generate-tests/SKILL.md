@@ -24,8 +24,9 @@ Generate Playwright tests for: `$ARGUMENTS`
 ### Step 1: Write
 - Read skills, existing tests, and frontend source
 - Write the test file to `tests/<feature-name>.spec.js`
-- write the tests only for P0 and P1, do not write unit or integration tests 
+- write the tests only for P0 and P1 if both together there are more than 12 test cases. If its less than 12 write test cases for P0, P1 and P2. Do not write unit or integration tests 
 - Always try to add new test data instead of existing data, if you need to use existing data, make sure it is not used by other tests to avoid flaky tests, if you need to use existing data, always ask the end user about it and wait for their confirmation before using it
+
 
 ### Step 2: Validate in Real Browser
 - Use **Playwright MCP** to navigate to the app pages involved in your test (https://automationtest-os-kord.orangehrm.com/web/index.php/auth/login)

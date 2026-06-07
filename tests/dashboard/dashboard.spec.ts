@@ -160,18 +160,23 @@ test.describe('Dashboard', () => {
   test('TC-DSH-003 — Leave List quick-launch tile navigates to the Leave List', async ({
     loginPage, page, dashboardPage,
   }) => {
+    const tile = tileByTitle('Leave List');
     await loginPage.loginAs('admin');
     await dashboardPage.gotoDashboard();
-    await dashboardPage.clickQuickLaunch('Leave List');
-    await expect(page).toHaveURL(quickLaunch.admin[1].urlPattern, { timeout: 10_000 });
+    await dashboardPage.clickQuickLaunch(tile.title);
+    await expect(page).toHaveURL(tile.urlPattern, { timeout: 10_000 });
   });
 
   // ── P1: TC-004 — Remaining quick-launch tiles navigate to their modules ──────
   test('TC-DSH-004 — Timesheets, Apply Leave, My Leave and My Timesheet tiles navigate', async ({
     loginPage, page, dashboardPage,
   }) => {
+    // Every tile not already covered by its own dedicated test (TC-002 / TC-003).
+    const covered = ['Assign Leave', 'Leave List'];
+    const remaining = quickLaunch.admin.filter((t) => !covered.includes(t.title));
+
     await loginPage.loginAs('admin');
-    for (const tile of quickLaunch.admin.slice(2)) {
+    for (const tile of remaining) {
       await dashboardPage.gotoDashboard();
       await dashboardPage.clickQuickLaunch(tile.title);
       await expect(page).toHaveURL(tile.urlPattern, { timeout: 10_000 });
@@ -236,7 +241,9 @@ test.describe('Dashboard', () => {
   // ── P0: TC-200 — Unauthenticated dashboard access redirects to login ─────────
   test('TC-DSH-200 — unauthenticated /dashboard/index redirects to login', async ({ page }) => {
     await page.context().clearCookies();
-    await page.goto(routes.dashboard, { waitUntil: 'domcontentloaded' });
+    // The auth redirect can interrupt the goto navigation itself (a Playwright race,
+    // not a failure) — the waitForURL below is the real oracle.
+    await page.goto(routes.dashboard, { waitUntil: 'domcontentloaded' }).catch(() => {});
     await page.waitForURL(urlPatterns.login, { timeout: 10_000 });
     await expect(page).toHaveURL(urlPatterns.login);
   });
@@ -248,9 +255,10 @@ test.describe('Dashboard', () => {
     await loginPage.loginAs('admin');
     await expect(page).toHaveURL(urlPatterns.dashboard);
 
-    // Simulate session expiry, then deep-link back.
+    // Simulate session expiry, then deep-link back. The auth redirect can interrupt
+    // the goto navigation itself (Playwright race) — waitForURL is the real oracle.
     await page.context().clearCookies();
-    await page.goto(routes.dashboard, { waitUntil: 'domcontentloaded' });
+    await page.goto(routes.dashboard, { waitUntil: 'domcontentloaded' }).catch(() => {});
     await page.waitForURL(urlPatterns.login, { timeout: 10_000 });
     await expect(page).toHaveURL(urlPatterns.login);
   });

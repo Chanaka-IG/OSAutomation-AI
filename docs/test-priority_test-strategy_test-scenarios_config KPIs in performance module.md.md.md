@@ -46,7 +46,6 @@
 | TC-007 | Add as the default scale | Default-scale flag drives which scale reviews use — meaningful data-integrity impact on the review cycle. |
 | TC-009 | Edit a KPI's Min/Max rating | Common maintenance edit; rating range feeds review scoring. High impact if mis-saved. |
 | TC-011 | Bulk delete via checkboxes | Primary efficiency path for cleanup; destructive + data integrity (must delete exactly the selected rows). |
-| TC-103 | KPI used by a review cannot be deleted | Referential-integrity guard — prevents orphaning review data. High-consequence rule; UI affordance (Edit-only) is the user-visible safeguard. |
 | TC-104 | Job Title dropdown lists only real job titles | Prevents creating KPIs against invalid titles (data integrity at input). Primary form interaction. |
 | TC-100 | Max must be greater than Min (inline message) | Guards an invalid rating scale reaching reviews; the most semantically important validation. |
 | TC-101 | Ratings constrained 0–100 (inline message) | Core bound validation on a required field; high reach (every add/edit touches ratings). |
