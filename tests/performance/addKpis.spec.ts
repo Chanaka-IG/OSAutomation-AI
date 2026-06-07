@@ -50,12 +50,12 @@ test.beforeEach(async ({ addKpisPage }, testInfo) => {
   // Implement any setup logic needed before all tests, such as creating necessary data or configurations
 });
 
-test.afterAll(async ({ orangehrmApiContext, orangehrmAdminApi }) => {
-  // Implement any cleanup logic needed after all tests, such as deleting test data or resetting configurations
-  await orangehrmAdminApi.loginAsAdmin();
-  const kpi = new KpisApi(orangehrmApiContext);
-  await kpi.deleteAllKpis();
-});
+// test.afterAll(async ({ orangehrmApiContext, orangehrmAdminApi }) => {
+//   // Implement any cleanup logic needed after all tests, such as deleting test data or resetting configurations
+//   await orangehrmAdminApi.loginAsAdmin();
+//   const kpi = new KpisApi(orangehrmApiContext);
+//   await kpi.deleteAllKpis();
+// });
 
 test.describe('Add KPIs', () => {
 
@@ -88,15 +88,17 @@ test.describe('Add KPIs', () => {
     await page.waitForLoadState('networkidle');
     expect(await addKpisPage.notAccessMsg()).toBe(true);
   });
+
   test('TC-008 | Edit an existing KPI title', async ({ addKpisPage }) => {
     await addKpisPage.navigateToSearchPage();
     await addKpisPage.editKpiByName(kpiAPIdata.seedRecords[1].title);
-    await addKpisPage.fillKeyIndicator(frontend.performance.updateKpi);
+    await addKpisPage.fillKeyIndicator(frontend.performance.updateKpi[0]);
     await addKpisPage.clickOnSave();
     const toastMessage = await addKpisPage.waitForSuccessToast();
     expect(toastMessage).toContain('Successfully Updated');
   });
-    test('TC-002 | Filter KPIs by Job Title ', async ({ addKpisPage }) => {
+
+  test('TC-002 | Filter KPIs by Job Title ', async ({ addKpisPage }) => {
     await addKpisPage.navigateToSearchPage();
     await addKpisPage.filterByJobTitle('QA Engineer');
     await addKpisPage.clickOnSearch();
@@ -104,20 +106,37 @@ test.describe('Add KPIs', () => {
     const row = await addKpisPage.getRowByName(kpiAPIdata.seedRecords[1].title);
     expect(await row.isVisible()).toBe(true);
   });
-   test('TC-003 | Reset clears the Job Title filter', async ({ addKpisPage }) => {
+
+  test('TC-003 | Reset clears the Job Title filter', async ({ addKpisPage }) => {
     await addKpisPage.navigateToSearchPage();
     await addKpisPage.filterByJobTitle('QA Engineer');
     await addKpisPage.clickOnReset();
-    expect (await addKpisPage.getDefaultText()).toContain('Select');
-
+    expect(await addKpisPage.getDefaultText()).toContain('Select');
   });
 
-     test.only('TC-003 | Reset clears the Job Title filter', async ({ addKpisPage }) => {
+  test('TC-004 | Add button → form', async ({ addKpisPage }) => {
     await addKpisPage.navigateToSearchPage();
-    await addKpisPage.filterByJobTitle('QA Engineer');
-    await addKpisPage.clickOnReset();
-    expect (await addKpisPage.getDefaultText()).toContain('Select');
+    await addKpisPage.clickOnAdd();
+    await addKpisPage.waitUntilFormLoaderDissapear();
+    expect(await addKpisPage.pageHeadingForAddKpi.isVisible()).toBe(true);
+  });
 
+  test('TC-006 | Add using default scale 0–100', async ({ addKpisPage }) => {
+    await addKpisPage.navigateToAddKpisPage();
+    await addKpisPage.fillKeyIndicator(frontend.performance.validScale);
+    await addKpisPage.clickOnSave();
+    const toastMessage = await addKpisPage.waitForSuccessToast();
+    expect(toastMessage).toContain('Successfully Saved');
+  });
+
+
+  test.only('TC-009 | Edit a KPIs Min/Max rating', async ({ addKpisPage }) => {
+    await addKpisPage.navigateToSearchPage();
+    await addKpisPage.editKpiByName(kpiAPIdata.seedRecords[2].title);
+    await addKpisPage.fillKeyIndicator(frontend.performance.updateKpi[1]);
+    await addKpisPage.clickOnSave();
+    const toastMessage = await addKpisPage.waitForSuccessToast();
+    expect(toastMessage).toContain('Successfully Updated');
   });
 });
 

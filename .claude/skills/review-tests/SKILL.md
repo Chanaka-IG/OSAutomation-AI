@@ -34,6 +34,7 @@ For each file:
 - **Issues Found** — tagged [CRITICAL] / [IMPORTANT] / [SUGGESTION] with line number, current code, fix, and which best practice rule is violated
 - **Score**: X/10
 - **Recommended Fixes** in priority order
+Write to **`docs/test-review-$ARGUMENTS.md`** (consumed by `/review-fixes-$ARGUMENTS` skill). Use this template:
 
 ## Rules
 - Every issue must reference which best practice rule it violates

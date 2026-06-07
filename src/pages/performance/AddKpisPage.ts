@@ -20,6 +20,7 @@ export class AddKpisPage extends BasePage {
     readonly yesDeleteButton: Locator;
     readonly deleteModal: Locator;
     readonly notAccessMsgLocator: Locator;
+    readonly addButton: Locator;
 
     constructor(page: Page) {
         super(page);
@@ -32,6 +33,7 @@ export class AddKpisPage extends BasePage {
         this.makeDefaultCheckbox = page.locator('.orangehrm-module-field-row').filter({ hasText: /Make Default Scale/ }).locator('.oxd-switch-wrapper');
         this.saveButton = page.getByRole('button', { name: 'Save' });
         this.cancelButton = page.getByRole('button', { name: 'Cancel' });
+        this.addButton = page.getByRole('button', { name: 'Add' });
         this.selectAllCheckbox = page.locator('.oxd-table-header .oxd-checkbox-wrapper');
         this.deleteSelectedButton = page.getByRole('button', { name: 'Delete Selected' });
         this.yesDeleteButton = page.getByRole('button', { name: 'Yes, Delete' });
@@ -54,11 +56,14 @@ export class AddKpisPage extends BasePage {
         await this.pageHeadingForkpiList.waitFor({ state: 'visible' });
     }
 
+    async clickOnAdd(): Promise<void> {
+        await this.addButton.click();
+    }
+
     async clickOnSearch(): Promise<void> {
         await this.searchButon.click();
 
     }
-
     async clickOnReset(): Promise<void> {
         await this.resetButton.click();
 
@@ -76,22 +81,33 @@ export class AddKpisPage extends BasePage {
         )
     }
 
-    async fillKeyIndicator(kpiData: { name: string; description?: string; jobTitle: string; minimumRating: string; maximumRating: string; makeDefault: boolean }): Promise<void> {
-        await this.keyPerformanceIndicatorInput.fill(kpiData.name);
-        await this.selectOxdOption(this.jobTitleDropdown, kpiData.jobTitle);
-        await this.minimumRatingInput.fill(kpiData.minimumRating);
-        await this.maximumRatingInput.fill(kpiData.maximumRating);
-        if (kpiData.makeDefault) {
-            const isChecked = await this.makeDefaultCheckbox.locator('input').isChecked();
-            if (!isChecked) {
-                await this.makeDefaultCheckbox.click();
-            }
-        } else {
-            const isChecked = await this.makeDefaultCheckbox.locator('input').isChecked();
-            if (isChecked) {
-                await this.makeDefaultCheckbox.click();
+    async fillKeyIndicator(kpiData: { name: string; description?: string; jobTitle: string; minimumRating: string; maximumRating: string; makeDefault: boolean | undefined }): Promise<void> {
+        if (kpiData.name !== "") {
+            await this.keyPerformanceIndicatorInput.fill(kpiData.name);
+        }
+        if (kpiData.jobTitle !== "") {
+            await this.selectOxdOption(this.jobTitleDropdown, kpiData.jobTitle);
+        }
+        if (kpiData.minimumRating !== "") {
+            await this.minimumRatingInput.fill(kpiData.minimumRating);
+        }
+        if (kpiData.maximumRating !== "") {
+            await this.maximumRatingInput.fill(kpiData.maximumRating);
+        }
+        if (kpiData.makeDefault !== undefined) {
+            if (kpiData.makeDefault) {
+                const isChecked = await this.makeDefaultCheckbox.locator('input').isChecked();
+                if (!isChecked) {
+                    await this.makeDefaultCheckbox.click();
+                }
+            } else {
+                const isChecked = await this.makeDefaultCheckbox.locator('input').isChecked();
+                if (isChecked) {
+                    await this.makeDefaultCheckbox.click();
+                }
             }
         }
+
     }
 
     async getRowByName(kpiName: string): Promise<Locator> {

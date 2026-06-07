@@ -24,6 +24,7 @@ import { pim } from './pim/frontend/pim';
 import { leave } from './leave/frontend/leave';
 import { recruitment } from './recruitment/frontend/recruitment';
 import { performance } from './performance/frontend/performance';
+import { adminJobTitles } from './admin/frontend/jobTitles';
 
 import * as pimFrontendApi from './pim/frontend-api';
 
@@ -51,6 +52,7 @@ export const frontend = {
   leave,
   recruitment,
   performance,
+  adminJobTitles,
 };
 
 /** API payloads owned by frontend/UI tests (not master-data seeding). */
