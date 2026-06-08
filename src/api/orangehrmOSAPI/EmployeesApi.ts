@@ -90,7 +90,12 @@ export class EmployeesApi extends BaseApiService {
    */
   async updateJobDetails(
     empNumber: number,
-    details: { jobTitleId?: number; empStatusId?: number; subunitId?: number },
+    details: {
+      jobTitleId?: number;
+      empStatusId?: number;
+      subunitId?: number;
+      locationId?: number;
+    },
   ): Promise<void> {
     const response = await this.put(`${employeesData.adminPath}/${empNumber}/job-details`, {
       data: {
@@ -98,6 +103,7 @@ export class EmployeesApi extends BaseApiService {
         jobTitleId: details.jobTitleId ?? null,
         empStatusId: details.empStatusId ?? null,
         subunitId: details.subunitId ?? null,
+        locationId: details.locationId ?? null,
       },
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
     });
@@ -108,6 +114,32 @@ export class EmployeesApi extends BaseApiService {
       );
     }
     log.info(`Job details updated for empNumber=${empNumber}`);
+  }
+
+  /**
+   * Sets the employee's work contact info (read back by the Directory detail panel).
+   * NOTE: the contact-details route uses the SINGULAR `pim/employee/{n}` path —
+   * `pim/employees/{n}/contact-details` 404s (verified live 2026-06-07).
+   */
+  async updateContactDetails(
+    empNumber: number,
+    details: { workEmail?: string; workTelephone?: string },
+  ): Promise<void> {
+    const singularPath = employeesData.adminPath.replace(/\/employees$/, '/employee');
+    const response = await this.put(`${singularPath}/${empNumber}/contact-details`, {
+      data: {
+        workEmail: details.workEmail ?? null,
+        workTelephone: details.workTelephone ?? null,
+      },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    });
+    if (!response.ok()) {
+      const text = await response.text();
+      throw new Error(
+        `EmployeesApi.updateContactDetails failed: HTTP ${response.status()} empNumber=${empNumber}\n${text.slice(0, 600)}`,
+      );
+    }
+    log.info(`Contact details updated for empNumber=${empNumber}`);
   }
 
   async getSupervisorEmpNumbers(empNumber: number): Promise<number[]> {

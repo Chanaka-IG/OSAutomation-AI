@@ -57,4 +57,28 @@ export class AdminUsersApi extends BaseApiService {
 
     log.info(`User successfully added: ${payload.username}`);
   }
+
+  /** Case-insensitive lookup (usernames are unique under MySQL's default collation). */
+  async findIdByUsername(username: string): Promise<number | undefined> {
+    const all = await this.getAll();
+    return all.find((u) => u.userName.toLowerCase() === username.toLowerCase())?.id;
+  }
+
+  /** Bulk hard-delete by user id. Logs (does not throw) on partial failure. */
+  async deleteByIds(ids: number[]): Promise<void> {
+    if (ids.length === 0) return;
+    const response = await this.delete(adminUsersData.adminPath, {
+      data: { ids },
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok()) {
+      const text = await response.text();
+      log.warn(`deleteByIds partial failure: HTTP ${response.status()} ${text.slice(0, 200)}`);
+    } else {
+      log.info(`Users deleted: [${ids.join(', ')}]`);
+    }
+  }
 }

@@ -149,8 +149,8 @@
 | Field             | Boundary cases                                                  |
 |-------------------|-----------------------------------------------------------------|
 | First/Last Name   | 1 char (rejected, min 2), 30 chars (max), 31 chars (rejected)   |
-| Username          | 5 chars (min), 40 chars (max), `Admin` (duplicate → error)     |
-| Password          | < 7 chars rejected, no upper-case rejected, valid: `Test@123`  |
+| Username          | 5 chars (min, `"Should be at least 5 characters"`), 40 chars (max), 41 chars (`"Should not exceed 40 characters"`, no truncation), `Admin` (duplicate → live `"Already exists"`, **case-insensitive**) |
+| Password          | < 8 chars rejected (`"Should have at least 8 characters"` — verified live 2026-06-07), no upper-case rejected (`"Your password must contain minimum 1 upper-case letter"`), `Test@1234` valid but shows non-blocking "could be guessable" warning — use a Strongest-rated password (e.g. `Kx9#mPv@2Lq7`) to keep the message slot empty |
 | Employee ID       | Empty (auto), explicit value (must be unique)                  |
 | Leave date range  | `fromDate > toDate` rejected; spanning weekend computes excluded days |
 | Timesheet hours   | `0:00`, `24:00`, `25:00` (rejected), negative (rejected)       |

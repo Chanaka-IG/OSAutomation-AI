@@ -162,9 +162,9 @@ refer automation-framework
 ### Pass data to Page class from test body
 -Dont pass hardcode data to the page class from the test body, if you need to pass data from the test body to the page class, make sure that the data is not hardcoded and it is coming from the test-data files. This will make the test more maintainable and less flaky. except the loginAs method.
 
-
 ### Add data via APIs
 -When adding data through APIs, always check whether the data you are adding is already exist or not, if it is already exist, use that data instead of adding new data, this will reduce the test execution time and also reduce the chances of flaky tests.
+-Dont add data through APIs inside the test body, always add data through APIs in the test hooks (beforeEach or beforeAll) and make sure to clean up the data after the test execution if necessary. This will make the test more maintainable and also reduce the chances of flaky tests.
 
 ```javascript
   async createIfAbsent(payload: AdminUserSeed): Promise<void> {

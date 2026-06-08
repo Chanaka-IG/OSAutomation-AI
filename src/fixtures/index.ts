@@ -31,6 +31,8 @@ import { VacanciesListPage } from '../pages/recruitment/VacanciesListPage';
 import { AddKpisPage } from '../pages/performance/AddKpisPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { JobTitlesPage } from '../pages/admin/JobTitlesPage';
+import { SystemUsersPage } from '../pages/admin/SystemUsersPage';
+import { DirectoryPage } from '../pages/directory/DirectoryPage';
 
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
 export type OrangehrmFixtures = {
@@ -57,6 +59,8 @@ export type OrangehrmFixtures = {
   addKpisPage: AddKpisPage;
   dashboardPage: DashboardPage;
   jobTitlesPage: JobTitlesPage;
+  systemUsersPage: SystemUsersPage;
+  directoryPage: DirectoryPage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
   orangehrmApiContext: APIRequestContext;
   orangehrmAdminApi: OrangehrmAdminApi;
@@ -162,6 +166,14 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
 
   jobTitlesPage: async ({ page }, use) => {
     await use(new JobTitlesPage(page));
+  },
+
+  systemUsersPage: async ({ page }, use) => {
+    await use(new SystemUsersPage(page));
+  },
+
+  directoryPage: async ({ page }, use) => {
+    await use(new DirectoryPage(page));
   },
 
   orangehrmApiContext: async ({ playwright }, use) => {
