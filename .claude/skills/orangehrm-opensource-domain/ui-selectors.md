@@ -60,15 +60,18 @@
 - Pagination: `.oxd-pagination`
 - Result count: `.orangehrm-horizontal-padding span` containing "Records Found"
 
-### Add / Edit User Form
-- User Role dropdown: anchored under "User Role" label
-- Employee Name autocomplete: anchored under "Employee Name" label — type at least 2 chars, wait for `.oxd-autocomplete-dropdown`, click first hint
-- Status dropdown: anchored under "Status" label
-- Username: anchored under "Username" label (`getByLabel('Username')` works)
-- Password: anchored under "Password" label
-- Confirm Password: anchored under "Confirm Password" label
+### Add / Edit User Form (verified live via Playwright MCP, 2026-06-07)
+- Form heading: `getByRole('heading', { name: 'Add User' })` — **h6**, not h5 (list heading "System Users" is h5)
+- User Role dropdown: anchored under "User Role" label — options: `Admin`, `ESS`
+- Employee Name autocomplete: `getByPlaceholder('Type for hints...')` — hints render as `getByRole('option')` and show the FULL name incl. middle name (e.g. "Marcus James Chen"); no match → option `"No Records Found"`; free text left unbound → field error `"Invalid"` on blur
+- Status dropdown: anchored under "Status" label — options: `Enabled`, `Disabled`
+- Username: anchored under "Username" label (no placeholder/aria-label — use `.oxd-input-group` filtered by label text). Live validation: `"Should be at least 5 characters"`, `"Should not exceed 40 characters"`, `"Already exists"` (case-insensitive, fires while typing)
+- Password / Confirm Password: `input[type="password"]` nth(0)/nth(1). Messages: `"Should have at least 8 characters"`, `"Your password must contain minimum 1 upper-case letter"`, `"Passwords do not match"`. NOTE: medium passwords show a non-blocking "could be guessable" warning in the same message slot, and a strength meter label (Very Weak…Strongest) renders above the field
+- Empty save: 5× `"Required"` but Confirm Password shows `"Passwords do not match"` instead
+- Disabled-account login attempt shows alert `"Account disabled"` in `.oxd-alert-content-text`
 - Save button: `getByRole('button', { name: 'Save' })`
 - Cancel button: `getByRole('button', { name: 'Cancel' })`
+- Reusable framework assets: `src/pages/admin/SystemUsersPage.ts`, `test-data/admin/frontend/systemUsers.ts`
 
 ### Admin → Job → Job Titles (`/admin/viewJobTitleList`)
 - Add button: `.orangehrm-header-container button:has-text("Add")`

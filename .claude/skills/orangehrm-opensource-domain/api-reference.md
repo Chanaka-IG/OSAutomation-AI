@@ -39,7 +39,7 @@
 |--------|-----------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
 | GET    | `/pim/employees`                                    | `?limit, offset, sortField, sortOrder, nameOrId, includeEmployees=onlyCurrent|currentAndPast|onlyPast, employeeId, supervisorId, jobTitleId, empStatusId, subunitId` |
 | GET    | `/pim/employees/{empNumber}`                        | -                                                                                                         |
-| POST   | `/pim/employees`                                    | `{ firstName, lastName, middleName?, employeeId?, empPicture? }`                                          |
+| POST   | `/pim/employees`                                    | `{ firstName, lastName, middleName?, employeeId?, empPicture? }` — `employeeId` > ~10 chars → `422 invalidParamKeys: ["employeeId"]` (verified 2026-06-07) |
 | PUT    | `/pim/employees/{empNumber}/personal-details`       | `{ firstName, middleName, lastName, employeeId, otherId?, drivingLicenseNo?, drivingLicenseExpiredDate?, gender?, maritalStatus?, nationalityId?, dateOfBirth?, "smoker": bool? }` |
 | GET    | `/pim/employees/{empNumber}/job-details`            | -                                                                                                         |
 | PUT    | `/pim/employees/{empNumber}/job-details`            | `{ jobTitleId, empStatusId, joinedDate, jobCategoryId?, subunitId?, locationId? }`                        |

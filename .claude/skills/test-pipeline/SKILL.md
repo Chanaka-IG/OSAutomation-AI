@@ -45,9 +45,24 @@ This step writes the test file, runs it in a real browser, and loops until all t
 
 ---
 
-## Step 5 — Pipeline Summary Report
+## Step 5 — Review generated Tests
 
-After all four steps complete successfully, output a structured summary:
+Invoke the `review-tests` skill, passing `$ARGUMENTS` as the argument.
+
+This step reviews the test generated test file, and writes the review report to `docs/review-tests_$ARGUMENTS.md` with identified issues.
+
+---
+
+## Step 6 —  Review Fixes
+
+Invoke the `review-fixes` skill, passing `$ARGUMENTS` as the argument.
+
+This step fixes the issues identified in the review report and updates the test file accordingly. Wait for it to complete fully before moving on.
+
+---
+## Step 7 — Pipeline Summary Report
+
+After all six steps complete successfully, output a structured summary:
 
 ```
 ## Pipeline Complete: $ARGUMENTS

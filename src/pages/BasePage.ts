@@ -7,15 +7,17 @@ export abstract class BasePage {
   readonly usernameInput: Locator;
   readonly passwordInput: Locator;
   readonly loginButton: Locator;
-  readonly tableLoader : Locator
-  readonly formLoader : Locator;
-  
+  readonly tableLoader: Locator
+  readonly formLoader: Locator;
+  readonly dropdownFirstOption: Locator;
+
   constructor(public readonly page: Page) {
     this.usernameInput = page.locator('input[name="username"]');
     this.passwordInput = page.locator('input[name="password"]');
     this.loginButton = page.getByRole('button', { name: 'Login' });
     this.tableLoader = page.locator('.oxd-table-loader');
     this.formLoader = page.locator('.oxd-loading-spinner');
+    this.dropdownFirstOption = page.getByRole('option', { name: '-- Select --' })
 
   }
 
@@ -70,35 +72,46 @@ export abstract class BasePage {
   }
 
   async waitUntilTableLoaderDissapear(): Promise<void> {
-    
-      try {
-        await this.tableLoader.waitFor({ state: 'visible', timeout: 2000 });
-        await this.tableLoader.waitFor({ state: 'detached' });
-      }
-      catch {
-        //ignore silently if the loader did not appear rather than failing the test, as in some cases the loader may not appear based on the response time of the application
-      }
+
+    try {
+      await this.tableLoader.waitFor({ state: 'visible', timeout: 2000 });
+      await this.tableLoader.waitFor({ state: 'detached' });
+    }
+    catch {
+      //ignore silently if the loader did not appear rather than failing the test, as in some cases the loader may not appear based on the response time of the application
+    }
   }
 
   async waitUntilMultipleTableLoaderDissapear(): Promise<void> {
-      const loaders = this.page.locator('.oxd-table-loader');
-      await expect(loaders).toHaveCount(0);
+    const loaders = this.page.locator('.oxd-table-loader');
+    await expect(loaders).toHaveCount(0);
   }
 
   async waitUntilFormLoaderDissapear(): Promise<void> {
-      try {
-        await this.formLoader.waitFor({ state: 'visible', timeout: 2000 });
-        await this.formLoader.waitFor({ state: 'hidden' });
-      }
-      catch {
-        //ignore silently if the loader did not appear rather than failing the test, as in some cases the loader may not appear based on the response time of the application
-      }
+    try {
+      await this.formLoader.waitFor({ state: 'visible', timeout: 2000 });
+      await this.formLoader.waitFor({ state: 'hidden' });
+    }
+    catch {
+      //ignore silently if the loader did not appear rather than failing the test, as in some cases the loader may not appear based on the response time of the application
+    }
 
   }
   async selectOxdOption(dropdown: Locator, optionText: string): Promise<void> {
     await dropdown.click();
     await this.page.getByRole('option', { name: optionText, exact: true }).click();
   }
-  
+
+  async getOxdDropdownOptions(dropdown: Locator): Promise<string[]> {
+    await dropdown.click();
+    await this.dropdownFirstOption.waitFor({state: 'visible', timeout: 3000})
+    const jobTitles = await this.page
+      .getByRole('option')
+      .allTextContents();
+
+    jobTitles.shift();
+    return jobTitles.map(text => text.trim());
+  }
+
 }
 

@@ -4,6 +4,7 @@
 - Login URL: `/web/index.php/auth/login`. Successful login redirects to `/web/index.php/dashboard/index`.
 - Default credentials on the public demo: `Admin` / `admin123`.
 - Wrong username or wrong password BOTH return the same generic error: `"Invalid credentials"` (no enumeration leak).
+- A user whose Status = Disabled gets a distinct alert: `"Account disabled"` (`.oxd-alert-content-text`, verified live 2026-06-07) — login is rejected even with valid credentials.
 - Session is server-side, identified by the `orangehrm` cookie. Idle timeout defaults to **30 minutes**; absolute session lifetime is **120 minutes**.
 - A hidden `_token` CSRF field is rendered into every form. Automation that posts directly (not through the visible button) must scrape and resubmit it.
 - After logout (or session timeout), any deep link forces redirect to `/auth/login?next=<original-url>`. Tests must handle this redirect explicitly.
@@ -19,6 +20,7 @@
 - An employee record MUST exist before a system user can be created for them (`User.empNumber` is non-nullable).
 - `firstName` and `lastName` are mandatory; `middleName` is optional.
 - `employeeId` is auto-generated as an incrementing string if left blank on creation. If supplied, it must be **unique across all employees** (including terminated and purged).
+  - Despite the DB column being String(50), `POST /api/v2/pim/employees` rejects an `employeeId` longer than ~10 chars with `422 Invalid Parameter (invalidParamKeys: ["employeeId"])` (verified live 2026-06-07) — don't build ids from a full `Date.now()` timestamp.
 - Once created, the employee number (`empNumber`) is immutable and is the FK target for nearly every other module (leave, timesheets, candidates-converted-to-employees, reviews).
 - **Termination** does not delete the employee — it sets `terminationId` and `terminationDate`. Terminated employees:
   - Disappear from default Employee List (filter "Include: Current and Past Employees" reveals them).
@@ -96,6 +98,8 @@ TIVATED → IN_PROGRESS → COMPLETED`. Reviews cannot be edited once `COMPLETED
 ## 9. Required Field Validation (Global)
 OrangeHRM uses consistent inline validation. Common rules tests should assert:
 - **Required text fields** show `"Required"` immediately below the OXD input when blurred empty.
+  - Exception (Add User form, verified live 2026-06-07): on an empty save, **Confirm Password** renders `"Passwords do not match"` instead of `"Required"`.
+- **Autocomplete (Employee Name etc.)**: free-typed text never bound to a hint shows `"Invalid"` on blur/save; a query matching nothing renders a `"No Records Found"` option in the dropdown.
 - **Length-limited fields** show `"Should be less than N characters"` (varies: 30 for name fields, 100 for email, 250 for textareas).
 - **Numeric fields** show `"Should be a number"` or `"Should be greater than 0"`.
 - **Date fields** require `YYYY-MM-DD` format in API; the UI date picker accepts the locale format configured in Admin → Localization (default `Y-m-d`).

@@ -4,6 +4,7 @@ import { frontend } from '../../test-data';
 import { EmployeesApi } from '../../src/api/orangehrmOSAPI/EmployeesApi';
 import { AdminUsersApi } from '../../src/api/orangehrmOSAPI/AdminUsersApi';
 import { KpisApi } from '../../src/api/orangehrmOSAPI/KpisApi'
+import { JobTitlesApi } from '../../src/api/orangehrmOSAPI/JobTitlesApi';
 import { kpis as kpiAPIdata } from '../../test-data/performance/api/kpis'
 
 
@@ -18,8 +19,9 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, orangehrmApiCont
   void masterDataReadiness;
 
   const kpi = new KpisApi(orangehrmApiContext);
-  const usersApi = new AdminUsersApi(orangehrmApiContext);
+  const users = new AdminUsersApi(orangehrmApiContext);
   const emploee = new EmployeesApi(orangehrmApiContext)
+  const jobTitles = new JobTitlesApi(orangehrmApiContext)
 
   await orangehrmAdminApi.loginAsAdmin();
   for (const employee of frontend.performance.employees) {
@@ -28,7 +30,7 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, orangehrmApiCont
   const empNumber = await emploee.getEmpNumberByEmployeeId(frontend.performance.employees[0].employeeId);
 
   if (empNumber !== undefined) {
-    await usersApi.createIfAbsent({
+    await users.createIfAbsent({
       username: frontend.performance.userData.username,
       password: frontend.performance.userData.password,
       status: frontend.performance.userData.status,
@@ -36,7 +38,6 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, orangehrmApiCont
       empNumber: empNumber
     });
   }
-
   for (const kpiData of kpiAPIdata.seedRecords) {
     await kpi.createIfAbsent(kpiData)
   }
@@ -130,13 +131,34 @@ test.describe('Add KPIs', () => {
   });
 
 
-  test.only('TC-009 | Edit a KPIs Min/Max rating', async ({ addKpisPage }) => {
+  test('TC-009 | Edit a KPIs Min/Max rating', async ({ addKpisPage }) => {
     await addKpisPage.navigateToSearchPage();
     await addKpisPage.editKpiByName(kpiAPIdata.seedRecords[2].title);
     await addKpisPage.fillKeyIndicator(frontend.performance.updateKpi[1]);
     await addKpisPage.clickOnSave();
     const toastMessage = await addKpisPage.waitForSuccessToast();
     expect(toastMessage).toContain('Successfully Updated');
+  });
+
+  test('TC-104 | Job Title dropdown lists only real job titles', async ({ addKpisPage, orangehrmApiContext, orangehrmAdminApi }) => {
+    await orangehrmAdminApi.loginAsAdmin();
+    const jobTitles = new JobTitlesApi(orangehrmApiContext)
+    const systemJobTitles = await jobTitles.getAll();
+    const systemJobTitleNames = systemJobTitles.map(job => job.title);
+    await addKpisPage.navigateToSearchPage();
+    expect(await addKpisPage.validateJobTitileDropDown(systemJobTitleNames)).toBeTruthy();
+  });
+
+  test('TC-100 | Max must be greater than Min (inline message)', async ({ addKpisPage }) => {
+    await addKpisPage.navigateToAddKpisPage();
+    await addKpisPage.fillKeyIndicator(frontend.performance.invalidScale);
+    await addKpisPage.validateInlineMsg(frontend.performance.validationMsges.rating);
+  });
+
+  test.only('TC-101 | Ratings constrained 0–100 (inline message)', async ({ addKpisPage}) => {
+    await addKpisPage.navigateToAddKpisPage();
+    await addKpisPage.fillKeyIndicator(frontend.performance.outOfScale);
+    await addKpisPage.validateInlineMsg(frontend.performance.validationMsges.outScale);
   });
 });
 

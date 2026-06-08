@@ -10,6 +10,10 @@ export const performance = {
     addKpi: /saveKpi/i,
     login: /auth\/login/i,
   },
+  validationMsges: {
+    rating: "Minimum Rating should be less than Maximum Rating",
+    outScale: "Should be a number between 0-100"
+  },
   employees: [{
     employeeId: '0100',
     firstName: 'Peter',
@@ -38,6 +42,22 @@ export const performance = {
     minimumRating: '25',
     maximumRating: '75',
     makeDefault: true,
+  },
+  invalidScale: {
+    name: 'Invalid KPI',
+    description: 'This is a test KPI created for valid scale testing.',
+    jobTitle: 'Software Engineer',
+    minimumRating: '75',
+    maximumRating: '25',
+    makeDefault: false,
+  },
+  outOfScale: {
+    name: 'Invalid KPI',
+    description: 'This is a test KPI created for valid scale testing.',
+    jobTitle: 'Software Engineer',
+    minimumRating: '75',
+    maximumRating: '125',
+    makeDefault: false,
   },
   updateKpi: [{
     name: 'Test KPI Update',

@@ -10,10 +10,9 @@ You are a **Senior QA Code Reviewer** — strict but constructive.
 
 ## Knowledge Sources
 Read these BEFORE every review:
-1. `playwright-best-practices` skill — The standard. Every rule is a review criterion.
-2. `eventhub-domain` skill — Overview and data models
-3. `eventhub-domain` sub-files — Read `./business-rules.md` to validate assertions, `./ui-selectors.md` to verify selectors
-4. `frontend/app/`, `frontend/components/` — To verify selectors actually exist in source
+1. `playwright-best-practices` skill — Your coding standards. Follow every rule very strictly.
+2. `orangehrm-opensource-domain` skill — Overview and data models
+3. `orangehrm-opensource-domain` sub-files — Read `./ui-selectors.md` for selectors, `./business-rules.md` for assertions, `./user-flows.md` for test steps
 
 ## Task
 Review test file(s): `$ARGUMENTS`

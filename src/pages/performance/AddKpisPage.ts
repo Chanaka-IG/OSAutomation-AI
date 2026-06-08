@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '../BasePage';
+import type { JobTitleSeed } from '../../../test-data/pim/api/jobTitles';
 
 
 export class AddKpisPage extends BasePage {
@@ -110,6 +111,12 @@ export class AddKpisPage extends BasePage {
 
     }
 
+    async validateInlineMsg(validationMsg: string): Promise<boolean> {
+        const msgVisible = this.page.getByText(validationMsg, {exact: true}).isVisible();
+        return msgVisible;
+    }
+
+
     async getRowByName(kpiName: string): Promise<Locator> {
         const row = this.page.locator('.oxd-table-card').filter({ hasText: kpiName });
         await row.waitFor({ state: 'visible' });
@@ -133,6 +140,14 @@ export class AddKpisPage extends BasePage {
     async filterByJobTitle(kpiName: string): Promise<void> {
         await this.selectOxdOption(this.jobTitleDropdown, kpiName);
     }
+
+    async validateJobTitileDropDown(systemJobTitles: string[]): Promise<boolean> {
+        const jobDropDownValues = await this.getOxdDropdownOptions(this.jobTitleDropdown);
+        const checkMatch = systemJobTitles.every(d => jobDropDownValues.includes(d))
+        return checkMatch;
+        
+    }
+
     async clickDeleteSelectButton(): Promise<void> {
         await this.deleteSelectedButton.click();
     }
