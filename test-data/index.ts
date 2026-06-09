@@ -25,6 +25,7 @@ import { leave } from './leave/frontend/leave';
 import { recruitment } from './recruitment/frontend/recruitment';
 import { performance } from './performance/frontend/performance';
 import { adminJobTitles } from './admin/frontend/jobTitles';
+import { adminPayGrades } from './admin/frontend/payGrades';
 import { adminSystemUsers } from './admin/frontend/systemUsers';
 import { directory } from './directory/frontend/directory';
 
@@ -55,6 +56,7 @@ export const frontend = {
   recruitment,
   performance,
   adminJobTitles,
+  adminPayGrades,
   adminSystemUsers,
   directory,
 };

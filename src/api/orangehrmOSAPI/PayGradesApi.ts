@@ -18,6 +18,11 @@ export class PayGradesApi extends BaseApiService {
     return json.data ?? [];
   }
 
+  async getIdByName(name: string): Promise<number | undefined> {
+    const all = await this.getAll();
+    return all.find((p) => p.name === name)?.id;
+  }
+
   async createIfAbsent(payload: PayGradeSeed): Promise<void> {
     const all = await this.getAll();
     if (all.some((p) => p.name === payload.name)) {
@@ -48,5 +53,24 @@ export class PayGradesApi extends BaseApiService {
     }
 
     log.info(`Pay grade successfully added: ${payload.name}`);
+  }
+
+  /** Hard-deletes pay grades by id (`DELETE /admin/pay-grades { ids }`). Used for suite cleanup. */
+  async deleteByIds(ids: number[]): Promise<void> {
+    if (ids.length === 0) return;
+    const response = await this.delete(payGradesData.adminPath, {
+      data: { ids },
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok()) {
+      const text = await response.text();
+      throw new Error(
+        `PayGradesApi.deleteByIds failed: HTTP ${response.status()} ids=[${ids.join(',')}]\n${text.slice(0, 400)}`,
+      );
+    }
+    log.info(`Pay grades deleted: [${ids.join(',')}]`);
   }
 }
