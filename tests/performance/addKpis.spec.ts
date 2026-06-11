@@ -71,15 +71,17 @@ test.describe('Add KPIs', () => {
     await addKpisPage.fillKeyIndicator(frontend.performance.validKpi);
     await addKpisPage.clickOnSave();
     const toastMessage = await addKpisPage.waitForSuccessToast();
-    expect(toastMessage).toContain('Successfully Saved');
+    expect(toastMessage).toContain(frontend.performance.toastMsg.success);
 
   });
 
-  test('TC-010 | Delete a single KPI via row action', async ({ addKpisPage }) => {
+  test.only('TC-010 | Delete a single KPI via row action', async ({ addKpisPage }) => {
     await addKpisPage.navigateToSearchPage();
     await addKpisPage.deleteKpiByName(kpiAPIdata.seedRecords[0].title);
     const toastMessage = await addKpisPage.waitForSuccessToast();
-    expect(toastMessage).toContain('Successfully Deleted');
+    expect(toastMessage).toContain(frontend.performance.toastMsg.delete);
+    const row = await addKpisPage.isRowExists(kpiAPIdata.seedRecords[0].title);
+    expect(row).toBe(false);
 
   });
 
@@ -96,7 +98,7 @@ test.describe('Add KPIs', () => {
     await addKpisPage.fillKeyIndicator(frontend.performance.updateKpi[0]);
     await addKpisPage.clickOnSave();
     const toastMessage = await addKpisPage.waitForSuccessToast();
-    expect(toastMessage).toContain('Successfully Updated');
+    expect(toastMessage).toContain(frontend.performance.toastMsg.update);
   });
 
   test('TC-002 | Filter KPIs by Job Title ', async ({ addKpisPage }) => {
@@ -104,8 +106,8 @@ test.describe('Add KPIs', () => {
     await addKpisPage.filterByJobTitle('QA Engineer');
     await addKpisPage.clickOnSearch();
     await addKpisPage.waitUntilTableLoaderDissapear();
-    const row = await addKpisPage.getRowByName(kpiAPIdata.seedRecords[1].title);
-    expect(await row.isVisible()).toBe(true);
+    const row = await addKpisPage.isRowExists(kpiAPIdata.seedRecords[1].title);
+    expect(row).toBe(true);
   });
 
   test('TC-003 | Reset clears the Job Title filter', async ({ addKpisPage }) => {
@@ -127,7 +129,7 @@ test.describe('Add KPIs', () => {
     await addKpisPage.fillKeyIndicator(frontend.performance.validScale);
     await addKpisPage.clickOnSave();
     const toastMessage = await addKpisPage.waitForSuccessToast();
-    expect(toastMessage).toContain('Successfully Saved');
+    expect(toastMessage).toContain(frontend.performance.toastMsg.success);
   });
 
 
@@ -137,7 +139,7 @@ test.describe('Add KPIs', () => {
     await addKpisPage.fillKeyIndicator(frontend.performance.updateKpi[1]);
     await addKpisPage.clickOnSave();
     const toastMessage = await addKpisPage.waitForSuccessToast();
-    expect(toastMessage).toContain('Successfully Updated');
+    expect(toastMessage).toContain(frontend.performance.toastMsg.update);
   });
 
   test('TC-104 | Job Title dropdown lists only real job titles', async ({ addKpisPage, orangehrmApiContext, orangehrmAdminApi }) => {
@@ -155,10 +157,17 @@ test.describe('Add KPIs', () => {
     await addKpisPage.validateInlineMsg(frontend.performance.validationMsges.rating);
   });
 
-  test.only('TC-101 | Ratings constrained 0–100 (inline message)', async ({ addKpisPage}) => {
+  test('TC-101 | Ratings constrained 0–100 (inline message)', async ({ addKpisPage }) => {
     await addKpisPage.navigateToAddKpisPage();
     await addKpisPage.fillKeyIndicator(frontend.performance.outOfScale);
     await addKpisPage.validateInlineMsg(frontend.performance.validationMsges.outScale);
+  });
+
+  test('TC-509 | Delete confirmation can be cancelled', async ({ addKpisPage }) => {
+    await addKpisPage.navigateToSearchPage();
+    await addKpisPage.CancelDeleteKpiByName(kpiAPIdata.seedRecords[3].title);
+    const row = await addKpisPage.isRowExists(kpiAPIdata.seedRecords[3].title);
+    expect(row).toBe(true);
   });
 });
 

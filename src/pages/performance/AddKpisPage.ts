@@ -19,6 +19,7 @@ export class AddKpisPage extends BasePage {
     readonly selectAllCheckbox: Locator;
     readonly deleteSelectedButton: Locator;
     readonly yesDeleteButton: Locator;
+    readonly noCancel: Locator;
     readonly deleteModal: Locator;
     readonly notAccessMsgLocator: Locator;
     readonly addButton: Locator;
@@ -38,6 +39,7 @@ export class AddKpisPage extends BasePage {
         this.selectAllCheckbox = page.locator('.oxd-table-header .oxd-checkbox-wrapper');
         this.deleteSelectedButton = page.getByRole('button', { name: 'Delete Selected' });
         this.yesDeleteButton = page.getByRole('button', { name: 'Yes, Delete' });
+        this.noCancel = page.getByRole('button', { name: 'No, Cancel' })
         this.searchButon = page.getByRole('button', { name: 'Search' });
         this.resetButton = page.getByRole('button', { name: 'Reset' });
         this.deleteModal = page.locator('.orangehrm-dialog-popup');
@@ -112,24 +114,36 @@ export class AddKpisPage extends BasePage {
     }
 
     async validateInlineMsg(validationMsg: string): Promise<boolean> {
-        const msgVisible = this.page.getByText(validationMsg, {exact: true}).isVisible();
+        const msgVisible = this.page.getByText(validationMsg, { exact: true }).isVisible();
         return msgVisible;
     }
 
-
-    async getRowByName(kpiName: string): Promise<Locator> {
+    async isRowExists(kpiName: string): Promise<boolean> {
+        await this.page.locator('.oxd-table-card').waitFor({state: 'visible'});
         const row = this.page.locator('.oxd-table-card').filter({ hasText: kpiName });
-        await row.waitFor({ state: 'visible' });
-        return row;
+        return (await row.count()) > 0;
+    }
+
+    private getRowByName(kpiName: string): Locator {
+        return this.page.locator('.oxd-table-card').filter({ hasText: kpiName });
     }
 
     async deleteKpiByName(kpiName: string): Promise<void> {
-        const row = await this.getRowByName(kpiName);
+        const row = this.getRowByName(kpiName);
         const checkbox = row.locator('.oxd-checkbox-input-icon');
         await checkbox.click();
         await this.clickDeleteSelectButton();
         await this.clickYesDeleteButton();
     }
+
+    async CancelDeleteKpiByName(kpiName: string): Promise<void> {
+        const row = await this.getRowByName(kpiName);
+        const checkbox = row.locator('.oxd-checkbox-input-icon');
+        await checkbox.click();
+        await this.clickDeleteSelectButton();
+        await this.clickNoCancel();
+    }
+
     async editKpiByName(kpiName: string): Promise<void> {
         const row = await this.getRowByName(kpiName);
         const deleteIcon = row.locator('.bi-pencil-fill');
@@ -145,7 +159,7 @@ export class AddKpisPage extends BasePage {
         const jobDropDownValues = await this.getOxdDropdownOptions(this.jobTitleDropdown);
         const checkMatch = systemJobTitles.every(d => jobDropDownValues.includes(d))
         return checkMatch;
-        
+
     }
 
     async clickDeleteSelectButton(): Promise<void> {
@@ -155,6 +169,11 @@ export class AddKpisPage extends BasePage {
     async clickYesDeleteButton(): Promise<void> {
         await this.deleteModal.waitFor({ state: 'visible' });
         await this.yesDeleteButton.click();
+    }
+
+    async clickNoCancel(): Promise<void> {
+        await this.deleteModal.waitFor({ state: 'visible' });
+        await this.noCancel.click();
     }
 
     async clickOnSave(): Promise<void> {

@@ -26,6 +26,8 @@ import { recruitment } from './recruitment/frontend/recruitment';
 import { performance } from './performance/frontend/performance';
 import { adminJobTitles } from './admin/frontend/jobTitles';
 import { adminPayGrades } from './admin/frontend/payGrades';
+import { adminEmploymentStatus } from './admin/frontend/employmentStatus';
+import { adminOrganizationStructure } from './admin/frontend/organizationStructure';
 import { adminSystemUsers } from './admin/frontend/systemUsers';
 import { directory } from './directory/frontend/directory';
 
@@ -57,6 +59,8 @@ export const frontend = {
   performance,
   adminJobTitles,
   adminPayGrades,
+  adminEmploymentStatus,
+  adminOrganizationStructure,
   adminSystemUsers,
   directory,
 };

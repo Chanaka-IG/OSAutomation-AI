@@ -32,6 +32,8 @@ import { AddKpisPage } from '../pages/performance/AddKpisPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { JobTitlesPage } from '../pages/admin/JobTitlesPage';
 import { PayGradesPage } from '../pages/admin/PayGradesPage';
+import { EmploymentStatusPage } from '../pages/admin/EmploymentStatusPage';
+import { OrganizationStructurePage } from '../pages/admin/OrganizationStructurePage';
 import { SystemUsersPage } from '../pages/admin/SystemUsersPage';
 import { DirectoryPage } from '../pages/directory/DirectoryPage';
 
@@ -61,6 +63,8 @@ export type OrangehrmFixtures = {
   dashboardPage: DashboardPage;
   jobTitlesPage: JobTitlesPage;
   payGradesPage: PayGradesPage;
+  employmentStatusPage: EmploymentStatusPage;
+  organizationStructurePage: OrganizationStructurePage;
   systemUsersPage: SystemUsersPage;
   directoryPage: DirectoryPage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
@@ -172,6 +176,14 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
 
   payGradesPage: async ({ page }, use) => {
     await use(new PayGradesPage(page));
+  },
+
+  employmentStatusPage: async ({ page }, use) => {
+    await use(new EmploymentStatusPage(page));
+  },
+
+  organizationStructurePage: async ({ page }, use) => {
+    await use(new OrganizationStructurePage(page));
   },
 
   systemUsersPage: async ({ page }, use) => {

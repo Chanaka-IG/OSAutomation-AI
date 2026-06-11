@@ -22,7 +22,7 @@ export const kpis = {
 
   seedRecords: [
     {
-      title: 'KPI 1',
+      title: 'Test Delete',
       minRating: 25,
       maxRating: 50,
       jobTitleId: 1,
@@ -37,6 +37,13 @@ export const kpis = {
     },
     {
       title : 'KPI 3',
+      minRating: 0,
+      maxRating: 100,
+      jobTitleId: 1,
+      isDefault: true,
+    },
+    {
+      title : 'Delete Cancel',
       minRating: 0,
       maxRating: 100,
       jobTitleId: 1,
