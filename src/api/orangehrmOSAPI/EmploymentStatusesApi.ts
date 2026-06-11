@@ -60,4 +60,23 @@ export class EmploymentStatusesApi extends BaseApiService {
 
     log.info(`Employment status successfully added: ${payload.name}`);
   }
+
+  /** Hard-deletes employment statuses by id (`DELETE /admin/employment-statuses { ids }`). Used for suite cleanup. */
+  async deleteByIds(ids: number[]): Promise<void> {
+    if (ids.length === 0) return;
+    const response = await this.delete(employmentStatusesData.adminPath, {
+      data: { ids },
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok()) {
+      const text = await response.text();
+      throw new Error(
+        `EmploymentStatusesApi.deleteByIds failed: HTTP ${response.status()} ids=[${ids.join(',')}]\n${text.slice(0, 400)}`,
+      );
+    }
+    log.info(`Employment statuses deleted: [${ids.join(',')}]`);
+  }
 }

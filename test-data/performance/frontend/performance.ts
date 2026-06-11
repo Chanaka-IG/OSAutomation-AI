@@ -14,6 +14,11 @@ export const performance = {
     rating: "Minimum Rating should be less than Maximum Rating",
     outScale: "Should be a number between 0-100"
   },
+  toastMsg : {
+    success : "Successfully Saved",
+    update : "Successfully Updated",
+    delete : "Successfully Deleted"
+  },
   employees: [{
     employeeId: '0100',
     firstName: 'Peter',
