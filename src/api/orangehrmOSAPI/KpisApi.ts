@@ -20,8 +20,9 @@ export class KpisApi extends BaseApiService {
             headers: { Accept: 'application/json' },
         })
         if (!response.ok()) {
-            console.log((await response.text()))
-            throw new Error('Kpis.getAll failed: HTTP ${response.status()}')
+            const text = await response.text();
+            log.error(`KpisApi.getAll failed: HTTP ${response.status()}`, { body: text.slice(0, 400) });
+            throw new Error(`KpisApi.getAll failed: HTTP ${response.status()}\n${text.slice(0, 600)}`)
         }
         const json = (await response.json()) as { data: Array<{ title: string, minRating: number, maxRating: number, jobTitleId: number, isDefault: boolean }> };
         return json.data ?? [];
@@ -68,8 +69,9 @@ export class KpisApi extends BaseApiService {
             headers: { Accept: 'application/json' },
         })
         if (!response.ok()) {
-            log.info((await response.text()))
-            throw new Error('Kpis.getAllId failed: HTTP ${response.status()}')
+            const text = await response.text();
+            log.error(`KpisApi.getAllId failed: HTTP ${response.status()}`, { body: text.slice(0, 400) });
+            throw new Error(`KpisApi.getAllId failed: HTTP ${response.status()}\n${text.slice(0, 600)}`)
         }
         const json = (await response.json()) as { data: Array<{ id: number, title: string }> };
         return json.data ?? [];
@@ -93,9 +95,9 @@ export class KpisApi extends BaseApiService {
             }
         })
         if (!response.ok()){
-            log.error((await response.text()))
-            throw new Error(`Failed to delete KPI`)
-            return
+            const text = await response.text();
+            log.error(`KpisApi.deleteExistKpis failed: HTTP ${response.status()}`, { body: text.slice(0, 400) });
+            throw new Error(`Failed to delete KPI: HTTP ${response.status()}`)
         }
         log.info(`KPI successfully deleted. IDs: ${JSON.stringify(idList)}`)
     }

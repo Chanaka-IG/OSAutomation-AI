@@ -39,4 +39,13 @@ export const adminOrganizationStructure = {
     overlongName: 'A'.repeat(101),
     description: 'Created by the organization-structure E2E suite.',
   },
+  /**
+   * Seeded master-data sub-unit reused (read-only!) for the duplicate-name check. The
+   * uniqueness validator only flags names that exist when the page loads, so the duplicate
+   * MUST be a pre-existing unit — a same-session creation is not detected. `Engineering` is
+   * seeded by `test-data/pim/api/subunits.ts`.
+   */
+  masterData: {
+    duplicateName: 'Engineering',
+  },
 } as const;

@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from '../BasePage';
 import type { JobTitleSeed } from '../../../test-data/pim/api/jobTitles';
 
@@ -72,16 +72,14 @@ export class AddKpisPage extends BasePage {
 
     }
 
-    async validateFieldVisibility(): Promise<boolean> {
-        return (
-            await this.keyPerformanceIndicatorInput.isVisible() &&
-            await this.jobTitleDropdown.isVisible() &&
-            await this.minimumRatingInput.isVisible() &&
-            await this.maximumRatingInput.isVisible() &&
-            await this.makeDefaultCheckbox.isVisible() &&
-            await this.saveButton.isVisible() &&
-            await this.cancelButton.isVisible()
-        )
+    async expectFieldsVisible(): Promise<void> {
+        await expect(this.keyPerformanceIndicatorInput).toBeVisible();
+        await expect(this.jobTitleDropdown).toBeVisible();
+        await expect(this.minimumRatingInput).toBeVisible();
+        await expect(this.maximumRatingInput).toBeVisible();
+        await expect(this.makeDefaultCheckbox).toBeVisible();
+        await expect(this.saveButton).toBeVisible();
+        await expect(this.cancelButton).toBeVisible();
     }
 
     async fillKeyIndicator(kpiData: { name: string; description?: string; jobTitle: string; minimumRating: string; maximumRating: string; makeDefault: boolean | undefined }): Promise<void> {
@@ -113,15 +111,12 @@ export class AddKpisPage extends BasePage {
 
     }
 
-    async validateInlineMsg(validationMsg: string): Promise<boolean> {
-        const msgVisible = this.page.getByText(validationMsg, { exact: true }).isVisible();
-        return msgVisible;
+    async expectInlineMsg(validationMsg: string): Promise<void> {
+        await expect(this.page.getByText(validationMsg, { exact: true })).toBeVisible();
     }
 
-    async isRowExists(kpiName: string): Promise<boolean> {
-        await this.page.locator('.oxd-table-card').waitFor({state: 'visible'});
-        const row = this.page.locator('.oxd-table-card').filter({ hasText: kpiName });
-        return (await row.count()) > 0;
+    async isRowExists(kpiName: string): Promise<void> {
+        await expect (this.page.locator('.oxd-table-card').filter({ hasText: kpiName })).toBeVisible();
     }
 
     private getRowByName(kpiName: string): Locator {

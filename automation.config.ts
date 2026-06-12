@@ -1,21 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { env } from './src/config/env';
 
-/**
- * Named without `playwright` in the filename on purpose: the VS Code/Cursor Playwright
- * extension activates on `*playwright*.config.*` and may run `node` from an outdated PATH.
- * CLI uses `--config automation.config.ts` (see package.json scripts).
- *
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
-
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
 export default defineConfig({
   /** Verifies seeded master data before UI/API runs; writes `test-results/master-data-status.json`. See `scripts/playwright-global-setup.ts`. */
   globalSetup:
@@ -42,16 +27,10 @@ export default defineConfig({
   /* Shared settings for all projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL: env.baseURL || undefined,
-    /**
-     * Worst-case cap for `goto` / `waitForURL` on slow hosts or CI.
-     * Fast loads still finish as soon as `domcontentloaded` fires — this is not a sleep.
-     * Prefer waiting on specific locators after navigation (see `EmployeeListPage.waitForListReady`).
-     */
     navigationTimeout: 90_000,
     video: 'on',
     screenshot: 'on',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
 
@@ -62,18 +41,6 @@ export default defineConfig({
       testIgnore: ['**/api/**', '**/setup/**'],
       use: { ...devices['Desktop Chrome'] },
     },
-
-    // {
-    //   name: 'firefox',
-    //   testIgnore: ['**/api/**', '**/setup/**'],
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   testIgnore: ['**/api/**', '**/setup/**'],
-    //   use: { ...devices['Desktop Safari'] },
-    // },
 
     {
       name: 'api',
@@ -90,32 +57,5 @@ export default defineConfig({
         trace: 'off',
       },
     },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
   ],
-
-  /* Run your local dev server before starting tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
 });
