@@ -116,6 +116,9 @@ await targetCard.getByTestId('book-now-btn').click();
 
 ## 4. Assertion Patterns
 
+### Where to use expect
+- Keep assertions (expect) in the test file(spec) whenever possible, and keep Page Objects focused on actions and data retrieval. 
+
 ### Visibility Checks
 ```javascript
 await expect(page.getByText('Event created!')).toBeVisible();
@@ -373,3 +376,11 @@ npx playwright show-report
 ## 12. Comment add
 - Dont add comment every actions. If the action is straight forward and clear to end user no need to add comment for that action, but if the action is not straight forward and it needs some explanation to understand why we are doing that action, then we should add comment for that action.
 
+## 13. Logs within the code
+- Never use `console.log()` for any type of logs or debug purpose. Always use createLogger for the logs. 
+
+```javascript
+import { createLogger } from "../../lib/logger";
+const log = createLogger('KpisApi');
+log.info(`KPI already exist, Skipping : ${payload.title}`)
+```

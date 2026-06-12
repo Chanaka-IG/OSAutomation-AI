@@ -41,7 +41,7 @@ export const performance = {
     makeDefault: true,
   },
   validScale: {
-    name: 'Test KPI',
+    name: 'Test KPI Default Scale',
     description: 'This is a test KPI created for valid scale testing.',
     jobTitle: 'Software Engineer',
     minimumRating: '25',
@@ -86,6 +86,10 @@ export const performance = {
     password: 'admin@OHRM123',
     status: true,
     userRoleId: 2,
+  },
+
+  jobRole : {
+    vacancy : "QA Engineer"
   }
 
 } as const;
