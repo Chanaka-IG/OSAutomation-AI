@@ -105,7 +105,7 @@ test.describe('Add KPIs', () => {
     await expect(addKpisPage.pageHeadingForAddKpi).toBeVisible();
   });
 
-  test('TC-006 | Add using default scale 0–100', async ({ addKpisPage }) => {
+  test('TC-006 | Add using default scale 0–10000', async ({ addKpisPage }) => {
     await addKpisPage.navigateToAddKpisPage();
     await addKpisPage.fillKeyIndicator(frontend.performance.validScale);
     await addKpisPage.clickOnSave();
