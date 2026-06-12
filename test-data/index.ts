@@ -30,6 +30,7 @@ import { adminEmploymentStatus } from './admin/frontend/employmentStatus';
 import { adminOrganizationStructure } from './admin/frontend/organizationStructure';
 import { adminSystemUsers } from './admin/frontend/systemUsers';
 import { directory } from './directory/frontend/directory';
+import  { myTackers } from './performance/frontend/myTrackers'
 
 import * as pimFrontendApi from './pim/frontend-api';
 
@@ -63,6 +64,7 @@ export const frontend = {
   adminOrganizationStructure,
   adminSystemUsers,
   directory,
+  myTackers
 };
 
 /** API payloads owned by frontend/UI tests (not master-data seeding). */

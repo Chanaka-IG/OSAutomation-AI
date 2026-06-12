@@ -36,6 +36,8 @@ import { EmploymentStatusPage } from '../pages/admin/EmploymentStatusPage';
 import { OrganizationStructurePage } from '../pages/admin/OrganizationStructurePage';
 import { SystemUsersPage } from '../pages/admin/SystemUsersPage';
 import { DirectoryPage } from '../pages/directory/DirectoryPage';
+import { MyTrackersPage } from '../pages/performance/MyTrackersPage'
+
 
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
 export type OrangehrmFixtures = {
@@ -67,6 +69,7 @@ export type OrangehrmFixtures = {
   organizationStructurePage: OrganizationStructurePage;
   systemUsersPage: SystemUsersPage;
   directoryPage: DirectoryPage;
+  myTrackersPage: MyTrackersPage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
   orangehrmApiContext: APIRequestContext;
   orangehrmAdminApi: OrangehrmAdminApi;
@@ -194,6 +197,10 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
     await use(new DirectoryPage(page));
   },
 
+  myTrackersPage: async ({ page }, use) => {
+    await use(new MyTrackersPage(page));
+  },
+
   orangehrmApiContext: async ({ playwright }, use) => {
     const context = await playwright.request.newContext({
       baseURL: env.baseURL || undefined,
@@ -250,7 +257,7 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
         if (!status.ok) {
           throw new Error(
             `Master data incomplete: ${status.missing.join('; ')}\n` +
-              `Run: npx playwright test --project=master-data tests/setup/seed-master-data.spec.ts`,
+            `Run: npx playwright test --project=master-data tests/setup/seed-master-data.spec.ts`,
           );
         }
         await use(status);

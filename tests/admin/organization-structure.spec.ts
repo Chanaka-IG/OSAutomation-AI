@@ -1,7 +1,6 @@
 import { test, expect } from '../../src/fixtures';
 import { env } from '../../src/config/env';
 import { frontend } from '../../test-data';
-import { subunits } from '../../test-data/pim/api/subunits';
 import { SubunitsApi } from '../../src/api/orangehrmOSAPI/SubunitsApi';
 
 /**
@@ -120,31 +119,27 @@ test.describe('Organization Structure — add & validation', () => {
     await org.saveDialogExpectingClose();
     createdNames.push(childName);
 
+    // The tree lazy-renders children collapsed — expand the parent to reveal the new child.
+    await org.expandNode(parentName);
     await expect(org.nodeLabel(childName)).toBeVisible();
   });
 
   test('TC-ADMIN-ORG-100 — Duplicate name (global) shows the unique-name error and blocks save', async ({
     organizationStructurePage: org,
   }) => {
-    // Seed a unit, then attempt to reuse its exact name from a fresh Add dialog.
-    const existing = `OS E2E Dup ${stamp()}`;
-    await org.openRootAddDialog();
-    await org.fillDialog({ name: existing, description: os.samples.description });
-    await org.saveDialogExpectingClose();
-    createdNames.push(existing);
-    await expect(org.nodeLabel(existing)).toBeVisible();
+    // Reuse a pre-seeded sub-unit name (the validator only flags names present at page load).
+    const duplicate = os.masterData.duplicateName;
 
     await org.openRootAddDialog();
-    await org.fillDialog({ name: existing });
+    await org.typeName(duplicate);
     await expect(org.fieldError).toHaveText(os.messages.duplicateName);
 
-    // Save is blocked client-side — dialog stays open, no second node created.
+    // Save is blocked client-side — dialog stays open, no node created.
     await org.clickSave();
     await expect(org.dialog).toBeVisible();
     await expect(org.fieldError).toHaveText(os.messages.duplicateName);
     await org.cancelButton.click();
     await expect(org.dialog).toBeHidden();
-    await expect(org.nodeLabel(existing)).toHaveCount(1);
   });
 
   test('TC-ADMIN-ORG-101 — Empty Name shows "Required" and blocks save', async ({
@@ -168,7 +163,9 @@ test.describe('Organization Structure — edit (with description)', () => {
     seededName = `OS E2E Edit ${stamp()}`;
     await orangehrmAdminApi.loginAsAdmin();
     const api = new SubunitsApi(orangehrmAdminApi.request);
-    await api.create({ parentId: 1, unitId: '', name: seededName, description: os.samples.description });
+    // BOTH unitId and description must be non-empty: on edit the UI re-sends every optional
+    // field, and an empty one becomes `null` → 422 (the documented edit defect, see TC-301).
+    await api.create({ parentId: 1, unitId: 'OSE5', name: seededName, description: os.samples.description });
     createdNames.push(seededName);
 
     await loginPage.loginAs('admin');
@@ -246,6 +243,8 @@ test.describe('Organization Structure — delete & cascade', () => {
     await org.gotoStructure();
     await org.enableEditMode();
     await expect(org.nodeLabel(parentName)).toBeVisible();
+    // Children render collapsed — expand to confirm the seeded child is present pre-delete.
+    await org.expandNode(parentName);
     await expect(org.nodeLabel(childName)).toBeVisible();
 
     // -- Delete the parent → both parent and child disappear --
@@ -255,23 +254,30 @@ test.describe('Organization Structure — delete & cascade', () => {
   });
 });
 
-// ─── P0: CONFIRMED BUG — editing a description-less unit fails silently (regression guard) ──
-test.describe('Organization Structure — silent description-null edit bug', () => {
+// ─── P0: CONFIRMED BUG — editing a unit with an empty optional field fails silently ──────────
+// Verified live 2026-06-11: on edit the UI re-sends EVERY optional field, and an empty one is
+// serialised as `null`, which the backend rejects with 422 {invalidParamKeys:[<field>]}. Here
+// we leave Description empty (the unit HAS a unitId), so the lone null is `description` — the
+// exact defect the domain notes record. The failure is SILENT: no toast, dialog stays open,
+// rename lost. This is a POTENTIAL APP BUG asserted as-is; do not "fix" it by injecting a dummy
+// value. (The same 422 occurs for an empty unitId — see the edit-with-description suite, which
+// seeds BOTH fields precisely to avoid this.)
+test.describe('Organization Structure — silent null-optional-field edit bug', () => {
   test.beforeEach(async ({ loginPage, organizationStructurePage }) => {
     await loginPage.loginAs('admin');
     await organizationStructurePage.gotoStructure();
     await organizationStructurePage.enableEditMode();
   });
 
-  test('TC-ADMIN-ORG-301 — Editing a unit created WITHOUT a description PUTs description:null → 422; dialog stays open, rename lost', async ({
+  test('TC-ADMIN-ORG-301 — Editing a unit with an empty Description PUTs description:null → 422; dialog stays open, rename lost', async ({
     organizationStructurePage: org,
-    page,
   }) => {
-    // -- Create a description-less unit via the UI (the API always sends a description) --
+    // -- Create a unit WITH a Unit Id but WITHOUT a Description --
+    const unitId = `E301-${stamp()}`;
     const name = `OS E2E NoDesc ${stamp()}`;
     const attempted = `OS E2E NoDesc Renamed ${stamp()}`;
     await org.openRootAddDialog();
-    await org.fillDialog({ name }); // Name only — no Unit Id, no Description
+    await org.fillDialog({ unitId, name }); // no Description
     await org.saveDialogExpectingClose();
     createdNames.push(name);
     await expect(org.nodeLabel(name)).toBeVisible();
@@ -283,20 +289,20 @@ test.describe('Organization Structure — silent description-null edit bug', () 
     await expect(org.descriptionInput).toHaveValue('');
     await org.fillDialog({ name: attempted });
 
-    // -- The UI sends description:null → the backend rejects it with 422 --
-    const putResponse = page.waitForResponse(
-      (r) =>
-        r.url().includes(subunits.adminPath.replace('/web/index.php', '')) &&
-        r.request().method() === 'PUT',
-    );
+    // -- The UI sends description:null → the backend rejects it with 422 (invalidParamKeys) --
+    const putResponse = org.waitForSubunitPut();
     await org.clickSave();
     const res = await putResponse;
     expect(res.status()).toBe(422);
+    const body = (await res.json()) as { error?: { data?: { invalidParamKeys?: string[] } } };
+    expect(body.error?.data?.invalidParamKeys).toContain('description');
 
-    // -- Bug symptom: no toast, dialog stays open, the rename is lost --
+    // -- Bug symptom: no toast; the 422 is swallowed and the dialog is left stuck in a
+    //    perpetual loading state (the form loader never clears and even blocks Cancel), so the
+    //    rename never applies. Escape the wedged dialog by reloading the page. --
     await expect(org.dialog).toBeVisible();
-    await org.cancelButton.click();
-    await expect(org.dialog).toBeHidden();
+    await expect(org.dialogFormLoader).toBeVisible();
+    await org.gotoStructure();
     await expect(org.nodeLabel(name)).toBeVisible();
     await expect(org.nodeLabel(attempted)).toHaveCount(0);
   });

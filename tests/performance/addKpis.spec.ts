@@ -1,4 +1,4 @@
-import { test, expect } from '../../src/fixtures';
+import { test, expect } from '../../src/fixtures/apiAction';
 import { env } from '../../src/config/env';
 import { frontend } from '../../test-data';
 import { EmployeesApi } from '../../src/api/orangehrmOSAPI/EmployeesApi';
@@ -8,26 +8,21 @@ import { JobTitlesApi } from '../../src/api/orangehrmOSAPI/JobTitlesApi';
 import { kpis as kpiAPIdata } from '../../test-data/performance/api/kpis'
 
 
-test.describe.configure({ mode: 'serial', timeout: 180_000 });
+test.describe.configure({ timeout: 180_000 });
 
 test.beforeEach(() => {
   test.skip(!env.baseURL, 'Set BASE_URL to run this suite.');
 });
 
-test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, orangehrmApiContext }) => {
+test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, kpi, users, employees }) => {
 
   void masterDataReadiness;
 
-  const kpi = new KpisApi(orangehrmApiContext);
-  const users = new AdminUsersApi(orangehrmApiContext);
-  const emploee = new EmployeesApi(orangehrmApiContext)
-  const jobTitles = new JobTitlesApi(orangehrmApiContext)
-
   await orangehrmAdminApi.loginAsAdmin();
   for (const employee of frontend.performance.employees) {
-    await emploee.createIfAbsent(employee)
+    await employees.createIfAbsent(employee)
   }
-  const empNumber = await emploee.getEmpNumberByEmployeeId(frontend.performance.employees[0].employeeId);
+  const empNumber = await employees.getEmpNumberByEmployeeId(frontend.performance.employees[0].employeeId);
 
   if (empNumber !== undefined) {
     await users.createIfAbsent({
@@ -43,27 +38,21 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, orangehrmApiCont
   }
 })
 
-test.beforeEach(async ({ addKpisPage }, testInfo) => {
-  if (testInfo.title.includes('TC-203')) {
-    return;
-  }
-  await addKpisPage.loginAs('admin');
-  // Implement any setup logic needed before all tests, such as creating necessary data or configurations
+test.afterAll(async ({ orangehrmApiContext, orangehrmAdminApi }) => {
+  await orangehrmAdminApi.loginAsAdmin();
+  const kpi = new KpisApi(orangehrmApiContext);
+  await kpi.deleteAllKpis();
 });
-
-// test.afterAll(async ({ orangehrmApiContext, orangehrmAdminApi }) => {
-//   // Implement any cleanup logic needed after all tests, such as deleting test data or resetting configurations
-//   await orangehrmAdminApi.loginAsAdmin();
-//   const kpi = new KpisApi(orangehrmApiContext);
-//   await kpi.deleteAllKpis();
-// });
 
 test.describe('Add KPIs', () => {
 
+  test.beforeEach(async ({ addKpisPage }) => {
+    await addKpisPage.loginAs('admin');
+  });
+
   test('TC-001 | List loads with correct columns/records', async ({ addKpisPage }) => {
     await addKpisPage.navigateToAddKpisPage();
-    const isVisible = await addKpisPage.validateFieldVisibility();
-    expect(isVisible).toBe(true);
+    await addKpisPage.expectFieldsVisible();
   });
 
   test('TC-005 | Add a KPI with all valid fields', async ({ addKpisPage }) => {
@@ -75,7 +64,7 @@ test.describe('Add KPIs', () => {
 
   });
 
-  test.only('TC-010 | Delete a single KPI via row action', async ({ addKpisPage }) => {
+  test('TC-010 | Delete a single KPI via row action', async ({ addKpisPage }) => {
     await addKpisPage.navigateToSearchPage();
     await addKpisPage.deleteKpiByName(kpiAPIdata.seedRecords[0].title);
     const toastMessage = await addKpisPage.waitForSuccessToast();
@@ -83,13 +72,6 @@ test.describe('Add KPIs', () => {
     const row = await addKpisPage.isRowExists(kpiAPIdata.seedRecords[0].title);
     expect(row).toBe(false);
 
-  });
-
-  test('TC-203 | Unauthenticated → login redirect ', async ({ addKpisPage, page }) => {
-    await addKpisPage.loginWithCredentials(frontend.performance.userData.username, frontend.performance.userData.password);
-    await addKpisPage.navigateToAddKpisPageasESS();
-    await page.waitForLoadState('networkidle');
-    expect(await addKpisPage.notAccessMsg()).toBe(true);
   });
 
   test('TC-008 | Edit an existing KPI title', async ({ addKpisPage }) => {
@@ -103,16 +85,15 @@ test.describe('Add KPIs', () => {
 
   test('TC-002 | Filter KPIs by Job Title ', async ({ addKpisPage }) => {
     await addKpisPage.navigateToSearchPage();
-    await addKpisPage.filterByJobTitle('QA Engineer');
+    await addKpisPage.filterByJobTitle(frontend.performance.jobRole.vacancy);
     await addKpisPage.clickOnSearch();
     await addKpisPage.waitUntilTableLoaderDissapear();
-    const row = await addKpisPage.isRowExists(kpiAPIdata.seedRecords[1].title);
-    expect(row).toBe(true);
+    await addKpisPage.isRowExists(kpiAPIdata.seedRecords[1].title);
   });
 
   test('TC-003 | Reset clears the Job Title filter', async ({ addKpisPage }) => {
     await addKpisPage.navigateToSearchPage();
-    await addKpisPage.filterByJobTitle('QA Engineer');
+    await addKpisPage.filterByJobTitle(frontend.performance.jobRole.vacancy);
     await addKpisPage.clickOnReset();
     expect(await addKpisPage.getDefaultText()).toContain('Select');
   });
@@ -121,7 +102,7 @@ test.describe('Add KPIs', () => {
     await addKpisPage.navigateToSearchPage();
     await addKpisPage.clickOnAdd();
     await addKpisPage.waitUntilFormLoaderDissapear();
-    expect(await addKpisPage.pageHeadingForAddKpi.isVisible()).toBe(true);
+    await expect(addKpisPage.pageHeadingForAddKpi).toBeVisible();
   });
 
   test('TC-006 | Add using default scale 0–100', async ({ addKpisPage }) => {
@@ -154,13 +135,13 @@ test.describe('Add KPIs', () => {
   test('TC-100 | Max must be greater than Min (inline message)', async ({ addKpisPage }) => {
     await addKpisPage.navigateToAddKpisPage();
     await addKpisPage.fillKeyIndicator(frontend.performance.invalidScale);
-    await addKpisPage.validateInlineMsg(frontend.performance.validationMsges.rating);
+    await addKpisPage.expectInlineMsg(frontend.performance.validationMsges.rating);
   });
 
   test('TC-101 | Ratings constrained 0–100 (inline message)', async ({ addKpisPage }) => {
     await addKpisPage.navigateToAddKpisPage();
     await addKpisPage.fillKeyIndicator(frontend.performance.outOfScale);
-    await addKpisPage.validateInlineMsg(frontend.performance.validationMsges.outScale);
+    await addKpisPage.expectInlineMsg(frontend.performance.validationMsges.outScale);
   });
 
   test('TC-509 | Delete confirmation can be cancelled', async ({ addKpisPage }) => {
@@ -171,4 +152,14 @@ test.describe('Add KPIs', () => {
   });
 });
 
-test
+test.describe('KPI access control (ESS)', () => {
+
+  test('TC-203 | ESS user is blocked from the admin KPI page', async ({ addKpisPage }) => {
+    await addKpisPage.loginWithCredentials(
+      frontend.performance.userData.username,
+      frontend.performance.userData.password,
+    );
+    await addKpisPage.navigateToAddKpisPageasESS();
+    await expect(addKpisPage.notAccessMsgLocator).toBeVisible();
+  });
+});

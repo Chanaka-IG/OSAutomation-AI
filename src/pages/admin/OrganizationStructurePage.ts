@@ -33,6 +33,8 @@ export class OrganizationStructurePage extends BasePage {
   readonly descriptionInput: Locator;
   readonly dialogNote: Locator;
   readonly fieldError: Locator;
+  /** In-dialog loading spinner; on a swallowed 422 it gets stuck and even blocks Cancel (TC-301). */
+  readonly dialogFormLoader: Locator;
   readonly saveButton: Locator;
   readonly cancelButton: Locator;
 
@@ -62,6 +64,7 @@ export class OrganizationStructurePage extends BasePage {
     this.descriptionInput = this.dialog.locator('textarea');
     this.dialogNote = this.dialog.locator('p.oxd-text--p');
     this.fieldError = this.dialog.locator('.oxd-input-field-error-message');
+    this.dialogFormLoader = this.dialog.locator('.oxd-form-loader');
     this.saveButton = this.dialog.getByRole('button', { name: 'Save' });
     this.cancelButton = this.dialog.getByRole('button', { name: 'Cancel' });
 
@@ -92,6 +95,27 @@ export class OrganizationStructurePage extends BasePage {
     return this.page.locator('.org-name').filter({ hasText: name });
   }
 
+  /** The tree-node wrapper for a node (carries `--open` when expanded; holds the expand toggle). */
+  nodeWrapper(name: string): Locator {
+    return this.page
+      .locator('.oxd-tree-node-wrapper')
+      .filter({ has: this.page.locator('.org-structure-card .org-name', { hasText: name }) });
+  }
+
+  /**
+   * Expands a parent node so its children render. The tree lazy-renders children and starts
+   * COLLAPSED (chevron-down = collapsed, chevron-up = expanded) — a child node is not in the
+   * DOM until its parent is expanded. No-op if the node has no toggle or is already expanded.
+   */
+  async expandNode(name: string): Promise<void> {
+    const collapsedToggle = this.nodeWrapper(name)
+      .locator('.oxd-tree-node-toggle:has(.bi-chevron-down)')
+      .first();
+    if (await collapsedToggle.isVisible().catch(() => false)) {
+      await collapsedToggle.click();
+    }
+  }
+
   // ── Edit mode ───────────────────────────────────────────────────────────────────
 
   async enableEditMode(): Promise<void> {
@@ -109,23 +133,35 @@ export class OrganizationStructurePage extends BasePage {
     await this.dialog.waitFor({ state: 'visible' });
   }
 
+  /** Bootstrap-icon class for each node action (the `.org-action` inline icon buttons). */
+  private static readonly ACTION_ICON = {
+    Delete: 'bi-trash-fill',
+    Edit: 'bi-pencil-fill',
+    Add: 'bi-plus',
+  } as const;
+
   /**
-   * Opens a node's kebab and clicks one of Delete / Edit / Add. Requires Edit mode ON.
+   * Triggers a node's Delete / Edit / Add action. Requires Edit mode ON.
    *
-   * The kebab trigger is the DIRECT button under `.org-action > li`; the opened menu renders
-   * as a nested `.oxd-dropdown-menu` whose items also contain `.oxd-icon-button`s — so the
-   * trigger must be selected as a direct child, never as `.org-action .oxd-icon-button`
-   * (which would match the menu icons too once the menu is open). The menu is opened only if
-   * the target item isn't already visible, so a pre-open menu never gets toggled shut.
+   * The action area is RESPONSIVE (verified live, 1280px viewport): at the test's default
+   * width each node renders three inline `.org-action` icon buttons — trash (Delete), pencil
+   * (Edit), plus (Add). At narrow widths it collapses to a kebab (`.org-action > li > button`)
+   * that opens an `.oxd-dropdown-menu` of Delete / Edit / Add `<li>`s. This handles both so the
+   * suite is robust to viewport changes.
    */
   async openNodeAction(name: string, action: 'Delete' | 'Edit' | 'Add'): Promise<void> {
     const card = this.card(name);
-    const item = card.locator('.oxd-dropdown-menu li').filter({ hasText: action }).first();
-    if (!(await item.isVisible().catch(() => false))) {
+    const icon = OrganizationStructurePage.ACTION_ICON[action];
+    const inlineButton = card.locator(`.org-action button:has(.${icon})`).first();
+
+    if (await inlineButton.isVisible().catch(() => false)) {
+      await inlineButton.click();
+    } else {
+      // Narrow layout: open the kebab, then click the menu item by its label.
       await card.locator('.org-action > li > button').first().click();
-      await item.waitFor({ state: 'visible' });
+      await card.locator('.oxd-dropdown-menu li').filter({ hasText: action }).first().click();
     }
-    await item.click();
+
     if (action !== 'Delete') {
       await this.dialog.waitFor({ state: 'visible' });
     }
@@ -149,10 +185,31 @@ export class OrganizationStructurePage extends BasePage {
     await this.waitUntilFormLoaderDissapear();
   }
 
+  /**
+   * Types the Name character-by-character. The async unique-name validator runs on each input
+   * event, so a single `fill()` can race its data load and miss the duplicate; per-character
+   * typing fires repeated input events and reliably surfaces the "should be unique" error.
+   */
+  async typeName(name: string): Promise<void> {
+    await this.nameInput.click();
+    await this.nameInput.fill('');
+    await this.nameInput.pressSequentially(name, { delay: 30 });
+  }
+
   /** Clicks Save when a save is expected to be BLOCKED (validation) or to fail (the silent
    *  description-null edit bug): the dialog stays open. Returns without waiting for a close. */
   async clickSave(): Promise<void> {
     await this.saveButton.click();
+  }
+
+  /**
+   * Returns a promise for the next `PUT /api/v2/admin/subunits/{id}` response (the edit save).
+   * Call BEFORE clicking Save so the listener is armed, then `await` it to inspect the status.
+   */
+  waitForSubunitPut() {
+    return this.page.waitForResponse(
+      (r) => /\/api\/v2\/admin\/subunits\/\d+$/.test(r.url()) && r.request().method() === 'PUT',
+    );
   }
 
   /** Deletes a node via its kebab → Delete → "Yes, Delete" confirmation. */
