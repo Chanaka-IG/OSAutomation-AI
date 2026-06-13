@@ -5,12 +5,16 @@ import { env } from '../config/env';
 import { EmployeesApi } from '../../src/api/orangehrmOSAPI/EmployeesApi';
 import { AdminUsersApi } from '../../src/api/orangehrmOSAPI/AdminUsersApi';
 import { KpisApi } from '../../src/api/orangehrmOSAPI/KpisApi'
+import { JobTitlesApi } from '../../src/api/orangehrmOSAPI/JobTitlesApi'
+import { MyTrackersApi } from '../../src/api/orangehrmOSAPI/MyTrackersApi'
 
 
 export type ApiAction = {
     employees: EmployeesApi,
     users: AdminUsersApi,
     kpi: KpisApi,
+    jobTitle: JobTitlesApi,
+    myTracker: MyTrackersApi,
     orangehrmApiContext: APIRequestContext;
 
 };
@@ -34,6 +38,12 @@ export const test = apiAction.extend<ApiAction>({
     },
     kpi: async ({ orangehrmApiContext }, use) => {
         await use(new KpisApi(orangehrmApiContext));
+    },
+    jobTitle: async ({ orangehrmApiContext }, use) => {
+        await use(new JobTitlesApi(orangehrmApiContext));
+    },
+    myTracker: async ({ orangehrmApiContext }, use) => {
+        await use(new MyTrackersApi(orangehrmApiContext));
     },
 });
 

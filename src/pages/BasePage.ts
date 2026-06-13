@@ -1,7 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import type { LoginRole } from '../../test-data/auth';
 import { auth } from '../../test-data/auth';
-import { expect } from '@playwright/test';
 
 export abstract class BasePage {
   readonly usernameInput: Locator;
@@ -10,6 +10,14 @@ export abstract class BasePage {
   readonly tableLoader: Locator
   readonly formLoader: Locator;
   readonly dropdownFirstOption: Locator;
+    private readonly successToastContent: Locator;
+  private readonly successHeader: Locator;
+  private readonly noRecordsHeader: Locator;
+  private readonly errorHeader: Locator;
+  private readonly successToastMsgForSave: Locator;
+  private readonly noRecordsToastMsg: Locator;
+  private readonly successToastMsgForDelete: Locator;
+  private readonly successToastMsgForUpdate: Locator;
 
   constructor(public readonly page: Page) {
     this.usernameInput = page.locator('input[name="username"]');
@@ -18,6 +26,14 @@ export abstract class BasePage {
     this.tableLoader = page.locator('.oxd-table-loader');
     this.formLoader = page.locator('.oxd-loading-spinner');
     this.dropdownFirstOption = page.getByRole('option', { name: '-- Select --' })
+    this.successToastContent = this.page.locator("#oxd-toaster_1")
+    this.successHeader = this.page.getByText("Success", { exact: true })
+    this.noRecordsHeader = this.page.getByText("Info", { exact: true })
+    this.errorHeader = this.page.getByText("Error", { exact: true })
+    this.successToastMsgForSave = this.page.getByText("Successfully Saved", { exact: true })
+    this.noRecordsToastMsg = this.page.locator(".oxd-text--toast-message")
+    this.successToastMsgForDelete = this.page.getByText("Successfully Deleted", { exact: true })
+    this.successToastMsgForUpdate = this.page.getByText("Successfully Updated", { exact: true })
 
   }
 
@@ -40,6 +56,56 @@ export abstract class BasePage {
     await toast.waitFor({ state: 'visible', timeout });
     return (await toast.innerText()).trim();
   }
+
+
+  async verifySuccessToastForSave(): Promise<void> {
+      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+        await test.expect(this.successHeader).toBeVisible();
+        await test.expect(this.successToastMsgForSave).toBeVisible();
+      })
+
+  }
+
+  async VerifyNoRecords(): Promise<void> {
+      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+        await test.expect(this.noRecordsHeader).toBeVisible();
+        await expect(this.noRecordsToastMsg).toHaveText("No Records Found");
+      })
+  }
+
+  async verifySuccessToastForUpdate(): Promise<void> {
+   
+      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+        await test.expect(this.successHeader).toBeVisible();
+        await test.expect(this.successToastMsgForUpdate).toBeVisible();
+      })
+
+  }
+
+  async verifySuccessToastforDeletion(): Promise<void> {
+    
+      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+        await test.expect(this.successHeader).toBeVisible();
+        await test.expect(this.successToastMsgForDelete).toBeVisible();
+      })
+
+  }
+
+  async verifyCustomToast(toastContent: string): Promise<void> {
+      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+        await test.expect(this.successHeader).toBeVisible();
+        await expect(this.page.getByText(toastContent, { exact: true })).toBeVisible();
+      })
+
+  }
+
+  async verifyCustomToastforError(toastContent: string): Promise<void> {
+      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+        await test.expect(this.errorHeader).toBeVisible();
+        await expect(this.page.getByText(toastContent, { exact: true })).toBeVisible();
+      })
+  }
+
 
   async loginAs(role: LoginRole): Promise<void> {
     const { username, password } = auth.getCredentials(role);

@@ -132,7 +132,7 @@ export class AddKpisPage extends BasePage {
     }
 
     async CancelDeleteKpiByName(kpiName: string): Promise<void> {
-        const row = await this.getRowByName(kpiName);
+        const row = this.getRowByName(kpiName);
         const checkbox = row.locator('.oxd-checkbox-input-icon');
         await checkbox.click();
         await this.clickDeleteSelectButton();
@@ -140,7 +140,7 @@ export class AddKpisPage extends BasePage {
     }
 
     async editKpiByName(kpiName: string): Promise<void> {
-        const row = await this.getRowByName(kpiName);
+        const row = this.getRowByName(kpiName);
         const deleteIcon = row.locator('.bi-pencil-fill');
         await deleteIcon.click();
         await this.waitUntilFormLoaderDissapear();

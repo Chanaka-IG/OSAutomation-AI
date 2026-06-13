@@ -20,6 +20,10 @@ import { ApplyLeavePage } from '../pages/leave/ApplyLeavePage';
 import { AddEmployeePage } from '../pages/pim/AddEmployeePage';
 import { EmployeeListPage } from '../pages/pim/EmployeeListPage';
 import { PersonalDetailsPage } from '../pages/pim/PersonalDetailsPage';
+import { OptionalFieldsPage } from '../pages/pim/OptionalFieldsPage';
+import { CustomFieldsPage } from '../pages/pim/CustomFieldsPage';
+import { ReportingMethodsPage } from '../pages/pim/ReportingMethodsPage';
+import { ReportToPage } from '../pages/pim/ReportToPage';
 import { PimModulePage } from '../pages/pim/PimModulePage';
 import { PimReportsPage } from '../pages/pim/PimReportsPage';
 import { RecruitmentModulePage } from '../pages/recruitment/RecruitmentModulePage';
@@ -35,8 +39,11 @@ import { PayGradesPage } from '../pages/admin/PayGradesPage';
 import { EmploymentStatusPage } from '../pages/admin/EmploymentStatusPage';
 import { OrganizationStructurePage } from '../pages/admin/OrganizationStructurePage';
 import { SystemUsersPage } from '../pages/admin/SystemUsersPage';
+import { WorkShiftsPage } from '../pages/admin/WorkShiftsPage';
 import { DirectoryPage } from '../pages/directory/DirectoryPage';
 import { MyTrackersPage } from '../pages/performance/MyTrackersPage'
+import { PunchPage } from '../pages/attendance/PunchPage';
+import { MyAttendanceRecordsPage } from '../pages/attendance/MyAttendanceRecordsPage';
 
 
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
@@ -52,6 +59,10 @@ export type OrangehrmFixtures = {
   pimReportsPage: PimReportsPage;
   employeeListPage: EmployeeListPage;
   personalDetailsPage: PersonalDetailsPage;
+  optionalFieldsPage: OptionalFieldsPage;
+  customFieldsPage: CustomFieldsPage;
+  reportingMethodsPage: ReportingMethodsPage;
+  reportToPage: ReportToPage;
   leaveModulePage: LeaveModulePage;
   leaveEntitlementsPage: LeaveEntitlementsPage;
   leaveEntitlementListPage: LeaveEntitlementListPage;
@@ -68,8 +79,11 @@ export type OrangehrmFixtures = {
   employmentStatusPage: EmploymentStatusPage;
   organizationStructurePage: OrganizationStructurePage;
   systemUsersPage: SystemUsersPage;
+  workShiftsPage: WorkShiftsPage;
   directoryPage: DirectoryPage;
   myTrackersPage: MyTrackersPage;
+  punchPage: PunchPage;
+  myAttendanceRecordsPage: MyAttendanceRecordsPage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
   orangehrmApiContext: APIRequestContext;
   orangehrmAdminApi: OrangehrmAdminApi;
@@ -127,6 +141,22 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
 
   personalDetailsPage: async ({ page }, use) => {
     await use(new PersonalDetailsPage(page));
+  },
+
+  optionalFieldsPage: async ({ page }, use) => {
+    await use(new OptionalFieldsPage(page));
+  },
+
+  customFieldsPage: async ({ page }, use) => {
+    await use(new CustomFieldsPage(page));
+  },
+
+  reportingMethodsPage: async ({ page }, use) => {
+    await use(new ReportingMethodsPage(page));
+  },
+
+  reportToPage: async ({ page }, use) => {
+    await use(new ReportToPage(page));
   },
 
   leaveModulePage: async ({ page }, use) => {
@@ -193,12 +223,24 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
     await use(new SystemUsersPage(page));
   },
 
+  workShiftsPage: async ({ page }, use) => {
+    await use(new WorkShiftsPage(page));
+  },
+
   directoryPage: async ({ page }, use) => {
     await use(new DirectoryPage(page));
   },
 
   myTrackersPage: async ({ page }, use) => {
     await use(new MyTrackersPage(page));
+  },
+
+  punchPage: async ({ page }, use) => {
+    await use(new PunchPage(page));
+  },
+
+  myAttendanceRecordsPage: async ({ page }, use) => {
+    await use(new MyAttendanceRecordsPage(page));
   },
 
   orangehrmApiContext: async ({ playwright }, use) => {
