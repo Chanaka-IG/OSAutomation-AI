@@ -245,6 +245,26 @@ export class PersonalDetailsPage extends BasePage {
 
   // ── Error helpers ──────────────────────────────────────────────────────────
 
+  // ── Optional-field visibility helpers ───────────────────────────────────────
+
+  /**
+   * A Personal Details field group located by its exact label. Resolves to 0 elements
+   * when the field is hidden (e.g. an optional field whose toggle is off).
+   */
+  fieldGroupByLabel(label: string): Locator {
+    return this.page
+      .locator('.oxd-grid-item')
+      .filter({ has: this.page.getByText(label, { exact: true }) });
+  }
+
+  /**
+   * An employee-record menu tab (the left/top record nav) located by its exact name.
+   * The tab strip renders duplicate labels (responsive variants), so scope to the first.
+   */
+  recordMenuTab(name: string): Locator {
+    return this.tabList.getByText(name, { exact: true }).first();
+  }
+
   /** True when the named input carries the OXD error-border class. */
   async inputHasError(placeholder: string): Promise<boolean> {
     const el = this.page.locator(`.oxd-input--error[placeholder="${placeholder}"]`);

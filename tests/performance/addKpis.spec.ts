@@ -1,10 +1,6 @@
 import { test, expect } from '../../src/fixtures/apiAction';
 import { env } from '../../src/config/env';
 import { frontend } from '../../test-data';
-import { EmployeesApi } from '../../src/api/orangehrmOSAPI/EmployeesApi';
-import { AdminUsersApi } from '../../src/api/orangehrmOSAPI/AdminUsersApi';
-import { KpisApi } from '../../src/api/orangehrmOSAPI/KpisApi'
-import { JobTitlesApi } from '../../src/api/orangehrmOSAPI/JobTitlesApi';
 import { kpis as kpiAPIdata } from '../../test-data/performance/api/kpis'
 
 
@@ -38,9 +34,8 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, kpi, users, empl
   }
 })
 
-test.afterAll(async ({ orangehrmApiContext, orangehrmAdminApi }) => {
+test.afterAll(async ({ orangehrmApiContext, orangehrmAdminApi,kpi }) => {
   await orangehrmAdminApi.loginAsAdmin();
-  const kpi = new KpisApi(orangehrmApiContext);
   await kpi.deleteAllKpis();
 });
 
@@ -105,7 +100,7 @@ test.describe('Add KPIs', () => {
     await expect(addKpisPage.pageHeadingForAddKpi).toBeVisible();
   });
 
-  test('TC-006 | Add using default scale 0–1000', async ({ addKpisPage }) => {
+  test('TC-006 | Add using default scale 0–100', async ({ addKpisPage }) => {
     await addKpisPage.navigateToAddKpisPage();
     await addKpisPage.fillKeyIndicator(frontend.performance.validScale);
     await addKpisPage.clickOnSave();
@@ -123,10 +118,9 @@ test.describe('Add KPIs', () => {
     expect(toastMessage).toContain(frontend.performance.toastMsg.update);
   });
 
-  test('TC-104 | Job Title dropdown lists only real job titles', async ({ addKpisPage, orangehrmApiContext, orangehrmAdminApi }) => {
+  test('TC-104 | Job Title dropdown lists only real job titles', async ({ addKpisPage, orangehrmApiContext, orangehrmAdminApi,jobTitle }) => {
     await orangehrmAdminApi.loginAsAdmin();
-    const jobTitles = new JobTitlesApi(orangehrmApiContext)
-    const systemJobTitles = await jobTitles.getAll();
+    const systemJobTitles = await jobTitle.getAll();
     const systemJobTitleNames = systemJobTitles.map(job => job.title);
     await addKpisPage.navigateToSearchPage();
     expect(await addKpisPage.validateJobTitileDropDown(systemJobTitleNames)).toBeTruthy();

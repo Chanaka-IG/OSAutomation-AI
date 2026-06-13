@@ -4,7 +4,7 @@ description: Playwright E2E test automation standards — locator strategy, asse
 user-invocable: false
 ---
 
-# Playwright Test Automation Best Practices for EventHub
+# Playwright Test Automation Best Practices for OrangehrmOS
 
 ## Overview
 This document defines the testing standards, patterns, and best practices for writing Playwright E2E tests in the EventHub project. All test automation agents and code reviewers MUST follow these guidelines.
@@ -333,6 +333,45 @@ await page.goto(`${BASE_URL}/bookings/${id}`, { waitUntil: 'networkidle' });
 ---
 
 ### Common Test Validation
+- For toast message validation always use predefined methods in BasePage rather than getting the toast messagge text and validate it. use following methods.
+
+```javascript
+ async verifySuccessToastForSave(): Promise<void> {
+      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+        await test.expect(this.successHeader).toBeVisible();
+        await test.expect(this.successToastMsgForSave).toBeVisible();
+      })
+
+  }
+
+  async VerifyNoRecords(): Promise<void> {
+      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+        await test.expect(this.noRecordsHeader).toBeVisible();
+        await expect(this.noRecordsToastMsg).toHaveText("No Records Found");
+      })
+  }
+
+  async verifySuccessToastForUpdate(): Promise<void> {
+   
+      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+        await test.expect(this.successHeader).toBeVisible();
+        await test.expect(this.successToastMsgForUpdate).toBeVisible();
+      })
+
+  }
+
+  async verifySuccessToastforDeletion(): Promise<void> {
+    
+      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+        await test.expect(this.successHeader).toBeVisible();
+        await test.expect(this.successToastMsgForDelete).toBeVisible();
+      })
+
+  }
+
+```
+
+
 - If there is a test element validation seems like common thing for other test as well (Example - Validate sucess message, Error message, Wait until spinner disappears), add them in to BasePage and reuse them in other tests. This will reduce the code duplication and make the test more maintainable.
 
 

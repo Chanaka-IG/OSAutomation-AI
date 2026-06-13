@@ -17,6 +17,10 @@ import { leavePeriod } from './leave/api/leavePeriod';
 import { leaveTypes } from './leave/api/leaveTypes';
 import { workweek } from './time/api/workweek';
 import { skills } from './pim/api/skills';
+import { workShifts } from './admin/api/workShifts';
+import { optionalFields } from './pim/api/optionalFields';
+import { customFields } from './pim/api/customFields';
+import { reportingMethods } from './pim/api/reportingMethods';
 
 import { auth } from './auth';
 import { addEmployee } from './pim/frontend/add-employee';
@@ -29,8 +33,13 @@ import { adminPayGrades } from './admin/frontend/payGrades';
 import { adminEmploymentStatus } from './admin/frontend/employmentStatus';
 import { adminOrganizationStructure } from './admin/frontend/organizationStructure';
 import { adminSystemUsers } from './admin/frontend/systemUsers';
+import { adminWorkShifts } from './admin/frontend/workShifts';
 import { directory } from './directory/frontend/directory';
-import  { myTackers } from './performance/frontend/myTrackers'
+import { attendance } from './time/frontend/attendance';
+import  { myTrackers } from './performance/frontend/myTrackers'
+import { optionalFields as optionalFieldsFrontend } from './pim/frontend/optionalFields';
+import { customFields as customFieldsFrontend } from './pim/frontend/customFields';
+import { reportingMethods as reportingMethodsFrontend } from './pim/frontend/reportingMethods';
 
 import * as pimFrontendApi from './pim/frontend-api';
 
@@ -48,6 +57,10 @@ export const api = {
   leaveTypes,
   workweek,
   skills,
+  workShifts,
+  optionalFields,
+  customFields,
+  reportingMethods,
 };
 
 /** UI routes, URL patterns, and form sample values, grouped by module. */
@@ -63,8 +76,13 @@ export const frontend = {
   adminEmploymentStatus,
   adminOrganizationStructure,
   adminSystemUsers,
+  adminWorkShifts,
+  optionalFields: optionalFieldsFrontend,
+  customFields: customFieldsFrontend,
+  reportingMethods: reportingMethodsFrontend,
   directory,
-  myTackers
+  myTrackers,
+  attendance,
 };
 
 /** API payloads owned by frontend/UI tests (not master-data seeding). */

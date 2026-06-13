@@ -26,6 +26,12 @@ Generate Playwright tests for: `$ARGUMENTS`
 - Write the test file to `tests/<feature-name>.spec.js`
 - write the tests only for P0 and P1 if both together there are more than 12 test cases. If its less than 12 write test cases for P0, P1 and P2. Do not write unit or integration tests 
 - Always try to add new test data instead of existing data, if you need to use existing data, make sure it is not used by other tests to avoid flaky tests, if you need to use existing data, always ask the end user about it and wait for their confirmation before using it
+- Creates separate, self-contained automated test cases for each prioritized test scenario, ensuring clear coverage, maintainability, and accurate test reporting. Never do as follows.
+    * E2E coverage for Add Work Shift (Admin → Job → Work Shifts) — P0 + P1 + P2.
+    * Covers: TC-001 (+500/504), TC-300 (+301), TC-200, TC-202,
+    *         TC-002 (+102/302/505), TC-100 (+303), TC-003 (+004/501/405), TC-502,
+    *         TC-503 (route-mocked empty list).
+
 
 
 ### Step 2: Validate in Real Browser
