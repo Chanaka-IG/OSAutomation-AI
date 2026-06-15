@@ -42,8 +42,11 @@ import { SystemUsersPage } from '../pages/admin/SystemUsersPage';
 import { WorkShiftsPage } from '../pages/admin/WorkShiftsPage';
 import { DirectoryPage } from '../pages/directory/DirectoryPage';
 import { MyTrackersPage } from '../pages/performance/MyTrackersPage'
-import { PunchPage } from '../pages/attendance/PunchPage';
-import { MyAttendanceRecordsPage } from '../pages/attendance/MyAttendanceRecordsPage';
+import { PunchPage } from '../pages/time/PunchPage';
+import { MyAttendanceRecordsPage } from '../pages/time/MyAttendanceRecordsPage';
+import { EmployeeAttendanceRecordsPage } from '../pages/time/EmployeeAttendanceRecordsPage';
+import { AttendanceConfigPage } from '../pages/time/AttendanceConfigPage';
+import { ProjectsPage } from '../pages/time/ProjectsPage';
 
 
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
@@ -84,6 +87,9 @@ export type OrangehrmFixtures = {
   myTrackersPage: MyTrackersPage;
   punchPage: PunchPage;
   myAttendanceRecordsPage: MyAttendanceRecordsPage;
+  employeeAttendanceRecordsPage: EmployeeAttendanceRecordsPage;
+  attendanceConfigPage: AttendanceConfigPage;
+  projectsPage: ProjectsPage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
   orangehrmApiContext: APIRequestContext;
   orangehrmAdminApi: OrangehrmAdminApi;
@@ -241,6 +247,18 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
 
   myAttendanceRecordsPage: async ({ page }, use) => {
     await use(new MyAttendanceRecordsPage(page));
+  },
+
+  employeeAttendanceRecordsPage: async ({ page }, use) => {
+    await use(new EmployeeAttendanceRecordsPage(page));
+  },
+
+  attendanceConfigPage: async ({ page }, use) => {
+    await use(new AttendanceConfigPage(page));
+  },
+
+  projectsPage: async ({ page }, use) => {
+    await use(new ProjectsPage(page));
   },
 
   orangehrmApiContext: async ({ playwright }, use) => {

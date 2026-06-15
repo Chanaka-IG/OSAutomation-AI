@@ -42,7 +42,7 @@ export const myTrackers = {
     userRoleId: 2,
   },
   ],
-  trackerData: {
+  trackerDataFrontend: {
     name: "Jacob - Tracker"
   },
   myTrackerUI: {
@@ -52,5 +52,10 @@ export const myTrackers = {
     log: "This is a positive logs",
     type: "positive",
     Comment: "Positive comment added"
+  },
+    negativeLog: {
+    log: "This is a negative logs",
+    type: "negative",
+    Comment: "Negative comment added"
   },
 } as const;
