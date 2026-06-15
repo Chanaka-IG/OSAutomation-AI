@@ -53,6 +53,21 @@ export class AttendanceApi extends BaseApiService {
     return ((await res.json()) as { data: AttendanceConfigs }).data;
   }
 
+  /**
+   * Writes the full attendance config (all three booleans). The config is a global singleton — callers
+   * MUST capture the prior value via {@link getConfigs} and restore it after the test.
+   */
+  async setConfigs(config: AttendanceConfigs): Promise<void> {
+    const res = await this.put(`${attendance.apiBaseUrl}${attendance.apiPaths.configs}`, {
+      headers: JSON_HEADERS,
+      data: config,
+    });
+    if (!res.ok()) {
+      throw new Error(`AttendanceApi.setConfigs failed: HTTP ${res.status()}\n${(await res.text()).slice(0, 400)}`);
+    }
+    log.info('Attendance config updated', config);
+  }
+
   /** Server's current UTC date/time — the anchor for UTC punch payloads. */
   async getCurrentDateTime(): Promise<{ utcDate: string; utcTime: string }> {
     const res = await this.get(`${attendance.apiBaseUrl}${attendance.apiPaths.currentDateTime}`, {
@@ -78,6 +93,30 @@ export class AttendanceApi extends BaseApiService {
     return (await this.getLatest())?.state.id ?? null;
   }
 
+  /**
+   * Records for the session employee on a given date (the My Records query).
+   * Returns the rows plus the server-computed `total` count and `sumLabel`
+   * ("Total Duration (Hours)") so tests can compare the rendered UI to the contract.
+   */
+  async getRecordsByDate(
+    date: string,
+  ): Promise<{ data: unknown[]; total: number; sumLabel: string }> {
+    const url = `${attendance.apiBaseUrl}${attendance.apiPaths.records}?limit=50&offset=0&date=${date}`;
+    const res = await this.get(url, { headers: JSON_HEADERS });
+    if (!res.ok()) {
+      throw new Error(`AttendanceApi.getRecordsByDate failed: HTTP ${res.status()}`);
+    }
+    const json = (await res.json()) as {
+      data: unknown[];
+      meta: { total: number; sum: { label: string } };
+    };
+    return {
+      data: json.data ?? [],
+      total: json.meta?.total ?? 0,
+      sumLabel: json.meta?.sum?.label ?? '0.00',
+    };
+  }
+
   async punchIn(note = ''): Promise<void> {
     const { utcDate, utcTime } = await this.getCurrentDateTime();
     const res = await this.post(`${attendance.apiBaseUrl}${attendance.apiPaths.records}`, {
@@ -100,6 +139,22 @@ export class AttendanceApi extends BaseApiService {
       throw new Error(`AttendanceApi.punchOut failed: HTTP ${res.status()}\n${(await res.text()).slice(0, 400)}`);
     }
     log.info('Punched out (API/UTC)', { note });
+  }
+
+  /**
+   * Employee Records summary for a date: one entry per employee with their day total, plus the
+   * server `total` (employee count). Used to compare the rendered roster/count to the contract.
+   */
+  async getEmployeeSummary(
+    date: string,
+  ): Promise<{ data: unknown[]; total: number }> {
+    const url = `${attendance.apiBaseUrl}${attendance.apiPaths.employeesSummary}?limit=50&offset=0&date=${date}`;
+    const res = await this.get(url, { headers: JSON_HEADERS });
+    if (!res.ok()) {
+      throw new Error(`AttendanceApi.getEmployeeSummary failed: HTTP ${res.status()}`);
+    }
+    const json = (await res.json()) as { data: unknown[]; meta: { total: number } };
+    return { data: json.data ?? [], total: json.meta?.total ?? 0 };
   }
 
   /** Guarantees the session employee is NOT punched in (closes an open record if present). */

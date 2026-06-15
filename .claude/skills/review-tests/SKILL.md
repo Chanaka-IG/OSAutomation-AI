@@ -26,6 +26,7 @@ If none specified, review all `tests/*.spec.js`.
 4. Cross-reference domain assertions with the domain skill
 5. Report with exact line numbers, code quotes, and fixes
 6. Most of the time end user will provide the spec file to review. But You have to review every other imported files inside the spec file as well.
+7. Strictly check whther the folder structure has been changed with new changes. Folder structure must be same through out the project
 
 ## Output Format
 For each file:

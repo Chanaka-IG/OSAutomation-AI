@@ -24,6 +24,8 @@ export const attendance = {
     latest: '/web/index.php/api/v2/attendance/records/latest',
     currentDateTime: '/web/index.php/api/v2/attendance/current-datetime',
     configs: '/web/index.php/api/v2/attendance/configs',
+    /** Employee Records summary (one entry per employee with their day total). */
+    employeesSummary: '/web/index.php/api/v2/attendance/employees/summary',
   },
   /** OrangeHRM origin only (from `BASE_URL` / `env.baseURL`). */
   get apiBaseUrl(): string {
@@ -36,6 +38,14 @@ export const attendance = {
     /** Admin-only screens — asserted ABSENT for ESS denial checks. */
     configuration: 'Attendance Configuration',
     employeeRecords: 'Employee Attendance Records',
+  },
+  /** Attendance Configuration toggle labels (exact, verified live). */
+  config: {
+    labels: {
+      changeTime: 'Employee can change current time when punching in/out',
+      modifyOwn: 'Employee can edit/delete own attendance records',
+      supervisorModify: 'Supervisor can add/edit/delete attendance records of subordinates',
+    },
   },
   /** UI strings verified live on the kord instance. */
   messages: {
@@ -53,5 +63,24 @@ export const attendance = {
     alreadyInNote: 'PIO already-in',
     /** Note used by the API state-reset punch-out. */
     resetNote: 'PIO reset',
+    /** My Records note prefixes (unique suffix appended per test). */
+    myRecordsInNote: 'MR in',
+    myRecordsOutNote: 'MR out',
+    /** A date guaranteed to have no records for any employee — used for empty-state checks. */
+    emptyDate: '2015-06-14',
+  },
+  /**
+   * Stable seeded master-data employees referenced by Employee Records tests.
+   * `option` is the autocomplete label (full name w/ middle); `summaryName` is the list label.
+   * Ruwan Kumara (empNumber 1) is the account the admin login maps to.
+   */
+  employees: {
+    ruwan: { empNumber: 1, name: 'Ruwan Kumara' },
+    marcus: {
+      empNumber: 2,
+      query: 'Marcus',
+      option: 'Marcus James Chen',
+      summaryName: 'Marcus Chen',
+    },
   },
 } as const;

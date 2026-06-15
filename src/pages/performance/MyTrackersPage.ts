@@ -24,7 +24,7 @@ export class MyTrackersPage extends BasePage {
     }
 
     async viewTracker(trackerName: string): Promise<void> {
-        const row = this.page.locator('.orangehrm-container').filter({ hasText: trackerName })
+        const row = this.page.locator('.orangehrm-container').filter({hasText : new RegExp(`^${trackerName}$`)})
         await row.getByRole('button', { name: 'View' }).click();
     }
 
@@ -82,5 +82,11 @@ export class MyTrackersPage extends BasePage {
             logBody,
             date
         };
+    }
+
+    async clickEditLog(logData:string): Promise<void>{
+        const logArea = this.page.locator('.oxd-table-row').filter({hasText : new RegExp(`^${logData}$`)});
+        await logArea.locator('.bi-three-dots-vertical').click();
+        await logArea.getByText('Edit', {exact: true}).click();
     }
 }

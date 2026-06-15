@@ -31,7 +31,7 @@ Generate Playwright tests for: `$ARGUMENTS`
     * Covers: TC-001 (+500/504), TC-300 (+301), TC-200, TC-202,
     *         TC-002 (+102/302/505), TC-100 (+303), TC-003 (+004/501/405), TC-502,
     *         TC-503 (route-mocked empty list).
-
+- Strictly follow the folder strucuture when creating new files
 
 
 ### Step 2: Validate in Real Browser

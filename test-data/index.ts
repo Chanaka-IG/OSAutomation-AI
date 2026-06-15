@@ -21,6 +21,7 @@ import { workShifts } from './admin/api/workShifts';
 import { optionalFields } from './pim/api/optionalFields';
 import { customFields } from './pim/api/customFields';
 import { reportingMethods } from './pim/api/reportingMethods';
+import  { trackers } from './performance/api/myTrackers'
 
 import { auth } from './auth';
 import { addEmployee } from './pim/frontend/add-employee';
@@ -36,6 +37,7 @@ import { adminSystemUsers } from './admin/frontend/systemUsers';
 import { adminWorkShifts } from './admin/frontend/workShifts';
 import { directory } from './directory/frontend/directory';
 import { attendance } from './time/frontend/attendance';
+import { projects as timeProjects } from './time/frontend/projects';
 import  { myTrackers } from './performance/frontend/myTrackers'
 import { optionalFields as optionalFieldsFrontend } from './pim/frontend/optionalFields';
 import { customFields as customFieldsFrontend } from './pim/frontend/customFields';
@@ -61,6 +63,7 @@ export const api = {
   optionalFields,
   customFields,
   reportingMethods,
+  trackers
 };
 
 /** UI routes, URL patterns, and form sample values, grouped by module. */
@@ -83,6 +86,7 @@ export const frontend = {
   directory,
   myTrackers,
   attendance,
+  projects: timeProjects,
 };
 
 /** API payloads owned by frontend/UI tests (not master-data seeding). */

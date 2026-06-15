@@ -1,7 +1,7 @@
 import { test, expect } from '../../src/fixtures/apiAction';
 import { env } from '../../src/config/env';
-import { frontend } from '../../test-data'; 3
-
+import { frontend } from '../../test-data';
+import { api } from '../../test-data';
 
 test.describe.configure({ timeout: 180_000 });
 
@@ -43,12 +43,21 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees
     }
 
     if (essEmpNumber !== undefined && supervisorEmpNumber !== undefined) {
-        const trackerData = {
-            trackerName: frontend.myTrackers.trackerData.name,
+        const trackerDataFrontend = {
+            trackerName: frontend.myTrackers.trackerDataFrontend.name,
             empNumber: essEmpNumber,
             reviewerEmpNumbers: [supervisorEmpNumber]
         }
-        await myTracker.createIfAbsent(trackerData);
+        const trackerDataApi = {
+            trackerName: api.trackers.trackerDataApi.name,
+            empNumber: essEmpNumber,
+            reviewerEmpNumbers: [supervisorEmpNumber]
+        }
+        await myTracker.createIfAbsent(trackerDataFrontend);
+        await myTracker.createIfAbsent(trackerDataApi);
+        await orangehrmAdminApi.logout();
+        await orangehrmAdminApi.loginAsESS(frontend.myTrackers.employees[1].username, frontend.myTrackers.employees[1].password);
+        await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.positiveLog);
     }
 })
 
@@ -65,12 +74,12 @@ test.describe('Test cases for my Trackers', () => {
         expect(page).toHaveURL(frontend.myTrackers.routes.myTrackerList)
     })
     test('**TC-002** | Open a tracker and view its logs', async ({ myTrackersPage }) => {
-        await myTrackersPage.viewTracker(frontend.myTrackers.trackerData.name);
+        await myTrackersPage.viewTracker(frontend.myTrackers.trackerDataFrontend.name);
         await myTrackersPage.validateTitle(frontend.myTrackers.myTrackerUI.title)
     })
-    test.only('**TC-004** | Add a Positive log to own tracker', async ({ myTrackersPage }) => {
+    test('**TC-004** | Add a Positive log to own tracker', async ({ myTrackersPage }) => {
         const fullName = `${frontend.myTrackers.employees[1].firstName} ${frontend.myTrackers.employees[1].lastName}`;
-        await myTrackersPage.viewTracker(frontend.myTrackers.trackerData.name);
+        await myTrackersPage.viewTracker(frontend.myTrackers.trackerDataFrontend.name);
         await myTrackersPage.clickAddLog()
         await myTrackersPage.fillLog(frontend.myTrackers.positiveLog)
         await myTrackersPage.clickSaveLogBtn()
@@ -81,6 +90,12 @@ test.describe('Test cases for my Trackers', () => {
         expect(logData.reviewerName).toContain(fullName)
         expect(logData.logBody).toContain(frontend.myTrackers.positiveLog.Comment)
         expect(logData.date).toContain(today)
+    })
+    //Covering TC-005 and TC-006
+    test.only('**TC-007** | Edit own log ', async ({ myTrackersPage }) => {
+        await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
+        await myTrackersPage.clickEditLog(api.trackers.positiveLog.log);
+
     })
 
 })
