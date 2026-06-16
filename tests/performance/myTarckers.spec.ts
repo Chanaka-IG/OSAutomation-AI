@@ -64,19 +64,22 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees
 
 test.describe('Test cases for my Trackers', () => {
 
-    const today = new Date().toISOString().split('T')[0];
+    // Anchored to the server clock at runtime (not the runner's UTC clock at collection time)
+    // so it matches the date the app renders for a just-created log.
+    let today: string;
 
-    test.beforeEach(async ({ myTrackersPage, page }) => {
+    test.beforeEach(async ({ myTrackersPage, page, myTracker }) => {
+        today = await myTracker.getServerDate();
         await myTrackersPage.loginWithCredentials(frontend.myTrackers.employees[1].username, frontend.myTrackers.employees[1].password);
         await page.goto(frontend.myTrackers.routes.myTrackerList)
     })
 
     test('**TC-001** | ESS views the My Trackers list ', async ({ page }) => {
-        expect(page).toHaveURL(frontend.myTrackers.routes.myTrackerList)
+        await expect(page).toHaveURL(new RegExp(frontend.myTrackers.routes.myTrackerList))
     })
     test('**TC-002** | Open a tracker and view its logs', async ({ myTrackersPage }) => {
         await myTrackersPage.viewTracker(frontend.myTrackers.trackerDataFrontend.name);
-        await myTrackersPage.validateTitle(frontend.myTrackers.myTrackerUI.title)
+        await expect(myTrackersPage.listTitle).toHaveText(frontend.myTrackers.myTrackerUI.title);
     })
     test('**TC-004** | Add a Positive log to own tracker', async ({ myTrackersPage }) => {
         const fullName = `${frontend.myTrackers.employees[1].firstName} ${frontend.myTrackers.employees[1].lastName}`;
@@ -108,14 +111,28 @@ test.describe('Test cases for my Trackers', () => {
         expect(logData.date).toContain(today)
 
     })
-    test.only('****TC-008** | Delete own log', async ({ myTrackersPage }) => {
+    test('**TC-008** | Delete own log', async ({ myTrackersPage }) => {
         const fullName = `${frontend.myTrackers.employees[1].firstName} ${frontend.myTrackers.employees[1].lastName}`;
         await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
         await myTrackersPage.clickDeleteLog(api.trackers.logForDelete.log);
         await myTrackersPage.clickYesDeleteBtn()
         await myTrackersPage.verifySuccessToastforDeletion();
-        expect (await myTrackersPage.validateListAfterDelete(api.trackers.logForDelete.log)).toHaveCount(0);
+        await expect(myTrackersPage.logRowByText(api.trackers.logForDelete.log)).toHaveCount(0);
     })
 
+    test('**TC-403** | XSS / special chars escaped on display', async ({ myTrackersPage }) => {
+        const fullName = `${frontend.myTrackers.employees[1].firstName} ${frontend.myTrackers.employees[1].lastName}`;
+        await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
+        await myTrackersPage.clickAddLog()
+        await myTrackersPage.fillLog(frontend.myTrackers.xssTest);
+        await myTrackersPage.clickSaveLogBtn()
+        await myTrackersPage.verifySuccessToastForSave();
+        await myTrackersPage.waitUntilTableLoaderDissapear();
+        const logData = await myTrackersPage.getLogDetails(frontend.myTrackers.xssTest.log)
+        expect(logData.logTitle).toContain(frontend.myTrackers.xssTest.log)
+        expect(logData.reviewerName).toContain(fullName)
+        expect(logData.logBody).toContain(frontend.myTrackers.xssTest.Comment)
+        expect(logData.date).toContain(today)
+    })
 })
 

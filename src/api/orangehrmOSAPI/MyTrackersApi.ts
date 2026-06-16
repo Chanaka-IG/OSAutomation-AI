@@ -3,7 +3,7 @@ import { trackers as myTrackersData } from '../../../test-data/performance/api/m
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 
-const log = createLogger('PayGradesApi');
+const log = createLogger('MyTrackerAPI');
 
 
 export class MyTrackersApi extends BaseApiService {
@@ -40,11 +40,27 @@ export class MyTrackersApi extends BaseApiService {
 
         if (!response.ok()) {
             throw new Error(
-                `LeaveRequestsApi.apply failed: HTTP ${response.status()}}`,
+                `My Tracker apply failed: HTTP ${response.status()}}`,
             );
 
         }
         log.info(`My Tracker successfully added: ${payload.trackerName}`);
+    }
+
+    /**
+     * Server's current date (`YYYY-MM-DD`) from the attendance current-datetime endpoint.
+     * Prefers the display-timezone date (`userDate`) and falls back to `utcDate`, so log-date
+     * assertions match what the app renders for a just-created log — not the test runner's UTC clock.
+     */
+    async getServerDate(): Promise<string> {
+        const response = await this.get('/web/index.php/api/v2/attendance/current-datetime', {
+            headers: { Accept: 'application/json' },
+        })
+        if (!response.ok()) {
+            throw new Error(`Failed to retrieve server date: HTTP ${response.status()}`)
+        }
+        const json = (await response.json()) as { data: { utcDate: string; userDate?: string } };
+        return json.data.userDate ?? json.data.utcDate;
     }
 
     async getTrackerIdByName(trackerName: string): Promise<number | undefined> {
@@ -58,20 +74,39 @@ export class MyTrackersApi extends BaseApiService {
         return json.data?.find((tracker) => tracker.trackerName === trackerName)?.id;
     }
 
+    async getLogs(id: number | undefined): Promise<Array<{ id: number; log: string }>> {
+        const response = await this.get(`/web/index.php/api/v2/performance/trackers/${id}/logs`, {
+            headers: { Accept: 'application/json' },
+        })
+        if (!response.ok()) {
+            throw new Error(`Failed to retrieve logs for tracker ${id}: HTTP ${response.status()}`)
+        }
+        const json = (await response.json()) as { data: Array<{ id: number; log: string }> };
+        return json.data ?? [];
+    }
+
     async addLog(id: number | undefined, payload : MyLogSeed): Promise<void> {
         const response = await this.post(`/web/index.php/api/v2/performance/trackers/${id}/logs`, {
             data: payload
         })
         if (!response.ok()) {
-            console.log(await response.text())
             log.error(`Employee tracker log add failed`)
             throw new Error(`Failed to add the log: HTTP ${response.status()}`)
         }
         log.info(`Successfully added the log`)
     }
 
+    async addLogIfAbsent(id: number | undefined, payload : MyLogSeed): Promise<void> {
+        const all = await this.getLogs(id);
+        if (all.some((l) => l.log === payload.log)) {
+            log.info(`Tracker log already exist, skipping: ${payload.log}`);
+            return;
+        }
+        await this.addLog(id, payload);
+    }
+
     async addLogAsESS(trackerName: string, payload : MyLogSeed): Promise<void> {
         const id = await this.getTrackerIdByName(trackerName);
-        await this.addLog(id, payload)
+        await this.addLogIfAbsent(id, payload)
     }
 }

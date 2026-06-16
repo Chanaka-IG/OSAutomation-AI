@@ -179,5 +179,7 @@ export abstract class BasePage {
     return jobTitles.map(text => text.trim());
   }
 
+  
+
 }
 

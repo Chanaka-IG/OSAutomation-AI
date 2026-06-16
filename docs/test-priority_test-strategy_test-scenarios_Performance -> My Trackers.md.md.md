@@ -37,7 +37,6 @@ Generation order recommendation: **P0 → P1 → P2 → P3**. The 3 Enterprise/A
 | **TC-006** | Add a General Comments log | Same as TC-005 — the third achievement category must persist and classify correctly. Primary path. |
 | **TC-007** | Edit own log | Core CRUD; correcting a self-logged entry is a common, expected action. High reach, no real workaround (delete+recreate loses date/attribution). |
 | **TC-008** | Delete own log | Core CRUD; removing an erroneous entry. High reach; data-integrity-adjacent (must actually remove). |
-| **TC-104** | Achievement options = the 3 seeded values | Drives every create/edit. If the dropdown offers wrong/missing options, all logging is mis-classified. Gates the primary write form. |
 | **TC-403** | XSS / special chars escaped on display | **Stored-XSS** surface: a malicious log/comment renders to the employee *and* reviewers/admins. Security concern → would normally be P0, held at P1 because Vue/OXD escapes by default (low likelihood) and the storage round-trip is also covered at API. Still high-impact if it regresses. |
 | **TC-503** | Add Log form fields + inline validation | The consolidated UI gate that prevents empty/invalid submissions reaching the backend; protects data quality on the primary write path. High impact, broad reach. |
 | **TC-504** | Success toast on add / edit / delete | The confirmation signal for **every** write action — high user reach. Its absence breaks the team's standard "assert on toast" success contract across all CRUD tests. |
