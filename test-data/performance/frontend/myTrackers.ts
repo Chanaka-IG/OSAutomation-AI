@@ -58,4 +58,9 @@ export const myTrackers = {
     type: "negative",
     Comment: "Negative comment added"
   },
+    updateLog: {
+    log: "This is the updated logs",
+    type: "negative",
+    Comment: "Comment updated"
+  },
 } as const;

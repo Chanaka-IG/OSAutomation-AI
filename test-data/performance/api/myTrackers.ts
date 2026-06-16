@@ -42,6 +42,11 @@ export const trackers = {
         achievement: 2,
         comment: "Negative comment added"
     },
+    logForDelete: {
+        log: "Delete log via API",
+        achievement: 1,
+        comment: "Delete log comment added"
+    },
     trackerDataApi: {
         name: "Jacob - Tracker via API"
     },

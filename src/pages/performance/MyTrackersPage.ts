@@ -10,6 +10,7 @@ export class MyTrackersPage extends BasePage {
     readonly postiveBtn: Locator;
     readonly negativeBtn: Locator;
     readonly saveBtn: Locator;
+    readonly yesDeleteBtn: Locator;
 
 
     constructor(page: Page) {
@@ -21,10 +22,13 @@ export class MyTrackersPage extends BasePage {
         this.postiveBtn = this.page.getByRole('button', { name: 'Positive' })
         this.negativeBtn = this.page.getByRole('button', { name: 'Negative' })
         this.saveBtn = this.page.getByRole('button', { name: 'Save' })
+        this.yesDeleteBtn = this.page.getByRole('button', { name: ' Yes, Delete ' })
     }
 
     async viewTracker(trackerName: string): Promise<void> {
-        const row = this.page.locator('.orangehrm-container').filter({hasText : new RegExp(`^${trackerName}$`)})
+        const row = this.page.getByRole('row').filter({
+            has: this.page.getByRole('cell', { name: trackerName, exact: true })
+        })
         await row.getByRole('button', { name: 'View' }).click();
     }
 
@@ -37,9 +41,11 @@ export class MyTrackersPage extends BasePage {
     }
 
     async fillLog(logData: PositiveLog): Promise<void> {
-        await this.page.locator('.oxd-sheet').waitFor({ state: 'visible' })
-        await this.logInput.fill(logData.log)
-
+        await this.page.locator('.orangehrm-modal-header').waitFor({ state: 'visible' })
+        await this.logInput.waitFor({ state: 'visible' }).then(async () => {
+            await this.logInput.click()
+            await this.logInput.fill(logData.log)
+        })
         if (logData.type === "positive") {
             await this.postiveBtn.click();
         }
@@ -55,7 +61,7 @@ export class MyTrackersPage extends BasePage {
 
     async getLogDetails(logData: string): Promise<LogData> {
 
-        const logArea = this.page.locator('.oxd-sheet').filter({hasText : logData});
+        const logArea = this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData });
         const reviewerName = (await logArea
             .locator('.orangehrm-employee-tracker-log-reviewer-name')
             .textContent())?.trim();
@@ -69,7 +75,7 @@ export class MyTrackersPage extends BasePage {
             .textContent())?.trim();
 
         const date = (await logArea
-            .locator('.orangehrm-employee-tracker-log-reviewer-date-container')
+            .locator('.orangehrm-employee-tracker-log-reviewer-date-container').first()
             .textContent())?.trim();
 
         if (!reviewerName || !logTitle || !logBody || !date) {
@@ -84,9 +90,22 @@ export class MyTrackersPage extends BasePage {
         };
     }
 
-    async clickEditLog(logData:string): Promise<void>{
-        const logArea = this.page.locator('.oxd-table-row').filter({hasText : new RegExp(`^${logData}$`)});
-        await logArea.locator('.bi-three-dots-vertical').click();
-        await logArea.getByText('Edit', {exact: true}).click();
+    async clickEditLog(logData: string): Promise<void> {
+        const logArea = this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData }).first();
+        await logArea.locator('.oxd-table-dropdown button').click();
+        await logArea.getByText('Edit', { exact: true }).click();
+    }
+
+    async clickDeleteLog(logData: string): Promise<void> {
+        const logArea = this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData }).first();
+        await logArea.locator('.oxd-table-dropdown button').click();
+        await logArea.getByText('Delete', { exact: true }).click();
+    }
+    async clickYesDeleteBtn(): Promise<void> {
+        await this.yesDeleteBtn.click();
+    }
+    async validateListAfterDelete(logData: string): Promise<Locator> {
+        const logArea = this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData }).first();
+        return logArea;
     }
 }
