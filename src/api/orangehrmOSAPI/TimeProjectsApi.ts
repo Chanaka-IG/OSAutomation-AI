@@ -121,4 +121,37 @@ export class TimeProjectsApi extends BaseApiService {
     const ids = all.filter((p) => names.includes(p.name)).map((p) => p.id);
     await this.deleteProjects(ids);
   }
+
+  // ── Activities ───────────────────────────────────────────────────────────
+  /** Activities path is singular: `/api/v2/time/project/{id}/activities`. */
+  private activitiesPath(projectId: number): string {
+    return `${projectsData.apiBaseUrl}/web/index.php/api/v2/time/project/${projectId}/activities`;
+  }
+
+  async getActivities(projectId: number): Promise<{ id: number; name: string }[]> {
+    const res = await this.get(`${this.activitiesPath(projectId)}?limit=50&offset=0`, {
+      headers: JSON_HEADERS,
+    });
+    if (!res.ok()) throw new Error(`TimeProjectsApi.getActivities failed: HTTP ${res.status()}`);
+    return ((await res.json()) as { data: { id: number; name: string }[] }).data ?? [];
+  }
+
+  async createActivity(projectId: number, name: string): Promise<{ id: number; name: string }> {
+    const res = await this.post(this.activitiesPath(projectId), {
+      headers: JSON_HEADERS,
+      data: { name },
+    });
+    if (!res.ok()) {
+      throw new Error(`TimeProjectsApi.createActivity failed: HTTP ${res.status()}\n${(await res.text()).slice(0, 300)}`);
+    }
+    log.info('Activity created', { projectId, name });
+    return ((await res.json()) as { data: { id: number; name: string } }).data;
+  }
+
+  /** Returns an existing activity id by name on the project, or creates one. */
+  async ensureActivity(projectId: number, name: string): Promise<number> {
+    const existing = (await this.getActivities(projectId)).find((a) => a.name === name);
+    if (existing) return existing.id;
+    return (await this.createActivity(projectId, name)).id;
+  }
 }

@@ -3,7 +3,7 @@ import { env } from '../../src/config/env';
 import { frontend } from '../../test-data';
 import { api } from '../../test-data';
 
-test.describe.configure({ timeout: 180_000 });
+test.describe.configure({ timeout: 50_000 });
 
 test.beforeEach(() => {
     test.skip(!env.baseURL, 'Set BASE_URL to run this suite.');
@@ -58,6 +58,7 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees
         await orangehrmAdminApi.logout();
         await orangehrmAdminApi.loginAsESS(frontend.myTrackers.employees[1].username, frontend.myTrackers.employees[1].password);
         await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.positiveLog);
+        await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.logForDelete);
     }
 })
 
@@ -92,10 +93,28 @@ test.describe('Test cases for my Trackers', () => {
         expect(logData.date).toContain(today)
     })
     //Covering TC-005 and TC-006
-    test.only('**TC-007** | Edit own log ', async ({ myTrackersPage }) => {
+    test('**TC-007** | Edit own log ', async ({ myTrackersPage }) => {
+        const fullName = `${frontend.myTrackers.employees[1].firstName} ${frontend.myTrackers.employees[1].lastName}`;
         await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
         await myTrackersPage.clickEditLog(api.trackers.positiveLog.log);
+        await myTrackersPage.fillLog(frontend.myTrackers.updateLog);
+        await myTrackersPage.clickSaveLogBtn()
+        await myTrackersPage.verifySuccessToastForUpdate();
+        await myTrackersPage.waitUntilTableLoaderDissapear();
+        const logData = await myTrackersPage.getLogDetails(frontend.myTrackers.updateLog.log)
+        expect(logData.logTitle).toContain(frontend.myTrackers.updateLog.log)
+        expect(logData.reviewerName).toContain(fullName)
+        expect(logData.logBody).toContain(frontend.myTrackers.updateLog.Comment)
+        expect(logData.date).toContain(today)
 
+    })
+    test.only('****TC-008** | Delete own log', async ({ myTrackersPage }) => {
+        const fullName = `${frontend.myTrackers.employees[1].firstName} ${frontend.myTrackers.employees[1].lastName}`;
+        await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
+        await myTrackersPage.clickDeleteLog(api.trackers.logForDelete.log);
+        await myTrackersPage.clickYesDeleteBtn()
+        await myTrackersPage.verifySuccessToastforDeletion();
+        expect (await myTrackersPage.validateListAfterDelete(api.trackers.logForDelete.log)).toHaveCount(0);
     })
 
 })

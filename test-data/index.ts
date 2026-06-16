@@ -38,6 +38,9 @@ import { adminWorkShifts } from './admin/frontend/workShifts';
 import { directory } from './directory/frontend/directory';
 import { attendance } from './time/frontend/attendance';
 import { projects as timeProjects } from './time/frontend/projects';
+import { timesheets as timeTimesheets } from './time/frontend/timesheets';
+import { employeeTimesheets as timeEmployeeTimesheets } from './time/frontend/employeeTimesheets';
+import { timesheetLifecycle as timeTimesheetLifecycle } from './time/frontend/timesheetLifecycle';
 import  { myTrackers } from './performance/frontend/myTrackers'
 import { optionalFields as optionalFieldsFrontend } from './pim/frontend/optionalFields';
 import { customFields as customFieldsFrontend } from './pim/frontend/customFields';
@@ -87,6 +90,9 @@ export const frontend = {
   myTrackers,
   attendance,
   projects: timeProjects,
+  timesheets: timeTimesheets,
+  employeeTimesheets: timeEmployeeTimesheets,
+  timesheetLifecycle: timeTimesheetLifecycle,
 };
 
 /** API payloads owned by frontend/UI tests (not master-data seeding). */
