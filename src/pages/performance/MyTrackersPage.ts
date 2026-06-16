@@ -63,15 +63,15 @@ export class MyTrackersPage extends BasePage {
 
         const logArea = this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData });
         const reviewerName = (await logArea
-            .locator('.orangehrm-employee-tracker-log-reviewer-name')
+            .locator('.orangehrm-employee-tracker-log-reviewer-name').first()
             .textContent())?.trim();
 
         const logTitle = (await logArea
-            .locator('.orangehrm-employee-tracker-log-title-text')
+            .locator('.orangehrm-employee-tracker-log-title-text').first()
             .textContent())?.trim();
 
         const logBody = (await logArea
-            .locator('.orangehrm-employee-tracker-log-body')
+            .locator('.orangehrm-employee-tracker-log-body').first()
             .textContent())?.trim();
 
         const date = (await logArea
@@ -104,8 +104,10 @@ export class MyTrackersPage extends BasePage {
     async clickYesDeleteBtn(): Promise<void> {
         await this.yesDeleteBtn.click();
     }
-    async validateListAfterDelete(logData: string): Promise<Locator> {
-        const logArea = this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData }).first();
-        return logArea;
+    logRowByText(logData: string): Locator {
+        return this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData });
     }
+
+    
+    
 }

@@ -6,10 +6,10 @@ export interface PositiveLog {
 }
 
 export interface LogData {
-  reviewerName : string,
+  reviewerName: string,
   logTitle: string,
   logBody: string,
-  date : string,
+  date: string,
 }
 
 export const myTrackers = {
@@ -53,14 +53,19 @@ export const myTrackers = {
     type: "positive",
     Comment: "Positive comment added"
   },
-    negativeLog: {
+  negativeLog: {
     log: "This is a negative logs",
     type: "negative",
     Comment: "Negative comment added"
   },
-    updateLog: {
+  updateLog: {
     log: "This is the updated logs",
     type: "negative",
     Comment: "Comment updated"
+  },
+  xssTest: {
+    log: "<script>alert('Log')</script>",
+    type: "positive",
+    Comment: "<script>alert('Comment XSS')</script>"
   },
 } as const;
