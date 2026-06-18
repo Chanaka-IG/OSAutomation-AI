@@ -1,4 +1,4 @@
-import type { MyTrackerSeed,MyLogSeed } from '../../../test-data/performance/api/myTrackers';
+import type { MyTrackerSeed, MyLogSeed } from '../../../test-data/performance/api/myTrackers';
 import { trackers as myTrackersData } from '../../../test-data/performance/api/myTrackers';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
@@ -63,7 +63,18 @@ export class MyTrackersApi extends BaseApiService {
         return json.data.userDate ?? json.data.utcDate;
     }
 
-    async getTrackerIdByName(trackerName: string): Promise<number | undefined> {
+    async getTrackerIdByNameForAdminLogs(trackerName: string): Promise<number | undefined> {
+        const response = await this.get(myTrackersData.adminPathForTrackerRetriew, {
+            headers: { Accept: 'application/json' },
+        })
+        if (!response.ok()) {
+            throw new Error(`Failed to retrieve data from My Tracker list: HTTP ${response.status()}`)
+        }
+        const json = (await response.json()) as { data: Array<{ id: number; title: string }> };
+        return json.data?.find((tracker) => tracker.title === trackerName)?.id;
+    }
+
+    async getTrackerIdByNameForESSLogs(trackerName: string): Promise<number | undefined> {
         const response = await this.get(myTrackersData.essPath, {
             headers: { Accept: 'application/json' },
         })
@@ -79,13 +90,13 @@ export class MyTrackersApi extends BaseApiService {
             headers: { Accept: 'application/json' },
         })
         if (!response.ok()) {
-            throw new Error(`Failed to retrieve logs for tracker ${id}: HTTP ${response.status()}`)
+            throw new Error(`Failed to retrieve logs for tracker ${id}: HTTP ${response.text()}`)
         }
         const json = (await response.json()) as { data: Array<{ id: number; log: string }> };
         return json.data ?? [];
     }
 
-    async addLog(id: number | undefined, payload : MyLogSeed): Promise<void> {
+    async addLog(id: number | undefined, payload: MyLogSeed): Promise<void> {
         const response = await this.post(`/web/index.php/api/v2/performance/trackers/${id}/logs`, {
             data: payload
         })
@@ -96,7 +107,7 @@ export class MyTrackersApi extends BaseApiService {
         log.info(`Successfully added the log`)
     }
 
-    async addLogIfAbsent(id: number | undefined, payload : MyLogSeed): Promise<void> {
+    async addLogIfAbsent(id: number | undefined, payload: MyLogSeed): Promise<void> {
         const all = await this.getLogs(id);
         if (all.some((l) => l.log === payload.log)) {
             log.info(`Tracker log already exist, skipping: ${payload.log}`);
@@ -105,8 +116,13 @@ export class MyTrackersApi extends BaseApiService {
         await this.addLog(id, payload);
     }
 
-    async addLogAsESS(trackerName: string, payload : MyLogSeed): Promise<void> {
-        const id = await this.getTrackerIdByName(trackerName);
+    async addLogAsAdmin(trackerName: string, payload: MyLogSeed): Promise<void> {
+        const id = await this.getTrackerIdByNameForAdminLogs(trackerName);
+        await this.addLogIfAbsent(id, payload)
+    }
+
+    async addLogAsESS(trackerName: string, payload: MyLogSeed): Promise<void> {
+        const id = await this.getTrackerIdByNameForESSLogs(trackerName);
         await this.addLogIfAbsent(id, payload)
     }
 }

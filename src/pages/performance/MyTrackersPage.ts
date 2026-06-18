@@ -107,7 +107,20 @@ export class MyTrackersPage extends BasePage {
     logRowByText(logData: string): Locator {
         return this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData });
     }
+    verifyInlineRequired(): [Locator, Locator] {
+        return [
+            this.page.locator('.oxd-form-row')
+                .filter({ hasText: 'Log' })
+                .getByText('Required', { exact: true }),
 
-    
-    
+            this.page.locator('.oxd-form-row')
+                .filter({ hasText: 'Comment' })
+                .getByText('Required', { exact: true })
+        ];
+
+    }
+    checkEditability(logData: string): Locator { 
+        const row = this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData });
+        return row.locator('.bi-three-dots-vertical')
+    }
 }

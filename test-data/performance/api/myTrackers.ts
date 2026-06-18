@@ -19,9 +19,11 @@ export const trackers = {
     },
 
     adminPath: '/web/index.php/api/v2/performance/config/trackers',
+    adminPathForTrackerRetriew: '/web/index.php/api/v2/performance/employees/trackers',
 
     /** ESS-accessible "My Trackers" endpoint (employee/reviewer scope). */
     essPath: '/web/index.php/api/v2/performance/trackers',
+    
 
     get adminUrl(): string {
         return `${this.orangehrmBaseURL}${this.adminPath}`;
@@ -49,5 +51,10 @@ export const trackers = {
     },
     trackerDataApi: {
         name: "Jacob - Tracker via API"
+    },
+    adminLog: {
+        log: "Log by Admin",
+        achievement: 2,
+        comment: "Log by Admin added"
     },
 }
