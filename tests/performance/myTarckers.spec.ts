@@ -55,6 +55,7 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees
         }
         await myTracker.createIfAbsent(trackerDataFrontend);
         await myTracker.createIfAbsent(trackerDataApi);
+        await myTracker.addLogAsAdmin(api.trackers.trackerDataApi.name, api.trackers.adminLog);
         await orangehrmAdminApi.logout();
         await orangehrmAdminApi.loginAsESS(frontend.myTrackers.employees[1].username, frontend.myTrackers.employees[1].password);
         await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.positiveLog);
@@ -66,10 +67,9 @@ test.describe('Test cases for my Trackers', () => {
 
     // Anchored to the server clock at runtime (not the runner's UTC clock at collection time)
     // so it matches the date the app renders for a just-created log.
-    let today: string;
+    const today = new Date().toISOString().split('T')[0];
 
     test.beforeEach(async ({ myTrackersPage, page, myTracker }) => {
-        today = await myTracker.getServerDate();
         await myTrackersPage.loginWithCredentials(frontend.myTrackers.employees[1].username, frontend.myTrackers.employees[1].password);
         await page.goto(frontend.myTrackers.routes.myTrackerList)
     })
@@ -81,7 +81,7 @@ test.describe('Test cases for my Trackers', () => {
         await myTrackersPage.viewTracker(frontend.myTrackers.trackerDataFrontend.name);
         await expect(myTrackersPage.listTitle).toHaveText(frontend.myTrackers.myTrackerUI.title);
     })
-    test('**TC-004** | Add a Positive log to own tracker', async ({ myTrackersPage }) => {
+    test('**TC-004** | Add a Positive log to own tracker | **TC-504** | Success toast on add / edit / delete | **TC-010** | Reviewer(s) + dates on tracker card', async ({ myTrackersPage }) => {
         const fullName = `${frontend.myTrackers.employees[1].firstName} ${frontend.myTrackers.employees[1].lastName}`;
         await myTrackersPage.viewTracker(frontend.myTrackers.trackerDataFrontend.name);
         await myTrackersPage.clickAddLog()
@@ -96,7 +96,7 @@ test.describe('Test cases for my Trackers', () => {
         expect(logData.date).toContain(today)
     })
     //Covering TC-005 and TC-006
-    test('**TC-007** | Edit own log ', async ({ myTrackersPage }) => {
+    test('**TC-007** | Edit own log **TC-504** | Success toast on add / edit / delete', async ({ myTrackersPage }) => {
         const fullName = `${frontend.myTrackers.employees[1].firstName} ${frontend.myTrackers.employees[1].lastName}`;
         await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
         await myTrackersPage.clickEditLog(api.trackers.positiveLog.log);
@@ -111,7 +111,7 @@ test.describe('Test cases for my Trackers', () => {
         expect(logData.date).toContain(today)
 
     })
-    test('**TC-008** | Delete own log', async ({ myTrackersPage }) => {
+    test('**TC-008** | Delete own log | **TC-504** | Success toast on add / edit / delete', async ({ myTrackersPage }) => {
         const fullName = `${frontend.myTrackers.employees[1].firstName} ${frontend.myTrackers.employees[1].lastName}`;
         await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
         await myTrackersPage.clickDeleteLog(api.trackers.logForDelete.log);
@@ -133,6 +133,20 @@ test.describe('Test cases for my Trackers', () => {
         expect(logData.reviewerName).toContain(fullName)
         expect(logData.logBody).toContain(frontend.myTrackers.xssTest.Comment)
         expect(logData.date).toContain(today)
+    })
+
+    test('**TC-503** | Add Log form fields + inline validation', async ({ myTrackersPage }) => {
+        await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
+        await myTrackersPage.clickAddLog()
+        await myTrackersPage.clickSaveLogBtn()
+        const [logValidation, commentValidation] = myTrackersPage.verifyInlineRequired();
+        await expect(logValidation).toBeVisible();
+        await expect(commentValidation).toBeVisible();
+    })
+
+    test.only('**TC-508** | Reviewer-authored logs read-only to the employee', async ({ myTrackersPage }) => {
+        await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
+        await expect(myTrackersPage.checkEditability(api.trackers.adminLog.log)).not.toBeVisible();
     })
 })
 

@@ -149,6 +149,13 @@ await expect(targetCard).toBeVisible({ timeout: 5000 });
 await expect(page.locator('#refund-spinner')).not.toBeVisible({ timeout: 6000 });
 ```
 
+### Playwright Assertions & Validation
+
+- Use locator-based assertions with await expect(locator)
+- Utilize auto-waiting and retry capabilities
+- Distinguish between locator assertions and value assertions
+- Implement stable UI validations with toHaveText, toHaveCount, toBeVisible, toBeHidden, etc.
+
 ---
 
 ## 5. Test Structure Patterns
