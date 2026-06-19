@@ -5,11 +5,19 @@ import { api } from '../../test-data';
 
 test.describe.configure({ timeout: 50_000 });
 
+// Backend log order for the TC-404 order tracker, snapshotted in beforeAll where the API context is
+// authenticated. The test-scoped myTracker fixture is unauthenticated inside a test body, so TC-404
+// asserts the rendered UI order against this snapshot rather than calling the API itself.
+let orderTrackerApiLogs: Array<{ id: number; log: string }> = [];
+
 test.beforeEach(() => {
     test.skip(!env.baseURL, 'Set BASE_URL to run this suite.');
 });
 
 test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees, myTracker }) => {
+
+    // First run seeds a dozen bulk logs over the network; give the hook headroom beyond the 30s default.
+    test.setTimeout(120_000);
 
     void masterDataReadiness;
 
@@ -53,13 +61,23 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees
             empNumber: essEmpNumber,
             reviewerEmpNumbers: [supervisorEmpNumber]
         }
+        const orderTracker = {
+            trackerName: api.trackers.orderTracker.name,
+            empNumber: essEmpNumber,
+            reviewerEmpNumbers: [supervisorEmpNumber]
+        }
         await myTracker.createIfAbsent(trackerDataFrontend);
         await myTracker.createIfAbsent(trackerDataApi);
+        await myTracker.createIfAbsent(orderTracker);
         await myTracker.addLogAsAdmin(api.trackers.trackerDataApi.name, api.trackers.adminLog);
         await orangehrmAdminApi.logout();
         await orangehrmAdminApi.loginAsESS(frontend.myTrackers.employees[1].username, frontend.myTrackers.employees[1].password);
         await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.positiveLog);
         await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.logForDelete);
+        await myTracker.addLogsIfAbsentAsESS(api.trackers.orderTracker.name, api.trackers.bulkLogs);
+
+        const orderTrackerId = await myTracker.getTrackerIdByNameForESSLogs(api.trackers.orderTracker.name);
+        orderTrackerApiLogs = await myTracker.getLogs(orderTrackerId);
     }
 })
 
@@ -144,9 +162,24 @@ test.describe('Test cases for my Trackers', () => {
         await expect(commentValidation).toBeVisible();
     })
 
-    test.only('**TC-508** | Reviewer-authored logs read-only to the employee', async ({ myTrackersPage }) => {
+    test('**TC-508** | Reviewer-authored logs read-only to the employee', async ({ myTrackersPage }) => {
         await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
         await expect(myTrackersPage.checkEditability(api.trackers.adminLog.log)).not.toBeVisible();
     })
+
 })
 
+test.describe("Test cases for Admin", () => {
+
+    const today = new Date().toISOString().split('T')[0];
+
+    test.beforeEach(async ({ myTrackersPage, page, myTracker }) => {
+        await myTrackersPage.loginAs('admin');
+        await page.goto(frontend.myTrackers.routes.myTrackerList)
+    })
+
+    test("Check the visibility of My Tracker as Admin user", async ({ page }) => {
+        await expect(page).toHaveURL(new RegExp(frontend.myTrackers.routes.myTrackerList))
+    })
+
+})

@@ -2,6 +2,7 @@ import type { MyTrackerSeed, MyLogSeed } from '../../../test-data/performance/ap
 import { trackers as myTrackersData } from '../../../test-data/performance/api/myTrackers';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
+import { Page } from '@playwright/test';
 
 const log = createLogger('MyTrackerAPI');
 
@@ -124,5 +125,22 @@ export class MyTrackersApi extends BaseApiService {
     async addLogAsESS(trackerName: string, payload: MyLogSeed): Promise<void> {
         const id = await this.getTrackerIdByNameForESSLogs(trackerName);
         await this.addLogIfAbsent(id, payload)
+    }
+
+    /**
+     * Add several logs to an ESS-owned tracker in order, skipping any that already exist.
+     * Resolves the tracker id once and adds sequentially so creation order (and therefore the
+     * newest-first display order) is deterministic across runs.
+     */
+    async addLogsIfAbsentAsESS(trackerName: string, payloads: MyLogSeed[]): Promise<void> {
+        const id = await this.getTrackerIdByNameForESSLogs(trackerName);
+        const existingTitles = new Set((await this.getLogs(id)).map((existing) => existing.log));
+        for (const payload of payloads) {
+            if (existingTitles.has(payload.log)) {
+                log.info(`Tracker log already exist, skipping: ${payload.log}`);
+                continue;
+            }
+            await this.addLog(id, payload);
+        }
     }
 }
