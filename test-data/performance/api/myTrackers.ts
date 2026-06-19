@@ -23,7 +23,10 @@ export const trackers = {
 
     /** ESS-accessible "My Trackers" endpoint (employee/reviewer scope). */
     essPath: '/web/index.php/api/v2/performance/trackers',
-    
+
+    /** Glob for the per-tracker logs endpoint (`.../trackers/{id}/logs`); used to route-mock the logs view. */
+    logsApiPattern: '**/api/v2/performance/trackers/*/logs**',
+
 
     get adminUrl(): string {
         return `${this.orangehrmBaseURL}${this.adminPath}`;
@@ -57,4 +60,17 @@ export const trackers = {
         achievement: 2,
         comment: "Log by Admin added"
     },
+    /** Dedicated tracker for TC-404 (many-logs ordering); kept separate so its bulk logs don't pollute other specs. */
+    orderTracker: {
+        name: "Jacob - Order Tracker via API"
+    },
+    /**
+     * Bulk logs for TC-404, seeded in creation order (01 -> 12). The OS My Trackers log view shows
+     * newest-created first, so the UI order is the reverse of this array.
+     */
+    bulkLogs: Array.from({ length: 12 }, (_, i) => ({
+        log: `Bulk log ${String(i + 1).padStart(2, '0')}`,
+        achievement: (i % 2) + 1,
+        comment: `Bulk comment ${i + 1}`,
+    })) as MyLogSeed[],
 }

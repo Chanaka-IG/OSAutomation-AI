@@ -11,6 +11,8 @@ export class MyTrackersPage extends BasePage {
     readonly negativeBtn: Locator;
     readonly saveBtn: Locator;
     readonly yesDeleteBtn: Locator;
+    readonly logTitles: Locator;
+    readonly paginationControl: Locator;
 
 
     constructor(page: Page) {
@@ -23,6 +25,8 @@ export class MyTrackersPage extends BasePage {
         this.negativeBtn = this.page.getByRole('button', { name: 'Negative' })
         this.saveBtn = this.page.getByRole('button', { name: 'Save' })
         this.yesDeleteBtn = this.page.getByRole('button', { name: ' Yes, Delete ' })
+        this.logTitles = this.page.locator('.orangehrm-employee-tracker-log-title-text')
+        this.paginationControl = this.page.locator('.oxd-pagination')
     }
 
     async viewTracker(trackerName: string): Promise<void> {
@@ -119,7 +123,7 @@ export class MyTrackersPage extends BasePage {
         ];
 
     }
-    checkEditability(logData: string): Locator { 
+    checkEditability(logData: string): Locator {
         const row = this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData });
         return row.locator('.bi-three-dots-vertical')
     }
