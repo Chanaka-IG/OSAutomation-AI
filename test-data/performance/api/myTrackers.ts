@@ -52,6 +52,11 @@ export const trackers = {
         achievement: 1,
         comment: "Delete log comment added"
     },
+    logForvalidateDeleteModal: {
+        log: "Log for validate delete modal",
+        achievement: 1,
+        comment: "Log for validate modal"
+    },
     trackerDataApi: {
         name: "Jacob - Tracker via API"
     },
@@ -63,6 +68,14 @@ export const trackers = {
     /** Dedicated tracker for TC-404 (many-logs ordering); kept separate so its bulk logs don't pollute other specs. */
     orderTracker: {
         name: "Jacob - Order Tracker via API"
+    },
+    validateDeleteModalContent: {
+        title: "Are you Sure?",
+        body: "The selected record will be permanently deleted. Are you sure you want to continue?"
+    },
+    lengthValidation: {
+        log: "Should not exceed 150 characters",
+        comment: "Should not exceed 3000 characters"
     },
     /**
      * Bulk logs for TC-404, seeded in creation order (01 -> 12). The OS My Trackers log view shows

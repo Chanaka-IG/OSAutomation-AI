@@ -74,6 +74,7 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees
         await orangehrmAdminApi.loginAsESS(frontend.myTrackers.employees[1].username, frontend.myTrackers.employees[1].password);
         await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.positiveLog);
         await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.logForDelete);
+        await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.logForvalidateDeleteModal);
         await myTracker.addLogsIfAbsentAsESS(api.trackers.orderTracker.name, api.trackers.bulkLogs);
 
         const orderTrackerId = await myTracker.getTrackerIdByNameForESSLogs(api.trackers.orderTracker.name);
@@ -167,7 +168,54 @@ test.describe('Test cases for my Trackers', () => {
         await expect(myTrackersPage.checkEditability(api.trackers.adminLog.log)).not.toBeVisible();
     })
 
-})
+    test('**TC-405** | Tracker with zero logs', async ({ myTrackersPage, page }) => {
+        await page.route(api.trackers.logsApiPattern, async route => {
+            if (route.request().method() === "GET") {
+                await route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify({ data: [], meta: { total: 0, positive: 0, negative: 0 }, rels: {} })
+                });
+                return;
+            }
+            await route.continue();
+        });
+        await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
+        await expect(myTrackersPage.validateEmptyLogText()).toBeVisible();
+    });
+
+    test('**TC-505** | Validate Delete confirmation dialog', async ({ myTrackersPage }) => {
+        await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
+        await myTrackersPage.clickDeleteLog(api.trackers.logForvalidateDeleteModal.log);
+        const deletModal = await myTrackersPage.validateDeleteModal();
+        expect(deletModal.title).toBe(api.trackers.validateDeleteModalContent.title);
+        expect(deletModal.body).toBe(api.trackers.validateDeleteModalContent.body);
+    })
+
+    test(' **TC-506** | Char-limit feedback in fields', async ({ myTrackersPage }) => {
+
+        const log = Array.from({ length: 151 }, () =>
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 52)]
+        ).join("");
+
+        const comment = Array.from({ length: 3001 }, () =>
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 52)]
+        ).join("");
+
+        const logData = {
+            log: log,
+            type: "positive",
+            Comment: comment
+        }
+
+        await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
+        await myTrackersPage.clickAddLog()
+        await myTrackersPage.fillLog(logData);
+        const errorMessages = await myTrackersPage.validateInLineErrorsForLength();
+        expect (errorMessages.logError).toBe(api.trackers.lengthValidation.log)
+        expect (errorMessages.commentError).toBe(api.trackers.lengthValidation.comment)
+    })
+});
 
 test.describe("Test cases for Admin", () => {
 

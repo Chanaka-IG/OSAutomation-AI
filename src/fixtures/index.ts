@@ -49,6 +49,7 @@ import { AttendanceConfigPage } from '../pages/time/AttendanceConfigPage';
 import { ProjectsPage } from '../pages/time/ProjectsPage';
 import { MyTimesheetPage } from '../pages/time/MyTimesheetPage';
 import { EmployeeTimesheetPage } from '../pages/time/EmployeeTimesheetPage';
+import { ClaimEventsPage } from '../pages/claim/ClaimEventsPage';
 
 
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
@@ -94,6 +95,7 @@ export type OrangehrmFixtures = {
   projectsPage: ProjectsPage;
   myTimesheetPage: MyTimesheetPage;
   employeeTimesheetPage: EmployeeTimesheetPage;
+  claimEventsPage: ClaimEventsPage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
   orangehrmApiContext: APIRequestContext;
   orangehrmAdminApi: OrangehrmAdminApi;
@@ -271,6 +273,10 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
 
   employeeTimesheetPage: async ({ page }, use) => {
     await use(new EmployeeTimesheetPage(page));
+  },
+
+  claimEventsPage: async ({ page }, use) => {
+    await use(new ClaimEventsPage(page));
   },
 
   orangehrmApiContext: async ({ playwright }, use) => {

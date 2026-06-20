@@ -22,6 +22,7 @@ import { optionalFields } from './pim/api/optionalFields';
 import { customFields } from './pim/api/customFields';
 import { reportingMethods } from './pim/api/reportingMethods';
 import  { trackers } from './performance/api/myTrackers'
+import { events as claimEvents } from './claim/api/events';
 
 import { auth } from './auth';
 import { addEmployee } from './pim/frontend/add-employee';
@@ -42,6 +43,7 @@ import { timesheets as timeTimesheets } from './time/frontend/timesheets';
 import { employeeTimesheets as timeEmployeeTimesheets } from './time/frontend/employeeTimesheets';
 import { timesheetLifecycle as timeTimesheetLifecycle } from './time/frontend/timesheetLifecycle';
 import  { myTrackers } from './performance/frontend/myTrackers'
+import { claimEvents as claimEventsFrontend } from './claim/frontend/events';
 import { optionalFields as optionalFieldsFrontend } from './pim/frontend/optionalFields';
 import { customFields as customFieldsFrontend } from './pim/frontend/customFields';
 import { reportingMethods as reportingMethodsFrontend } from './pim/frontend/reportingMethods';
@@ -66,7 +68,8 @@ export const api = {
   optionalFields,
   customFields,
   reportingMethods,
-  trackers
+  trackers,
+  claimEvents
 };
 
 /** UI routes, URL patterns, and form sample values, grouped by module. */
@@ -88,6 +91,7 @@ export const frontend = {
   reportingMethods: reportingMethodsFrontend,
   directory,
   myTrackers,
+  claimEvents: claimEventsFrontend,
   attendance,
   projects: timeProjects,
   timesheets: timeTimesheets,

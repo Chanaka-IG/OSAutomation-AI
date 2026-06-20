@@ -13,7 +13,9 @@ export class MyTrackersPage extends BasePage {
     readonly yesDeleteBtn: Locator;
     readonly logTitles: Locator;
     readonly paginationControl: Locator;
-
+    readonly noLogText: Locator;
+    readonly modalHeader: Locator;
+    readonly modalBody: Locator;
 
     constructor(page: Page) {
         super(page)
@@ -27,6 +29,9 @@ export class MyTrackersPage extends BasePage {
         this.yesDeleteBtn = this.page.getByRole('button', { name: ' Yes, Delete ' })
         this.logTitles = this.page.locator('.orangehrm-employee-tracker-log-title-text')
         this.paginationControl = this.page.locator('.oxd-pagination')
+        this.noLogText = this.page.getByText('No Records Found', { exact: true })
+        this.modalHeader = this.page.locator('.orangehrm-modal-header')
+        this.modalBody = this.page.locator('.oxd-text--card-body')
     }
 
     async viewTracker(trackerName: string): Promise<void> {
@@ -126,5 +131,26 @@ export class MyTrackersPage extends BasePage {
     checkEditability(logData: string): Locator {
         const row = this.page.locator('.orangehrm-employee-tracker-log-content-section').filter({ hasText: logData });
         return row.locator('.bi-three-dots-vertical')
+    }
+    validateEmptyLogText(): Locator {
+        return this.noLogText;
+    }
+    async validateDeleteModal(): Promise<{ title: string, body: string }> {
+        const title = await this.modalHeader.textContent();
+        const body = await this.modalBody.textContent();
+
+        return {
+            title: title ?? '',
+            body: body ?? '',
+        }
+    }
+    async validateInLineErrorsForLength(): Promise<{ logError: string, commentError: string }> {
+        const logError = await this.locator('.oxd-form-row').filter({hasText:'Log'}).locator('.oxd-input-field-error-message').textContent();
+        const commentError = await this.locator('.oxd-form-row').filter({hasText:'Comment'}).locator('.oxd-input-field-error-message').textContent();
+
+        return {
+            logError: logError ?? '',
+            commentError: commentError ?? '',
+        }
     }
 }
