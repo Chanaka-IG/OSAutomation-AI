@@ -17,6 +17,7 @@ export class MyTrackersPage extends BasePage {
     readonly modalHeader: Locator;
     readonly modalBody: Locator;
 
+
     constructor(page: Page) {
         super(page)
         this.listTitle = this.page.getByRole('heading', { name: 'Tracker Logs' })
@@ -66,6 +67,10 @@ export class MyTrackersPage extends BasePage {
 
     async clickSaveLogBtn(): Promise<void> {
         await this.saveBtn.click();
+    }
+
+    async waitUntilModalDissapear(): Promise<void> {
+        await this.page.locator('.oxd-sheet--white').waitFor({state:'detached'});
     }
 
     async getLogDetails(logData: string): Promise<LogData> {
@@ -145,12 +150,25 @@ export class MyTrackersPage extends BasePage {
         }
     }
     async validateInLineErrorsForLength(): Promise<{ logError: string, commentError: string }> {
-        const logError = await this.locator('.oxd-form-row').filter({hasText:'Log'}).locator('.oxd-input-field-error-message').textContent();
-        const commentError = await this.locator('.oxd-form-row').filter({hasText:'Comment'}).locator('.oxd-input-field-error-message').textContent();
+        const logError = await this.locator('.oxd-form-row').filter({ hasText: 'Log' }).locator('.oxd-input-field-error-message').textContent();
+        const commentError = await this.locator('.oxd-form-row').filter({ hasText: 'Comment' }).locator('.oxd-input-field-error-message').textContent();
 
         return {
             logError: logError ?? '',
             commentError: commentError ?? '',
         }
     }
+
+    async getPositiveFeedbackCount(): Promise<number> {
+        return Number(await this.page
+            .locator('.orangehrm-employee-tracker-ratings-text.--positive')
+            .innerText());
+    }
+
+    async getNegativeFeedbackCount(): Promise<number> {
+        return Number(await this.page
+            .locator('.orangehrm-employee-tracker-ratings-text.--negative')
+            .innerText());
+    }
+
 }
