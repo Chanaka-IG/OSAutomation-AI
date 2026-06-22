@@ -23,6 +23,8 @@ import { customFields } from './pim/api/customFields';
 import { reportingMethods } from './pim/api/reportingMethods';
 import  { trackers } from './performance/api/myTrackers'
 import { events as claimEvents } from './claim/api/events';
+import { expenseTypes as claimExpenseTypes } from './claim/api/expenseTypes';
+import { claimRequests } from './claim/api/claimRequests';
 
 import { auth } from './auth';
 import { addEmployee } from './pim/frontend/add-employee';
@@ -44,6 +46,10 @@ import { employeeTimesheets as timeEmployeeTimesheets } from './time/frontend/em
 import { timesheetLifecycle as timeTimesheetLifecycle } from './time/frontend/timesheetLifecycle';
 import  { myTrackers } from './performance/frontend/myTrackers'
 import { claimEvents as claimEventsFrontend } from './claim/frontend/events';
+import { claimExpenseTypes as claimExpenseTypesFrontend } from './claim/frontend/expenseTypes';
+import { submitClaim as submitClaimFrontend } from './claim/frontend/submitClaim';
+import { assignClaim as assignClaimFrontend } from './claim/frontend/assignClaim';
+import { employeeClaims as employeeClaimsFrontend } from './claim/frontend/employeeClaims';
 import { optionalFields as optionalFieldsFrontend } from './pim/frontend/optionalFields';
 import { customFields as customFieldsFrontend } from './pim/frontend/customFields';
 import { reportingMethods as reportingMethodsFrontend } from './pim/frontend/reportingMethods';
@@ -69,7 +75,9 @@ export const api = {
   customFields,
   reportingMethods,
   trackers,
-  claimEvents
+  claimEvents,
+  claimExpenseTypes,
+  claimRequests
 };
 
 /** UI routes, URL patterns, and form sample values, grouped by module. */
@@ -92,6 +100,10 @@ export const frontend = {
   directory,
   myTrackers,
   claimEvents: claimEventsFrontend,
+  claimExpenseTypes: claimExpenseTypesFrontend,
+  submitClaim: submitClaimFrontend,
+  assignClaim: assignClaimFrontend,
+  employeeClaims: employeeClaimsFrontend,
   attendance,
   projects: timeProjects,
   timesheets: timeTimesheets,

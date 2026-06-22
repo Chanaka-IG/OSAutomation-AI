@@ -57,6 +57,16 @@ export const trackers = {
         achievement: 1,
         comment: "Log for validate modal"
     },
+    logForValidatePositiveFeedback: {
+        log: "Log for validate feedback count for positive",
+        achievement: 1,
+        comment: "Log for validate feedback count"
+    },
+    logForValidateNegativeFeedback: {
+        log: "Log for validate feedback count for Negative",
+        achievement: 2,
+        comment: "Log for validate feedback count"
+    },
     trackerDataApi: {
         name: "Jacob - Tracker via API"
     },
@@ -68,6 +78,9 @@ export const trackers = {
     /** Dedicated tracker for TC-404 (many-logs ordering); kept separate so its bulk logs don't pollute other specs. */
     orderTracker: {
         name: "Jacob - Order Tracker via API"
+    },
+    feedbackCheck: {
+        name: "Jacob - Feedback Count check VIA API"
     },
     validateDeleteModalContent: {
         title: "Are you Sure?",

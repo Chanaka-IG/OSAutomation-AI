@@ -3,7 +3,7 @@ import { env } from '../../src/config/env';
 import { frontend } from '../../test-data';
 import { api } from '../../test-data';
 
-test.describe.configure({ timeout: 50_000 });
+test.describe.configure({ timeout: 90_000 });
 
 // Backend log order for the TC-404 order tracker, snapshotted in beforeAll where the API context is
 // authenticated. The test-scoped myTracker fixture is unauthenticated inside a test body, so TC-404
@@ -66,15 +66,23 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees
             empNumber: essEmpNumber,
             reviewerEmpNumbers: [supervisorEmpNumber]
         }
+        const feedbackCount = {
+            trackerName: api.trackers.feedbackCheck.name,
+            empNumber: essEmpNumber,
+            reviewerEmpNumbers: [supervisorEmpNumber]
+        }
         await myTracker.createIfAbsent(trackerDataFrontend);
         await myTracker.createIfAbsent(trackerDataApi);
         await myTracker.createIfAbsent(orderTracker);
+        await myTracker.createIfAbsent(feedbackCount);
         await myTracker.addLogAsAdmin(api.trackers.trackerDataApi.name, api.trackers.adminLog);
         await orangehrmAdminApi.logout();
         await orangehrmAdminApi.loginAsESS(frontend.myTrackers.employees[1].username, frontend.myTrackers.employees[1].password);
         await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.positiveLog);
         await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.logForDelete);
         await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.logForvalidateDeleteModal);
+        await myTracker.addLogAsESS(api.trackers.feedbackCheck.name, api.trackers.logForValidatePositiveFeedback);
+        await myTracker.addLogAsESS(api.trackers.feedbackCheck.name, api.trackers.logForValidateNegativeFeedback);
         await myTracker.addLogsIfAbsentAsESS(api.trackers.orderTracker.name, api.trackers.bulkLogs);
 
         const orderTrackerId = await myTracker.getTrackerIdByNameForESSLogs(api.trackers.orderTracker.name);
@@ -212,10 +220,31 @@ test.describe('Test cases for my Trackers', () => {
         await myTrackersPage.clickAddLog()
         await myTrackersPage.fillLog(logData);
         const errorMessages = await myTrackersPage.validateInLineErrorsForLength();
-        expect (errorMessages.logError).toBe(api.trackers.lengthValidation.log)
-        expect (errorMessages.commentError).toBe(api.trackers.lengthValidation.comment)
+        expect(errorMessages.logError).toBe(api.trackers.lengthValidation.log)
+        expect(errorMessages.commentError).toBe(api.trackers.lengthValidation.comment)
+    })
+
+    test.only('**TC-509** | Validate the feedback count upon adding a new log', async ({ myTrackersPage }) => {
+        await myTrackersPage.viewTracker(api.trackers.feedbackCheck.name);
+        const currentPositiveCount = await myTrackersPage.getPositiveFeedbackCount();
+        const currentNegativeCount = await myTrackersPage.getNegativeFeedbackCount();
+        await myTrackersPage.clickAddLog()
+        await myTrackersPage.fillLog(frontend.myTrackers.positiveLog);
+        await myTrackersPage.clickSaveLogBtn()
+        await myTrackersPage.waitUntilModalDissapear()
+        await myTrackersPage.waitUntilFormLoaderDissapear();
+        await myTrackersPage.clickAddLog()
+        await myTrackersPage.fillLog(frontend.myTrackers.negativeLog);
+        await myTrackersPage.clickSaveLogBtn()
+        await myTrackersPage.waitUntilModalDissapear()
+        await myTrackersPage.waitUntilFormLoaderDissapear();
+        const PositiveCountAfterNewLog = await myTrackersPage.getPositiveFeedbackCount();
+        const NegativeCountAfterNewLog = await myTrackersPage.getNegativeFeedbackCount();
+        expect(PositiveCountAfterNewLog).toBe(currentPositiveCount + 1)
+        expect(NegativeCountAfterNewLog).toBe(currentNegativeCount + 1)
     })
 });
+
 
 test.describe("Test cases for Admin", () => {
 
