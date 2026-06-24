@@ -91,10 +91,34 @@ export class MyTrackersApi extends BaseApiService {
             headers: { Accept: 'application/json' },
         })
         if (!response.ok()) {
-            throw new Error(`Failed to retrieve logs for tracker ${id}: HTTP ${response.text()}`)
+            throw new Error(`Failed to retrieve logs for tracker ${id}: HTTP ${await response.text()}`)
         }
         const json = (await response.json()) as { data: Array<{ id: number; log: string }> };
         return json.data ?? [];
+    }
+
+    async getAllTrackers(): Promise<Array<{ id: number}>> {
+        const response = await this.get(myTrackersData.getAllTrakers, {
+            headers: { Accept: 'application/json' },
+        })
+        if (!response.ok()) {
+            throw new Error(`Failed to retrieve all trackers: HTTP ${response.text()}`)
+        }
+        const json = (await response.json()) as { data: Array<{ id: number}> };
+        return json.data ?? [];
+    }
+
+    async deleteAllTrackerData(ids: number[]): Promise<void> {
+        const response = await this.delete(myTrackersData.deleteTrackers, {
+            data : {
+                ids : ids
+            }
+        })
+        if (!response.ok()) {
+            throw new Error(`Failed to delete trackers: HTTP ${response.status()} ${await response.text()}`)
+        }
+        log.info(`Successfully deleted all trackers`)
+        
     }
 
     async addLog(id: number | undefined, payload: MyLogSeed): Promise<void> {
@@ -142,5 +166,14 @@ export class MyTrackersApi extends BaseApiService {
             }
             await this.addLog(id, payload);
         }
+    }
+    async deleteAllTrackers(): Promise<void> {
+        const allIds = (await this.getAllTrackers()).map((tracker) => tracker.id);
+        if (allIds.length === 0) {
+            log.info(`No trackers to delete, skipping`);
+            return;
+        }
+        await this.deleteAllTrackerData(allIds);
+
     }
 }

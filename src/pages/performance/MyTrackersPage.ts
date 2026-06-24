@@ -41,11 +41,6 @@ export class MyTrackersPage extends BasePage {
         })
         await row.getByRole('button', { name: 'View' }).click();
     }
-
-    async validateTitle(title: string): Promise<void> {
-        expect(await this.listTitle.textContent()).toEqual(title)
-    }
-
     async clickAddLog(): Promise<void> {
         await this.addLogBtn.click();
     }
