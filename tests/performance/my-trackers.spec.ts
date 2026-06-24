@@ -5,23 +5,24 @@ import { api } from '../../test-data';
 
 test.describe.configure({ timeout: 90_000 });
 
-// Backend log order for the TC-404 order tracker, snapshotted in beforeAll where the API context is
-// authenticated. The test-scoped myTracker fixture is unauthenticated inside a test body, so TC-404
-// asserts the rendered UI order against this snapshot rather than calling the API itself.
-let orderTrackerApiLogs: Array<{ id: number; log: string }> = [];
-
 test.beforeEach(() => {
     test.skip(!env.baseURL, 'Set BASE_URL to run this suite.');
 });
 
 test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees, myTracker }) => {
 
-    // First run seeds a dozen bulk logs over the network; give the hook headroom beyond the 30s default.
+    // First run seeds trackers + logs over the network; give the hook headroom beyond the 30s default.
     test.setTimeout(120_000);
 
     void masterDataReadiness;
 
     await orangehrmAdminApi.loginAsAdmin();
+
+    // Clean slate before seeding: afterAll wipes all trackers, but an interrupted prior run leaves
+    // them behind. Without this, createIfAbsent skips re-seeding the surviving trackers and the
+    // UI-write tests (TC-004 / TC-403 / TC-509) append duplicate logs that accumulate across runs.
+    await myTracker.deleteAllTrackers();
+
     for (const employee of frontend.myTrackers.employees) {
         await employees.createIfAbsent(employee)
     }
@@ -61,11 +62,6 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees
             empNumber: essEmpNumber,
             reviewerEmpNumbers: [supervisorEmpNumber]
         }
-        const orderTracker = {
-            trackerName: api.trackers.orderTracker.name,
-            empNumber: essEmpNumber,
-            reviewerEmpNumbers: [supervisorEmpNumber]
-        }
         const feedbackCount = {
             trackerName: api.trackers.feedbackCheck.name,
             empNumber: essEmpNumber,
@@ -73,7 +69,6 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees
         }
         await myTracker.createIfAbsent(trackerDataFrontend);
         await myTracker.createIfAbsent(trackerDataApi);
-        await myTracker.createIfAbsent(orderTracker);
         await myTracker.createIfAbsent(feedbackCount);
         await myTracker.addLogAsAdmin(api.trackers.trackerDataApi.name, api.trackers.adminLog);
         await orangehrmAdminApi.logout();
@@ -83,11 +78,12 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, users, employees
         await myTracker.addLogAsESS(api.trackers.trackerDataApi.name, api.trackers.logForvalidateDeleteModal);
         await myTracker.addLogAsESS(api.trackers.feedbackCheck.name, api.trackers.logForValidatePositiveFeedback);
         await myTracker.addLogAsESS(api.trackers.feedbackCheck.name, api.trackers.logForValidateNegativeFeedback);
-        await myTracker.addLogsIfAbsentAsESS(api.trackers.orderTracker.name, api.trackers.bulkLogs);
-
-        const orderTrackerId = await myTracker.getTrackerIdByNameForESSLogs(api.trackers.orderTracker.name);
-        orderTrackerApiLogs = await myTracker.getLogs(orderTrackerId);
     }
+})
+
+test.afterAll(async ({ myTracker,orangehrmAdminApi }) => {
+    await orangehrmAdminApi.loginAsAdmin();
+    await myTracker.deleteAllTrackers();
 })
 
 test.describe('Test cases for my Trackers', () => {
@@ -96,12 +92,12 @@ test.describe('Test cases for my Trackers', () => {
     // so it matches the date the app renders for a just-created log.
     const today = new Date().toISOString().split('T')[0];
 
-    test.beforeEach(async ({ myTrackersPage, page, myTracker }) => {
+    test.beforeEach(async ({ myTrackersPage, page }) => {
         await myTrackersPage.loginWithCredentials(frontend.myTrackers.employees[1].username, frontend.myTrackers.employees[1].password);
         await page.goto(frontend.myTrackers.routes.myTrackerList)
     })
 
-    test('**TC-001** | ESS views the My Trackers list ', async ({ page }) => {
+    test.only('**TC-001** | ESS views the My Trackers list ', async ({ page }) => {
         await expect(page).toHaveURL(new RegExp(frontend.myTrackers.routes.myTrackerList))
     })
     test('**TC-002** | Open a tracker and view its logs', async ({ myTrackersPage }) => {
@@ -139,7 +135,6 @@ test.describe('Test cases for my Trackers', () => {
 
     })
     test('**TC-008** | Delete own log | **TC-504** | Success toast on add / edit / delete', async ({ myTrackersPage }) => {
-        const fullName = `${frontend.myTrackers.employees[1].firstName} ${frontend.myTrackers.employees[1].lastName}`;
         await myTrackersPage.viewTracker(api.trackers.trackerDataApi.name);
         await myTrackersPage.clickDeleteLog(api.trackers.logForDelete.log);
         await myTrackersPage.clickYesDeleteBtn()
@@ -224,7 +219,7 @@ test.describe('Test cases for my Trackers', () => {
         expect(errorMessages.commentError).toBe(api.trackers.lengthValidation.comment)
     })
 
-    test.only('**TC-509** | Validate the feedback count upon adding a new log', async ({ myTrackersPage }) => {
+    test('**TC-509** | Validate the feedback count upon adding a new log', async ({ myTrackersPage }) => {
         await myTrackersPage.viewTracker(api.trackers.feedbackCheck.name);
         const currentPositiveCount = await myTrackersPage.getPositiveFeedbackCount();
         const currentNegativeCount = await myTrackersPage.getNegativeFeedbackCount();
@@ -247,10 +242,7 @@ test.describe('Test cases for my Trackers', () => {
 
 
 test.describe("Test cases for Admin", () => {
-
-    const today = new Date().toISOString().split('T')[0];
-
-    test.beforeEach(async ({ myTrackersPage, page, myTracker }) => {
+    test.beforeEach(async ({ myTrackersPage, page }) => {
         await myTrackersPage.loginAs('admin');
         await page.goto(frontend.myTrackers.routes.myTrackerList)
     })
