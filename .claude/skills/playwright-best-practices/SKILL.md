@@ -327,8 +327,8 @@ await page.getByRole('button', { name: 'Book Event' }).waitFor({ state: 'visible
 ```
 
 ### DON'T: Use arbitrary sleeps
+- BAD - Never do this
 ```javascript
-// BAD - Never do this
 await page.waitForTimeout(2000);
 ```
 

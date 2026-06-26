@@ -10,14 +10,21 @@ export abstract class BasePage {
   readonly tableLoader: Locator
   readonly formLoader: Locator;
   readonly dropdownFirstOption: Locator;
-    private readonly successToastContent: Locator;
-  private readonly successHeader: Locator;
-  private readonly noRecordsHeader: Locator;
-  private readonly errorHeader: Locator;
-  private readonly successToastMsgForSave: Locator;
-  private readonly noRecordsToastMsg: Locator;
-  private readonly successToastMsgForDelete: Locator;
-  private readonly successToastMsgForUpdate: Locator;
+  readonly successToastContent: Locator;
+  readonly successHeader: Locator;
+  readonly noRecordsHeader: Locator;
+  readonly errorHeader: Locator;
+  readonly successToastMsgForSave: Locator;
+  readonly successToastMsgForActivate: Locator;
+  readonly noRecordsToastMsg: Locator;
+  readonly successToastMsgForDelete: Locator;
+  readonly successToastMsgForUpdate: Locator;
+  readonly celenderPicker: Locator;
+  readonly monthDropDownIcon: Locator;
+  readonly monthDropDownList: Locator;
+  readonly yearDropDownIcon: Locator;
+  readonly yearDropDownList: Locator;
+  readonly dateContent: Locator;
 
   constructor(public readonly page: Page) {
     this.usernameInput = page.locator('input[name="username"]');
@@ -34,7 +41,13 @@ export abstract class BasePage {
     this.noRecordsToastMsg = this.page.locator(".oxd-text--toast-message")
     this.successToastMsgForDelete = this.page.getByText("Successfully Deleted", { exact: true })
     this.successToastMsgForUpdate = this.page.getByText("Successfully Updated", { exact: true })
-
+    this.successToastMsgForActivate = page.getByText("Successfully Activated", { exact: true })
+    this.celenderPicker = page.locator(".oxd-date-input-calendar")
+    this.monthDropDownIcon = page.locator('.oxd-icon.bi-caret-down-fill.oxd-icon-button__icon').first()
+    this.monthDropDownList = page.locator('.oxd-calendar-selector-month ul')
+    this.yearDropDownIcon = page.locator(".oxd-icon.bi-caret-down-fill.oxd-icon-button__icon").nth(1)
+    this.yearDropDownList = page.locator('.oxd-calendar-selector-year ul')
+    this.dateContent = page.locator(".oxd-calendar-dates-grid")
   }
 
   /** Relative paths use `baseURL` from automation.config; absolute URLs work as-is. */
@@ -59,53 +72,60 @@ export abstract class BasePage {
 
 
   async verifySuccessToastForSave(): Promise<void> {
-      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
-        await test.expect(this.successHeader).toBeVisible();
-        await test.expect(this.successToastMsgForSave).toBeVisible();
-      })
+    await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+      await test.expect(this.successHeader).toBeVisible();
+      await test.expect(this.successToastMsgForSave).toBeVisible();
+    })
 
   }
 
   async VerifyNoRecords(): Promise<void> {
-      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
-        await test.expect(this.noRecordsHeader).toBeVisible();
-        await expect(this.noRecordsToastMsg).toHaveText("No Records Found");
-      })
+    await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+      await test.expect(this.noRecordsHeader).toBeVisible();
+      await expect(this.noRecordsToastMsg).toHaveText("No Records Found");
+    })
   }
 
   async verifySuccessToastForUpdate(): Promise<void> {
-   
-      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
-        await test.expect(this.successHeader).toBeVisible();
-        await test.expect(this.successToastMsgForUpdate).toBeVisible();
-      })
+
+    await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+      await test.expect(this.successHeader).toBeVisible();
+      await test.expect(this.successToastMsgForUpdate).toBeVisible();
+    })
 
   }
 
   async verifySuccessToastforDeletion(): Promise<void> {
-    
-      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
-        await test.expect(this.successHeader).toBeVisible();
-        await test.expect(this.successToastMsgForDelete).toBeVisible();
-      })
+
+    await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+      await test.expect(this.successHeader).toBeVisible();
+      await test.expect(this.successToastMsgForDelete).toBeVisible();
+    })
 
   }
 
   async verifyCustomToast(toastContent: string): Promise<void> {
-      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
-        await test.expect(this.successHeader).toBeVisible();
-        await expect(this.page.getByText(toastContent, { exact: true })).toBeVisible();
-      })
+    await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+      await test.expect(this.successHeader).toBeVisible();
+      await expect(this.page.getByText(toastContent, { exact: true })).toBeVisible();
+    })
 
   }
 
   async verifyCustomToastforError(toastContent: string): Promise<void> {
-      await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
-        await test.expect(this.errorHeader).toBeVisible();
-        await expect(this.page.getByText(toastContent, { exact: true })).toBeVisible();
-      })
+    await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+      await test.expect(this.errorHeader).toBeVisible();
+      await expect(this.page.getByText(toastContent, { exact: true })).toBeVisible();
+    })
   }
 
+  async verifySuccessToastForActivate(): Promise<void> {
+    await this.successToastContent.waitFor({ state: 'visible' }).then(async () => {
+      await test.expect(this.successHeader).toBeVisible();
+      await test.expect(this.successToastMsgForActivate).toBeVisible();
+    })
+
+  }
 
   async loginAs(role: LoginRole): Promise<void> {
     const { username, password } = auth.getCredentials(role);
@@ -170,7 +190,7 @@ export abstract class BasePage {
 
   async getOxdDropdownOptions(dropdown: Locator): Promise<string[]> {
     await dropdown.click();
-    await this.dropdownFirstOption.waitFor({state: 'visible', timeout: 3000})
+    await this.dropdownFirstOption.waitFor({ state: 'visible', timeout: 3000 })
     const jobTitles = await this.page
       .getByRole('option')
       .allTextContents();
@@ -179,7 +199,30 @@ export abstract class BasePage {
     return jobTitles.map(text => text.trim());
   }
 
-  
-
+  async pickDateFromDatePicker(inputDate: string, dateField: Locator,): Promise<void> {
+    const [year, month, day] = inputDate.split('-');
+    const monthMap: Record<string, string> = {
+      "01": 'January',
+      "02": 'February',
+      "03": 'March',
+      "04": 'April',
+      "05": 'May',
+      "06": 'June',
+      "07": 'July',
+      "08": 'August',
+      "09": 'September',
+      "10": 'October',
+      "11": 'November',
+      "12": 'December',
+    };
+    await dateField.click();
+    await this.celenderPicker.waitFor({ state: 'visible' })
+    await this.monthDropDownIcon.click();
+    await this.monthDropDownList.getByText(monthMap[month], { exact: true }).click();
+    await this.yearDropDownIcon.click();
+    await this.yearDropDownList.getByText(year, { exact: true }).click();
+    await this.dateContent.getByText(String(Number(day)), { exact: true }).click();
+    await this.celenderPicker.waitFor({ state: 'detached' })
+  }
 }
 

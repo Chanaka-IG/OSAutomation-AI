@@ -25,6 +25,7 @@ import  { trackers } from './performance/api/myTrackers'
 import { events as claimEvents } from './claim/api/events';
 import { expenseTypes as claimExpenseTypes } from './claim/api/expenseTypes';
 import { claimRequests } from './claim/api/claimRequests';
+import { reviewData } from './performance/api/manageReviews'
 
 import { auth } from './auth';
 import { addEmployee } from './pim/frontend/add-employee';
@@ -53,6 +54,7 @@ import { employeeClaims as employeeClaimsFrontend } from './claim/frontend/emplo
 import { optionalFields as optionalFieldsFrontend } from './pim/frontend/optionalFields';
 import { customFields as customFieldsFrontend } from './pim/frontend/customFields';
 import { reportingMethods as reportingMethodsFrontend } from './pim/frontend/reportingMethods';
+import { manageReviews as manageReviewsFrontend} from './performance/frontend/manageReviews'
 
 import * as pimFrontendApi from './pim/frontend-api';
 
@@ -77,7 +79,8 @@ export const api = {
   trackers,
   claimEvents,
   claimExpenseTypes,
-  claimRequests
+  claimRequests,
+  reviewData
 };
 
 /** UI routes, URL patterns, and form sample values, grouped by module. */
@@ -109,6 +112,8 @@ export const frontend = {
   timesheets: timeTimesheets,
   employeeTimesheets: timeEmployeeTimesheets,
   timesheetLifecycle: timeTimesheetLifecycle,
+  manageReviewData : manageReviewsFrontend
+
 };
 
 /** API payloads owned by frontend/UI tests (not master-data seeding). */
