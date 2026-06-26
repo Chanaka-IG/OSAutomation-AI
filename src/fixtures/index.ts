@@ -9,6 +9,7 @@ import {
   writeMasterDataStatus,
 } from '../setup/masterDataVerification';
 import { LoginPage } from '../pages/auth/LoginPage';
+import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
 import { LeaveModulePage } from '../pages/leave/LeaveModulePage';
 import { LeaveEntitlementsPage } from '../pages/leave/LeaveEntitlementsPage';
 import { LeaveEntitlementListPage } from '../pages/leave/LeaveEntitlementListPage';
@@ -54,11 +55,13 @@ import { ClaimExpenseTypesPage } from '../pages/claim/ClaimExpenseTypesPage';
 import { SubmitClaimPage } from '../pages/claim/SubmitClaimPage';
 import { AssignClaimPage } from '../pages/claim/AssignClaimPage';
 import { EmployeeClaimsPage } from '../pages/claim/EmployeeClaimsPage';
+import { ManageReviews } from '../pages/performance/ManageReviews'
 
 
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
 export type OrangehrmFixtures = {
   loginPage: LoginPage;
+  resetPasswordPage: ResetPasswordPage;
   assignLeavePage: AssignLeavePage;
   applyLeavePage: ApplyLeavePage;
   leaveListPage: LeaveListPage;
@@ -104,6 +107,7 @@ export type OrangehrmFixtures = {
   submitClaimPage: SubmitClaimPage;
   assignClaimPage: AssignClaimPage;
   employeeClaimsPage: EmployeeClaimsPage;
+  manageReviews:ManageReviews;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
   orangehrmApiContext: APIRequestContext;
   orangehrmAdminApi: OrangehrmAdminApi;
@@ -121,6 +125,10 @@ export type OrangehrmWorkerFixtures = {
 export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
+  },
+
+  resetPasswordPage: async ({ page }, use) => {
+    await use(new ResetPasswordPage(page));
   },
 
   assignLeavePage: async ({ page }, use) => {
@@ -302,7 +310,9 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
   employeeClaimsPage: async ({ page }, use) => {
     await use(new EmployeeClaimsPage(page));
   },
-
+  manageReviews : async ({page}, use) => {
+    await use (new ManageReviews(page))
+  },
   orangehrmApiContext: async ({ playwright }, use) => {
     const context = await playwright.request.newContext({
       baseURL: env.baseURL || undefined,

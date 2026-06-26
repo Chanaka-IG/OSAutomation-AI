@@ -31,9 +31,46 @@ function resolveCredentials(role: LoginRole): { username: string; password: stri
 export const auth = {
   routes: {
     login: '/web/index.php/auth/login',
+    /** "Forgot your password?" target. On an email-unconfigured instance this is the terminal page. */
+    requestPasswordReset: '/web/index.php/auth/requestPasswordResetCode',
+    logout: '/web/index.php/auth/logout',
+    dashboard: '/web/index.php/dashboard/index',
+    /** A protected page used to prove unauthenticated/expired sessions redirect to login. */
+    protectedDeepLink: '/web/index.php/pim/viewEmployeeList',
   },
   urlPatterns: {
     login: /auth\/login/i,
+    dashboard: /dashboard\/index/i,
+    requestPasswordReset: /auth\/requestPasswordResetCode/i,
+  },
+  /** Login / reset strings verified live on the kord instance (OrangeHRM OS 5.8, 2026-06-25). */
+  messages: {
+    invalidCredentials: 'Invalid credentials',
+    required: 'Required',
+    accountDisabled: 'Account disabled',
+    resetHeading: 'Reset Password',
+    /** Shown on the reset page when the instance has no email configured. */
+    emailNotConfigured:
+      'The OrangeHRM system is not configured to receive email notifications. Please contact your OrangeHRM administrator to reset your password',
+  },
+  /** Inputs for negative / edge login attempts. */
+  samples: {
+    unknownUsername: 'no.such.user.zzz',
+    wrongPassword: 'wrong@Password123',
+    longUsername: 'a'.repeat(200),
+    sqlInjectionUsername: "' OR '1'='1",
+  },
+  /** Suite-owned employee + disabled system user for the "Account disabled" path. */
+  disabledUser: {
+    employee: {
+      // OrangeHRM caps employeeId at ~10 chars — keep it short or it is silently rejected.
+      employeeId: 'AUTHDIS01',
+      firstName: 'Disabled',
+      lastName: 'LoginUser',
+      middleName: '',
+    },
+    username: 'disabled.login.user',
+    password: 'Disabled@OHRM123',
   },
   /** Override with OHRM_USERNAME / OHRM_PASSWORD (or ADMIN_*); same source as `getCredentials('admin')`. */
   credentials: {
