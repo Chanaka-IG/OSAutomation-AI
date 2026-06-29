@@ -5,7 +5,7 @@ export type KPIseed = {
   title: string;
   minRating: number;
   maxRating: number;
-  jobTitleId: number;
+  jobTitleId: number | undefined;
   isDefault: boolean;
 };
 

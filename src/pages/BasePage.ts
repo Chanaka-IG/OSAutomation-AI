@@ -25,6 +25,8 @@ export abstract class BasePage {
   readonly yearDropDownIcon: Locator;
   readonly yearDropDownList: Locator;
   readonly dateContent: Locator;
+  readonly logoutArea: Locator;
+  readonly logoutLink: Locator;
 
   constructor(public readonly page: Page) {
     this.usernameInput = page.locator('input[name="username"]');
@@ -48,6 +50,8 @@ export abstract class BasePage {
     this.yearDropDownIcon = page.locator(".oxd-icon.bi-caret-down-fill.oxd-icon-button__icon").nth(1)
     this.yearDropDownList = page.locator('.oxd-calendar-selector-year ul')
     this.dateContent = page.locator(".oxd-calendar-dates-grid")
+    this.logoutArea = page.locator('.oxd-userdropdown-tab')
+    this.logoutLink = page.getByRole('menuitem', {name: 'Logout'})
   }
 
   /** Relative paths use `baseURL` from automation.config; absolute URLs work as-is. */
@@ -135,6 +139,11 @@ export abstract class BasePage {
       );
     }
     await this.loginWithCredentials(username, password);
+  }
+
+  async logOut(): Promise<void> {
+    await this.logoutArea.click();
+    await this.logoutLink.click();
   }
 
   /**

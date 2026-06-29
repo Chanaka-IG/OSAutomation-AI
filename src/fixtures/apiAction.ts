@@ -7,6 +7,9 @@ import { AdminUsersApi } from '../../src/api/orangehrmOSAPI/AdminUsersApi';
 import { KpisApi } from '../../src/api/orangehrmOSAPI/KpisApi'
 import { JobTitlesApi } from '../../src/api/orangehrmOSAPI/JobTitlesApi'
 import { MyTrackersApi } from '../../src/api/orangehrmOSAPI/MyTrackersApi'
+import { AssignDerectSupervisors } from '../../src/api/orangehrmOSAPI/AssignSupervisors'
+import { AssignJobTitlesApi } from '../api/orangehrmOSAPI/AssignJobTitltesApi'
+import { ManageReviewsApi } from '../api/orangehrmOSAPI/ManageReviewsApi'
 
 
 export type ApiAction = {
@@ -15,6 +18,9 @@ export type ApiAction = {
     kpi: KpisApi,
     jobTitle: JobTitlesApi,
     myTracker: MyTrackersApi,
+    assignDerectSupervisors:AssignDerectSupervisors,
+    assignJobTitles: AssignJobTitlesApi,
+    manageReview: ManageReviewsApi,
     orangehrmApiContext: APIRequestContext;
 
 };
@@ -45,6 +51,16 @@ export const test = apiAction.extend<ApiAction>({
     myTracker: async ({ orangehrmApiContext }, use) => {
         await use(new MyTrackersApi(orangehrmApiContext));
     },
+    assignDerectSupervisors: async ({ orangehrmApiContext }, use)=> {
+        await use (new AssignDerectSupervisors(orangehrmApiContext))
+    },
+    assignJobTitles : async ({orangehrmApiContext}, use) => {
+        await use (new AssignJobTitlesApi(orangehrmApiContext))
+    },
+    manageReview : async ({orangehrmApiContext}, use) => {
+        await use (new ManageReviewsApi(orangehrmApiContext))
+    },
+
 });
 
 export { expect } from '@playwright/test';

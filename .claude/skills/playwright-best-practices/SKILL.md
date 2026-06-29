@@ -289,16 +289,6 @@ const SIX_EVENTS_RESPONSE = {
 
 ---
 
-```
-
-### Test Users
-| User          | Email                       | Password    | Purpose          |
-|---------------|----------------------------|-------------|------------------|
-| Gmail User    | rahulshetty1@gmail.com     | Magiclife1! | Primary tester   |
-| Yahoo User    | rahulshetty1@yahoo.com     | Magiclife1! | Cross-user tests |
-
----
-
 ## 8. Dynamic Data Handling
 
 ### Unique Test Data
@@ -307,6 +297,31 @@ Generate unique data to avoid test pollution:
 const eventTitle = `Test Event ${Date.now()}`;
 ```
 
+### Avoid Hardcoded Primary Key IDs in Test Data
+- When creating test data via APIs, database seeding, or within the test itself, never use hardcoded primary key IDs (e.g., jobTitleId: 1, locationId: 2, employeeId: 5).
+
+- Primary key IDs are environment-specific and may change because of other tests, seed data, or database resets. Hardcoding them makes tests unreliable.
+
+-Instead:
+  Query the system to retrieve the current ID of the required record before using it.
+  Look up records using stable identifiers such as names, codes, or unique keys.
+  If the required record does not exist, create it first and use the ID returned by the creation API.
+  Pass dynamically retrieved IDs throughout the test.
+
+- Tests must be environment-independent and should always resolve or create the required IDs dynamically instead of relying on hardcoded database values.  
+
+```javascript
+ seedRecords: [
+    {
+      title: 'Test Delete',
+      minRating: 25,
+      maxRating: 50,
+      jobTitleId: 1,
+      isDefault: false,
+    },
+ ]  
+```
+Dont use jobTitleId: 1 as above in anywhere.
 
 
 ## 9. Wait Strategies
