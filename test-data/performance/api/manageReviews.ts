@@ -2,6 +2,8 @@
 
 export const reviewData = {
 
+    adminPath : '/web/index.php/api/v2/performance/manage/reviews',
+
     apiEmployees: [{
         employeeId: '0300',
         firstName: 'Rezaa',

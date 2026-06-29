@@ -18,6 +18,14 @@ export type JobTitleRecord = {
 };
 
 export class JobTitlesApi extends BaseApiService {
+
+  async getJobTitleIDbyName(jobTitle: string): Promise<number | undefined> {
+    const allJobTitles = await this.getAll();
+    const jobTitleID = allJobTitles.find((item) => item.title === jobTitle)
+    return jobTitleID?.id;
+  }
+
+
   async getAll(): Promise<JobTitleRecord[]> {
     const response = await this.get(jobTitlesData.adminPath, {
       headers: { Accept: 'application/json' },

@@ -2,7 +2,6 @@ import type { MyTrackerSeed, MyLogSeed } from '../../../test-data/performance/ap
 import { trackers as myTrackersData } from '../../../test-data/performance/api/myTrackers';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
-import { Page } from '@playwright/test';
 
 const log = createLogger('MyTrackerAPI');
 
