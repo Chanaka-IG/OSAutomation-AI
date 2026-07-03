@@ -21,6 +21,7 @@ export class ManageReviews extends BasePage {
     readonly saveBtn: Locator;
     readonly completeBtn: Locator;
     readonly okBtn: Locator;
+    readonly accessDeniedMsg: Locator;
 
     constructor(page: Page) {
         super(page)
@@ -31,15 +32,16 @@ export class ManageReviews extends BasePage {
         this.endDate = this.page.locator('.oxd-grid-item').filter({ hasText: /^Review Period End Date$/ }).locator('input')
         this.dueDate = this.page.locator('.oxd-grid-item').filter({ hasText: /^Due Date$/ }).locator('input')
         this.activeBtn = this.page.getByRole('button', { name: 'Activate' })
-        this.rating = this.page.locator('.oxd-grid-4 orangehrm-evaluation-grid').getByRole('textbox').first();
-        this.comment = this.page.locator('.oxd-grid-4 orangehrm-evaluation-grid').getByRole('textbox').nth(1);
-        this.generalComment = this.page.locator('.oxd-grid-3 orangehrm-evaluation-grid').getByRole('textbox')
+        this.rating = this.page.locator('.oxd-grid-4.orangehrm-evaluation-grid').getByRole('textbox').first();
+        this.comment = this.page.locator('.oxd-grid-4.orangehrm-evaluation-grid').getByRole('textbox').nth(1);
+        this.generalComment = this.page.locator('.oxd-grid-3.orangehrm-evaluation-grid').getByRole('textbox')
         this.completionDate = this.page.locator('.orangehrm-performance-review-grid').getByPlaceholder('yyyy-mm-dd');
-        this.finalRating = this.page.locator('.oxd-grid-4 orangehrm-performance-review-grid').getByRole('textbox').first()
-        this.finalComment = this.page.locator('.oxd-grid-4 orangehrm-performance-review-grid').getByRole('textbox').nth(1)
+        this.finalRating = this.page.locator('.oxd-grid-4.orangehrm-performance-review-grid').getByRole('textbox').nth(1)
+        this.finalComment = this.page.locator('.oxd-grid-4.orangehrm-performance-review-grid').getByRole('textbox').nth(2)
         this.saveBtn = this.page.getByRole('button', { name: 'Save' })
         this.completeBtn = this.page.getByRole('button', { name: 'Complete' })
         this.okBtn = this.page.getByRole('button', { name: 'Ok' })
+        this.accessDeniedMsg = this.page.getByText('Credential Required', { exact: true })
     }
     async clickOnAddReview(): Promise<void> {
         await this.addBtn.click();
@@ -92,11 +94,8 @@ export class ManageReviews extends BasePage {
 
     async clickOnActionAsSupervisor(employeeName: string): Promise<void> {
         console.log(employeeName)
-        console.log(await this.page.getByRole('row', { name: 'Maraso Kallis'}).isVisible());
-        await expect (this.page.getByRole('row', { name: 'Maraso Kallis'})).toBeVisible();
-        // console.log(await this.page.getByRole('row').filter({ hasText: employeeName }).isVisible())
-        // console.log(await this.page.getByRole('row').filter({ hasText: employeeName }).getByRole('button', {name:'Evaluate'}).isVisible())
-        // await this.page.getByRole('row').filter({ hasText: employeeName }).getByRole('button', {name:'Evaluate'}).click();
+        await this.page.waitForTimeout(4000);
+        await this.page.getByRole('row').filter({ hasText: employeeName }).getByTitle('Evaluate').click();
 
     }
     async fillReviewasSupervvisor(reviewData: supervisorReview, today: string): Promise<void> {
@@ -115,5 +114,8 @@ export class ManageReviews extends BasePage {
     }
     async confirmReview(): Promise<void> {
         await this.okBtn.click();
+    }
+    verifyAccessDeniedVisibility() {
+        return this.accessDeniedMsg;
     }
 }
