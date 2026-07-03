@@ -1,9 +1,9 @@
 export type supervisorReview = {
-  rating : number,
-   comment : string,
-   generalComment :string,
-   finalRating: number,
-   finalComment : string
+  rating: number,
+  comment: string,
+  generalComment: string,
+  finalRating: number,
+  finalComment: string
 };
 
 
@@ -18,6 +18,10 @@ export const manageReviews = {
     employeeName: 'Maraso Jack Kallis',
     supervisorName: 'Rezaa'
   },
+  saveReview: {
+    employeeName: 'Adams Mugas Gilchrist',
+    supervisorName: 'Marco'
+  },
 
   jobTitle: {
     title: "Job Title with KPI",
@@ -29,16 +33,21 @@ export const manageReviews = {
     employeeName: 'Maraso Kallis',
     reviewStatus: 'Activated'
   },
+  validateDataForSave: {
+    employeeName: 'Adams Gilchrist',
+    reviewStatus: 'Inactive'
+  },
+
   logasSupervisor: {
     username: "Rezaa",
     password: "admin@OHRM123"
   },
   supervisorReview: {
-   rating : 30,
-   comment : "Supervisor Review",
-   generalComment :"Supervisor geberal Review",
-   finalRating: 40,
-   finalComment : "Final comment added"
+    rating: 30,
+    comment: "Supervisor Review",
+    generalComment: "Supervisor geberal Review",
+    finalRating: 40,
+    finalComment: "Final comment added"
   }
 
 }

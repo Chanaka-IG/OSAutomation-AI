@@ -2,7 +2,7 @@
 
 export const reviewData = {
 
-    adminPath : '/web/index.php/api/v2/performance/manage/reviews',
+    adminPath: '/web/index.php/api/v2/performance/manage/reviews',
 
     apiEmployees: [{
         employeeId: '0300',
@@ -24,5 +24,26 @@ export const reviewData = {
         status: true,
         userRoleId: 2,
     },
+    {
+        employeeId: '0302',
+        firstName: 'Marco',
+        lastName: 'Janson',
+        middleName: 'Hales',
+        username: 'Marco',
+        password: 'admin@OHRM123',
+        status: true,
+        userRoleId: 2,
+    },
+    {
+        employeeId: '0303',
+        firstName: 'Adams',
+        lastName: 'Gilchrist',
+        middleName: 'Mugas',
+        username: 'Adams',
+        password: 'admin@OHRM123',
+        status: true,
+        userRoleId: 2,
+    },
+
     ],
 }
