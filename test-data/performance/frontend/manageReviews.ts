@@ -6,7 +6,6 @@ export type supervisorReview = {
   finalComment: string
 };
 
-
 export const manageReviews = {
 
   routes: {
@@ -37,10 +36,19 @@ export const manageReviews = {
     employeeName: 'Adams Gilchrist',
     reviewStatus: 'Inactive'
   },
-
+  validateDataForComplete: {
+    employeeName: 'Shane Warne',
+    reviewStatus: 'Activated'
+  },
   logasSupervisor: {
     username: "Rezaa",
     password: "admin@OHRM123"
+  },
+  validateDataForSearch: {
+    employeeName: 'Daniiel Vittori',
+    jobTitle: 'Job Title with KPI',
+    reviewer: 'Jonothan Trott',
+    reviewStatus: 'Activated'
   },
   supervisorReview: {
     rating: 30,
@@ -48,6 +56,9 @@ export const manageReviews = {
     generalComment: "Supervisor geberal Review",
     finalRating: 40,
     finalComment: "Final comment added"
-  }
+  },
+  searchCriteria: {
+    employeeName: 'Daniiel Jasmis Vittori',
+  },
 
 }

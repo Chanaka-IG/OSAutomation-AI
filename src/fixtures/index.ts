@@ -56,6 +56,7 @@ import { SubmitClaimPage } from '../pages/claim/SubmitClaimPage';
 import { AssignClaimPage } from '../pages/claim/AssignClaimPage';
 import { EmployeeClaimsPage } from '../pages/claim/EmployeeClaimsPage';
 import { ManageReviews } from '../pages/performance/ManageReviews'
+import { MaintenancePage } from '../pages/maintenance/MaintenancePage'
 
 
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
@@ -108,6 +109,7 @@ export type OrangehrmFixtures = {
   assignClaimPage: AssignClaimPage;
   employeeClaimsPage: EmployeeClaimsPage;
   manageReviews:ManageReviews;
+  maintenancePage: MaintenancePage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
   orangehrmApiContext: APIRequestContext;
   orangehrmAdminApi: OrangehrmAdminApi;
@@ -312,6 +314,9 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
   },
   manageReviews : async ({page}, use) => {
     await use (new ManageReviews(page))
+  },
+  maintenancePage: async ({ page }, use) => {
+    await use(new MaintenancePage(page));
   },
   orangehrmApiContext: async ({ playwright }, use) => {
     const context = await playwright.request.newContext({

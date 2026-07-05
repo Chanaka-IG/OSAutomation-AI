@@ -176,6 +176,53 @@ export class EmployeesApi extends BaseApiService {
     log.info(`Supervisor empNumber=${supervisorEmpNumber} added for empNumber=${empNumber}`);
   }
 
+  /**
+   * Terminates an employee (moves them into the "past employee" set that the Maintenance
+   * Purge screen operates on). Endpoint is the PLURAL `terminations` — singular 404s.
+   * `terminationReasonId` must be a valid `pim/termination-reasons` id (e.g. 3 = "Contract Not Renewed").
+   */
+  async terminate(
+    empNumber: number,
+    details: { date: string; terminationReasonId: number; note?: string },
+  ): Promise<void> {
+    const response = await this.post(`${employeesData.adminPath}/${empNumber}/terminations`, {
+      data: {
+        date: details.date,
+        terminationReasonId: details.terminationReasonId,
+        note: details.note ?? null,
+      },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    });
+    if (!response.ok()) {
+      const text = await response.text();
+      throw new Error(
+        `EmployeesApi.terminate failed: HTTP ${response.status()} empNumber=${empNumber}\n${text.slice(0, 600)}`,
+      );
+    }
+    log.info(`Employee terminated: empNumber=${empNumber}`);
+  }
+
+  /**
+   * Resolves a termination-reason id by name (defaults to the first available reason).
+   * Ids are environment-specific, so callers must never hardcode them.
+   */
+  async getTerminationReasonId(name?: string): Promise<number> {
+    const reasonsPath = employeesData.adminPath.replace(/\/employees$/, '/termination-reasons');
+    const response = await this.get(`${reasonsPath}?limit=100`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok()) {
+      throw new Error(`EmployeesApi.getTerminationReasonId failed: HTTP ${response.status()}`);
+    }
+    const json = (await response.json()) as { data: Array<{ id: number; name: string }> };
+    const reasons = json.data ?? [];
+    if (reasons.length === 0) {
+      throw new Error('EmployeesApi.getTerminationReasonId: no termination reasons available');
+    }
+    const match = name ? reasons.find((r) => r.name === name) : undefined;
+    return (match ?? reasons[0]).id;
+  }
+
   /** Bulk-delete employees by empNumber. Silently ignores partial failures. */
   async deleteEmployees(empNumbers: number[]): Promise<void> {
     if (empNumbers.length === 0) return;
