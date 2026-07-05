@@ -2,7 +2,6 @@ import { test, expect } from '../../src/fixtures/apiAction';
 import { env } from '../../src/config/env';
 import { frontend } from '../../test-data';
 import { api } from '../../test-data';
-import { manageReviews } from '../../test-data/performance/frontend/manageReviews';
 
 test.describe.configure({ timeout: 120_000 });
 
@@ -11,10 +10,25 @@ test.beforeEach(() => {
 });
 
 
-test.beforeAll(async ({ masterDataReadiness, orangehrmAdminApi, employees, users, assignDerectSupervisors, jobTitle, kpi, assignJobTitles }) => {
+test.beforeAll(async ({ masterDataReadiness, orangehrmAdminApi, employees, users, assignDerectSupervisors, jobTitle, kpi, assignJobTitles, manageReview }) => {
     test.setTimeout(120_000);
 
-    const index = [0, 2]
+    const base = new Date();
+    const format = (d: Date): string => d.toISOString().split('T')[0];
+
+    const today = format(base);
+
+    const twoWeeksBefore = new Date(base);
+    twoWeeksBefore.setDate(base.getDate() - 14);
+    const startDate = format(twoWeeksBefore)
+
+    const twoWeeksAfter = new Date(base);
+    twoWeeksAfter.setDate(base.getDate() + 14);
+    const endDate = format(twoWeeksAfter)
+
+    const oneMonthAfter = new Date(base);
+    oneMonthAfter.setMonth(base.getMonth() + 1);
+    const dueDate = format(oneMonthAfter)
 
     void masterDataReadiness;
     await orangehrmAdminApi.loginAsAdmin();
@@ -61,6 +75,50 @@ test.beforeAll(async ({ masterDataReadiness, orangehrmAdminApi, employees, users
         await assignDerectSupervisors.createSupervisors(essEmpNumber, supervisorEmpNumber);
         await assignJobTitles.assignJobTitles(essEmpNumber, jobTitleID, frontend.manageReviewData.jobTitle.title);
     }
+
+    const apisupervisorID = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[4].employeeId);
+    if (apisupervisorID === undefined) {
+        throw new Error('Unable to resolve supervisor employee number for review setup');
+    }
+
+    const apiEmployeeID = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[5].employeeId);
+    if (apiEmployeeID === undefined) {
+        throw new Error('Unable to resolve employee number for review setup');
+    }
+
+    const reviewAPI1 = {
+        activate: true,
+        dueDate: dueDate,
+        empNumber: apiEmployeeID,
+        endDate: endDate,
+        reviewerEmpNumber: apisupervisorID,
+        startDate: startDate
+    }
+
+    await manageReview.createReview(reviewAPI1);
+
+
+    const apisupervisorIDForSearch = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[6].employeeId);
+    if (apisupervisorIDForSearch === undefined) {
+        throw new Error('Unable to resolve supervisor employee number for review setup');
+    }
+
+    const apiEmployeeIDForSearch = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[7].employeeId);
+    if (apiEmployeeIDForSearch === undefined) {
+        throw new Error('Unable to resolve employee number for review setup');
+    }
+
+    const reviewAPI2 = {
+        activate: true,
+        dueDate: dueDate,
+        empNumber: apiEmployeeIDForSearch,
+        endDate: endDate,
+        reviewerEmpNumber: apisupervisorIDForSearch,
+        startDate: startDate
+    }
+
+    await manageReview.createReview(reviewAPI2);
+
 })
 
 test.afterAll(async ({ manageReview, orangehrmAdminApi }) => {
@@ -113,7 +171,7 @@ test.describe("Test cases for Manage reviews", () => {
 
     })
 
-    test.only("TC-001 | Admin creates a review (Save)", async ({ page, manageReviews }) => {
+    test("TC-001 | Admin creates a review (Save)", async ({ page, manageReviews }) => {
 
         const base = new Date();
         const format = (d: Date): string => d.toISOString().split('T')[0];
@@ -147,5 +205,35 @@ test.describe("Test cases for Manage reviews", () => {
         await manageReviews.loginWithCredentials(api.reviewData.apiEmployees[1].username, api.reviewData.apiEmployees[1].password);
         await page.goto(frontend.manageReviewData.routes.manageReviews)
         await expect(manageReviews.verifyAccessDeniedVisibility()).toBeVisible();
+    })
+
+    test("TC-003 | Complete an existing Inprogress review from the list ", async ({ page, manageReviews }) => {
+        const base = new Date();
+        const format = (d: Date): string => d.toISOString().split('T')[0];
+        const today = format(base);
+
+        await manageReviews.loginAs('admin')
+        await page.goto(frontend.manageReviewData.routes.manageReviews)
+        await manageReviews.clickOnActionAsSupervisor(frontend.manageReviewData.validateDataForComplete.employeeName)
+        await manageReviews.fillReviewasSupervvisor(frontend.manageReviewData.supervisorReview, today);
+        await manageReviews.clickComplete();
+        await manageReviews.confirmReview();
+        await manageReviews.verifySuccessToastForSave();
+    })
+
+
+    test.only("TC-005 | Created review is searchable in the list ", async ({ page, manageReviews }) => {
+        await manageReviews.loginAs('admin')
+        await page.goto(frontend.manageReviewData.routes.manageReviews)
+        await manageReviews.fillSearchCriteria(frontend.manageReviewData.searchCriteria.employeeName);
+        await manageReviews.clickSearch();
+        await manageReviews.waitUntilTableLoaderDissapear()
+        const validateData = await manageReviews.validateDataInTable(frontend.manageReviewData.validateDataForSearch.employeeName)
+        expect(validateData.employeeName).not.toBeNull();
+        expect(validateData.jobTitle).not.toBeNull();
+        expect(validateData.period).toBe(frontend.manageReviewData.validateDataForSearch.reviewStatus);
+        expect(validateData.dueDate).not.toBeNull();
+        expect(validateData.reviewer).not.toBeNull();
+        expect(validateData.status).not.toBeNull();
     })
 })

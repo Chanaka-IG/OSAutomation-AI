@@ -55,6 +55,7 @@ import { optionalFields as optionalFieldsFrontend } from './pim/frontend/optiona
 import { customFields as customFieldsFrontend } from './pim/frontend/customFields';
 import { reportingMethods as reportingMethodsFrontend } from './pim/frontend/reportingMethods';
 import { manageReviews as manageReviewsFrontend} from './performance/frontend/manageReviews'
+import { maintenance as maintenanceFrontend } from './maintenance/frontend/maintenance'
 
 import * as pimFrontendApi from './pim/frontend-api';
 
@@ -112,7 +113,8 @@ export const frontend = {
   timesheets: timeTimesheets,
   employeeTimesheets: timeEmployeeTimesheets,
   timesheetLifecycle: timeTimesheetLifecycle,
-  manageReviewData : manageReviewsFrontend
+  manageReviewData : manageReviewsFrontend,
+  maintenance: maintenanceFrontend
 
 };
 

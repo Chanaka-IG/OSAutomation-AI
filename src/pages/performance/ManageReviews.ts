@@ -22,6 +22,7 @@ export class ManageReviews extends BasePage {
     readonly completeBtn: Locator;
     readonly okBtn: Locator;
     readonly accessDeniedMsg: Locator;
+    readonly searchBtn: Locator;
 
     constructor(page: Page) {
         super(page)
@@ -42,6 +43,7 @@ export class ManageReviews extends BasePage {
         this.completeBtn = this.page.getByRole('button', { name: 'Complete' })
         this.okBtn = this.page.getByRole('button', { name: 'Ok' })
         this.accessDeniedMsg = this.page.getByText('Credential Required', { exact: true })
+        this.searchBtn = this.page.getByRole('button', { name: 'Search' })
     }
     async clickOnAddReview(): Promise<void> {
         await this.addBtn.click();
@@ -94,7 +96,6 @@ export class ManageReviews extends BasePage {
 
     async clickOnActionAsSupervisor(employeeName: string): Promise<void> {
         console.log(employeeName)
-        await this.page.waitForTimeout(4000);
         await this.page.getByRole('row').filter({ hasText: employeeName }).getByTitle('Evaluate').click();
 
     }
@@ -115,7 +116,33 @@ export class ManageReviews extends BasePage {
     async confirmReview(): Promise<void> {
         await this.okBtn.click();
     }
-    verifyAccessDeniedVisibility() {
+    verifyAccessDeniedVisibility(): Locator {
         return this.accessDeniedMsg;
+    }
+    async fillSearchCriteria(employeeName: string): Promise<void> {
+        await this.selectEmployeeForSearch(employeeName);
+    }
+    async clickSearch(): Promise<void> {
+        await this.searchBtn.click();
+    }
+    async selectEmployeeForSearch(empName: string): Promise<void> {
+        await this.employeeNameInput.click();
+        await this.employeeNameInput.pressSequentially(empName);
+        const option = this.page.getByRole('option', { name: empName, exact: true });
+        await option.waitFor({ state: 'visible', timeout: 8_000 });
+        await option.click();
+    }
+
+    async validateDataInTable(employeeName: string): Promise<{ employeeName: string | null, jobTitle: string | null, period: string | null, dueDate: string | null, reviewer: string | null, status: string | null }> {
+        const row = this.page.getByRole('row').filter({ hasText: employeeName });
+        return {
+            employeeName: await row.getByRole('cell').nth(1).textContent(),
+            jobTitle: await row.getByRole('cell').nth(2).textContent(),
+            period: await row.getByRole('cell').nth(3).textContent(),
+            dueDate: await row.getByRole('cell').nth(4).textContent(),
+            reviewer: await row.getByRole('cell').nth(5).textContent(),
+            status: await row.getByRole('cell').nth(6).textContent(),
+        };
+
     }
 }
