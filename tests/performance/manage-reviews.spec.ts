@@ -76,6 +76,7 @@ test.beforeAll(async ({ masterDataReadiness, orangehrmAdminApi, employees, users
         await assignJobTitles.assignJobTitles(essEmpNumber, jobTitleID, frontend.manageReviewData.jobTitle.title);
     }
 
+    // Create reviews for testing
     const apisupervisorID = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[4].employeeId);
     if (apisupervisorID === undefined) {
         throw new Error('Unable to resolve supervisor employee number for review setup');
@@ -97,7 +98,7 @@ test.beforeAll(async ({ masterDataReadiness, orangehrmAdminApi, employees, users
 
     await manageReview.createReview(reviewAPI1);
 
-
+    // Create reviews for testing search and supervisor validation
     const apisupervisorIDForSearch = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[6].employeeId);
     if (apisupervisorIDForSearch === undefined) {
         throw new Error('Unable to resolve supervisor employee number for review setup');
@@ -118,6 +119,31 @@ test.beforeAll(async ({ masterDataReadiness, orangehrmAdminApi, employees, users
     }
 
     await manageReview.createReview(reviewAPI2);
+
+    // Create reviews for testing for readonly behavior of completed review
+
+    const apisupervisorIDForReadOnly = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[8].employeeId);
+    if (apisupervisorIDForReadOnly === undefined) {
+        throw new Error('Unable to resolve supervisor employee number for review setup');
+    }
+
+    const apiEmployeeIDForReadOnly = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[9].employeeId);
+    if (apiEmployeeIDForReadOnly === undefined) {
+        throw new Error('Unable to resolve employee number for review setup');
+    }
+
+    const reviewAPI3 = {
+        activate: true,
+        dueDate: dueDate,
+        empNumber: apiEmployeeIDForReadOnly,
+        endDate: endDate,
+        reviewerEmpNumber: apisupervisorIDForReadOnly,
+        startDate: startDate
+    }
+
+    await manageReview.createReview(reviewAPI3);
+
+
 
 })
 
@@ -207,7 +233,7 @@ test.describe("Test cases for Manage reviews", () => {
         await expect(manageReviews.verifyAccessDeniedVisibility()).toBeVisible();
     })
 
-    test("TC-003 | Complete an existing Inprogress review from the list ", async ({ page, manageReviews }) => {
+    test.only("TC-003 | Complete an existing Inprogress review from the list | TC-103 | Completed review renders read-only", async ({ page, manageReviews }) => {
         const base = new Date();
         const format = (d: Date): string => d.toISOString().split('T')[0];
         const today = format(base);
@@ -219,21 +245,53 @@ test.describe("Test cases for Manage reviews", () => {
         await manageReviews.clickComplete();
         await manageReviews.confirmReview();
         await manageReviews.verifySuccessToastForSave();
+        await manageReviews.waitUntilFormLoaderDissapear();
+        await manageReviews.validateDataReadonly();
     })
 
 
-    test.only("TC-005 | Created review is searchable in the list ", async ({ page, manageReviews }) => {
+    test("TC-005 | Created review is searchable in the list ", async ({ page, manageReviews }) => {
+
+        const base = new Date();
+        const format = (d: Date): string => d.toISOString().split('T')[0];
+
+        const today = format(base);
+
+        const twoWeeksBefore = new Date(base);
+        twoWeeksBefore.setDate(base.getDate() - 14);
+        const startDate = format(twoWeeksBefore)
+
+        const twoWeeksAfter = new Date(base);
+        twoWeeksAfter.setDate(base.getDate() + 14);
+        const endDate = format(twoWeeksAfter)
+
+        const oneMonthAfter = new Date(base);
+        oneMonthAfter.setMonth(base.getMonth() + 1);
+        const dueDate = format(oneMonthAfter)
+
         await manageReviews.loginAs('admin')
         await page.goto(frontend.manageReviewData.routes.manageReviews)
         await manageReviews.fillSearchCriteria(frontend.manageReviewData.searchCriteria.employeeName);
         await manageReviews.clickSearch();
         await manageReviews.waitUntilTableLoaderDissapear()
         const validateData = await manageReviews.validateDataInTable(frontend.manageReviewData.validateDataForSearch.employeeName)
-        expect(validateData.employeeName).not.toBeNull();
-        expect(validateData.jobTitle).not.toBeNull();
-        expect(validateData.period).toBe(frontend.manageReviewData.validateDataForSearch.reviewStatus);
-        expect(validateData.dueDate).not.toBeNull();
-        expect(validateData.reviewer).not.toBeNull();
-        expect(validateData.status).not.toBeNull();
+        expect(validateData.employeeName).toBe(frontend.manageReviewData.validateDataForSearch.employeeName);
+        expect(validateData.jobTitle).toBe(frontend.manageReviewData.validateDataForSearch.jobTitle);
+        expect(validateData.period).toBe(startDate + " - " + endDate);
+        expect(validateData.dueDate).toBe(dueDate);
+        expect(validateData.reviewer).toBe(frontend.manageReviewData.validateDataForSearch.reviewer);
+        expect(validateData.status).toBe(frontend.manageReviewData.validateDataForSearch.reviewStatus);
+    })
+
+    test("TC-100 | Reviewer autocomplete shows only the employee's supervisors", async ({ page, manageReviews }) => {
+
+        await manageReviews.loginAs('admin')
+        await page.goto(frontend.manageReviewData.routes.manageReviews)
+        await manageReviews.clickOnAddReview();
+        await manageReviews.selectEmployee(frontend.manageReviewData.validateSupervisor.employeeName);
+        const supervisorData = await manageReviews.validateSupervisor(frontend.manageReviewData.validateSupervisor.supervisorForSearch);
+        expect(supervisorData.optionCount).toBe(1);
+        expect(supervisorData.option).not.toBeNull();
+        expect(supervisorData.option).toBe(frontend.manageReviewData.validateSupervisor.supervisorName);
     })
 })

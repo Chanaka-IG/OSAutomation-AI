@@ -72,6 +72,17 @@ export class ManageReviews extends BasePage {
         await option.waitFor({ state: 'visible', timeout: 8_000 });
         await option.click();
     }
+    async validateSupervisor(supervisorName: string): Promise<{ optionCount: number; option: string | null; }> {
+        await this.supervisorNameInput.click();
+        await this.supervisorNameInput.pressSequentially(supervisorName);
+        await this.page.getByRole('option', { name: supervisorName }).waitFor({ state: 'visible', timeout: 8_000 });
+        const optionCount = await this.page.getByRole('option').count();
+        const option = await this.page.getByRole('option').first().textContent();
+        return {
+            optionCount: optionCount,
+            option: option
+        };
+    }
 
     async fillStartDate(startDate: string): Promise<void> {
         await this.pickDateFromDatePicker(startDate, this.startDate)
@@ -95,7 +106,6 @@ export class ManageReviews extends BasePage {
     }
 
     async clickOnActionAsSupervisor(employeeName: string): Promise<void> {
-        console.log(employeeName)
         await this.page.getByRole('row').filter({ hasText: employeeName }).getByTitle('Evaluate').click();
 
     }
@@ -138,11 +148,16 @@ export class ManageReviews extends BasePage {
         return {
             employeeName: await row.getByRole('cell').nth(1).textContent(),
             jobTitle: await row.getByRole('cell').nth(2).textContent(),
-            period: await row.getByRole('cell').nth(3).textContent(),
+            period: await row.getByRole('cell').nth(3).locator('.data').textContent(),
             dueDate: await row.getByRole('cell').nth(4).textContent(),
             reviewer: await row.getByRole('cell').nth(5).textContent(),
             status: await row.getByRole('cell').nth(6).textContent(),
         };
-
+    }
+    
+    async validateDataReadonly(): Promise<void> {
+        await expect(this.rating).toBeDisabled();
+        await expect(this.comment).toBeDisabled();
+        await expect(this.generalComment).toBeDisabled();
     }
 }
