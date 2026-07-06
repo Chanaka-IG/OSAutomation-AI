@@ -60,5 +60,10 @@ export const manageReviews = {
   searchCriteria: {
     employeeName: 'Daniiel Jasmis Vittori',
   },
+  validateSupervisor: {
+    supervisorForSearch : 'Marco',
+    employeeName: 'Adams Mugas Gilchrist',
+    supervisorName: 'Marco Hales Janson'
+  },
 
 }

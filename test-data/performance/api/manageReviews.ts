@@ -2,10 +2,10 @@
 export type reviewAPI = {
     activate: boolean,
     dueDate: string,
-    empNumber: number ,
+    empNumber: number,
     endDate: string,
     reviewerEmpNumber: number,
-    startDate: string   
+    startDate: string
 };
 
 export const reviewData = {
@@ -72,7 +72,7 @@ export const reviewData = {
         status: true,
         userRoleId: 2,
     },
-     {
+    {
         employeeId: '0306',
         firstName: 'Jonothan',
         lastName: 'Trott',
@@ -88,6 +88,26 @@ export const reviewData = {
         lastName: 'Vittori',
         middleName: 'Jasmis',
         username: 'Daniiel',
+        password: 'admin@OHRM123',
+        status: true,
+        userRoleId: 2,
+    },
+  {
+        employeeId: '0308',
+        firstName: 'Jonathan',
+        lastName: 'Smith',
+        middleName: 'James',
+        username: 'Jonathan',
+        password: 'admin@OHRM123',
+        status: true,
+        userRoleId: 2,
+    },
+    {
+        employeeId: '0309',
+        firstName: 'Michael',
+        lastName: 'Johnson',
+        middleName: 'David',
+        username: 'Michael',
         password: 'admin@OHRM123',
         status: true,
         userRoleId: 2,
