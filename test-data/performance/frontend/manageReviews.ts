@@ -40,6 +40,10 @@ export const manageReviews = {
     employeeName: 'Shane Warne',
     reviewStatus: 'Activated'
   },
+  validateDataForSaveReview: {
+    displayName: 'Daniel Wilson',
+    reviewStatus: 'Inactive'
+  },
   logasSupervisor: {
     username: "Rezaa",
     password: "admin@OHRM123"
@@ -61,9 +65,16 @@ export const manageReviews = {
     employeeName: 'Daniiel Jasmis Vittori',
   },
   validateSupervisor: {
-    supervisorForSearch : 'Marco',
+    supervisorForSearch: 'Marco',
     employeeName: 'Adams Mugas Gilchrist',
     supervisorName: 'Marco Hales Janson'
   },
-
+  updateReview: {
+    employeeName: 'Adams Mugas Gilchrist',
+    supervisorName: 'Marco'
+  },
+  dataForDeleteReview: {
+    employeeName: 'Benjamin Walker',
+    reviewStatus: 'Activated'
+  },
 }
