@@ -23,6 +23,7 @@ export class ManageReviews extends BasePage {
     readonly okBtn: Locator;
     readonly accessDeniedMsg: Locator;
     readonly searchBtn: Locator;
+    readonly yesDeleteBtn: Locator;
 
     constructor(page: Page) {
         super(page)
@@ -44,6 +45,7 @@ export class ManageReviews extends BasePage {
         this.okBtn = this.page.getByRole('button', { name: 'Ok' })
         this.accessDeniedMsg = this.page.getByText('Credential Required', { exact: true })
         this.searchBtn = this.page.getByRole('button', { name: 'Search' })
+        this.yesDeleteBtn = this.page.getByRole('button', { name: 'Yes, Delete' })
     }
     async clickOnAddReview(): Promise<void> {
         await this.addBtn.click();
@@ -59,6 +61,7 @@ export class ManageReviews extends BasePage {
 
     async selectEmployee(empName: string): Promise<void> {
         await this.employeeNameInput.click();
+        await this.employeeNameInput.clear();
         await this.employeeNameInput.pressSequentially(empName);
         const option = this.page.getByRole('option', { name: empName, exact: true });
         await option.waitFor({ state: 'visible', timeout: 8_000 });
@@ -67,6 +70,7 @@ export class ManageReviews extends BasePage {
 
     async selectSupervisor(supervisorName: string): Promise<void> {
         await this.supervisorNameInput.click();
+        await this.supervisorNameInput.clear();
         await this.supervisorNameInput.pressSequentially(supervisorName);
         const option = this.page.getByRole('option', { name: supervisorName });
         await option.waitFor({ state: 'visible', timeout: 8_000 });
@@ -107,6 +111,13 @@ export class ManageReviews extends BasePage {
 
     async clickOnActionAsSupervisor(employeeName: string): Promise<void> {
         await this.page.getByRole('row').filter({ hasText: employeeName }).getByTitle('Evaluate').click();
+
+    }
+    async clickOnDeleteReview(employeeName: string): Promise<void> {
+        await this.page.getByRole('row').filter({ hasText: employeeName }).locator('.bi-trash').click();
+    }
+    async clickOnEditIcon(employeeName: string): Promise<void> {
+        await this.page.getByRole('row').filter({ hasText: employeeName }).getByTitle('Edit').click();
 
     }
     async fillReviewasSupervvisor(reviewData: supervisorReview, today: string): Promise<void> {
@@ -154,10 +165,27 @@ export class ManageReviews extends BasePage {
             status: await row.getByRole('cell').nth(6).textContent(),
         };
     }
-    
-    async validateDataReadonly(): Promise<void> {
-        await expect(this.rating).toBeDisabled();
-        await expect(this.comment).toBeDisabled();
-        await expect(this.generalComment).toBeDisabled();
+
+    async validateDataReadonly(): Promise<{ rating: Locator, comment: Locator, generalComment: Locator }> {
+        await this.page.waitForEvent('load');
+        return {
+            rating: this.rating,
+            comment: this.comment,
+            generalComment: this.generalComment
+        }
+    }
+    async clickYesOnDeleteConfirmation(): Promise<void> {
+        await this.yesDeleteBtn.click();
+    }
+    validateRequiredErrors(): { employeeError: Locator, supervisorError: Locator, startDateError: Locator, endDateError: Locator, dueDateError: Locator } {
+        return {
+            employeeError: this.page.locator('.oxd-grid-item').filter({ hasText: 'Employee Name' }).getByText('Required', { exact: true }),
+            supervisorError: this.page.locator('.oxd-grid-item').filter({ hasText: 'Supervisor Reviewer' }).getByText('Required', { exact: true }),
+            startDateError: this.page.locator('.oxd-grid-item').filter({ hasText: 'Review Period Start Date' }).getByText('Required', { exact: true }),
+            endDateError: this.page.locator('.oxd-grid-item').filter({ hasText: 'Review Period End Date' }).getByText('Required', { exact: true }),
+            dueDateError: this.page.locator('.oxd-grid-item').filter({ hasText: 'Due Date' }).getByText('Required', { exact: true })
+        }
+
+
     }
 }

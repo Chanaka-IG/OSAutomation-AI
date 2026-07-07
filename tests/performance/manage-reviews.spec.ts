@@ -143,7 +143,49 @@ test.beforeAll(async ({ masterDataReadiness, orangehrmAdminApi, employees, users
 
     await manageReview.createReview(reviewAPI3);
 
+    // Create reviews for testing
+    const apisupervisorIDForSaveReview = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[10].employeeId);
+    if (apisupervisorIDForSaveReview === undefined) {
+        throw new Error('Unable to resolve supervisor employee number for review setup');
+    }
 
+    const apiEmployeeIDForSaveReview = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[11].employeeId);
+    if (apiEmployeeIDForSaveReview === undefined) {
+        throw new Error('Unable to resolve employee number for review setup');
+    }
+
+    const reviewAPI4 = {
+        activate: false,
+        dueDate: dueDate,
+        empNumber: apiEmployeeIDForSaveReview,
+        endDate: endDate,
+        reviewerEmpNumber: apisupervisorIDForSaveReview,
+        startDate: startDate
+    }
+
+    await manageReview.createReview(reviewAPI4);
+
+    // Create reviews for delete testing
+    const apisupervisorIDFordeleteReview = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[14].employeeId);
+    if (apisupervisorIDFordeleteReview === undefined) {
+        throw new Error('Unable to resolve supervisor employee number for review setup');
+    }
+
+    const apiEmployeeIDFordeleteReview = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[15].employeeId);
+    if (apiEmployeeIDFordeleteReview === undefined) {
+        throw new Error('Unable to resolve employee number for review setup');
+    }
+
+    const reviewAPI5 = {
+        activate: true,
+        dueDate: dueDate,
+        empNumber: apiEmployeeIDFordeleteReview,
+        endDate: endDate,
+        reviewerEmpNumber: apisupervisorIDFordeleteReview,
+        startDate: startDate
+    }
+
+    await manageReview.createReview(reviewAPI5);
 
 })
 
@@ -233,7 +275,7 @@ test.describe("Test cases for Manage reviews", () => {
         await expect(manageReviews.verifyAccessDeniedVisibility()).toBeVisible();
     })
 
-    test.only("TC-003 | Complete an existing Inprogress review from the list | TC-103 | Completed review renders read-only", async ({ page, manageReviews }) => {
+    test("TC-003 | Complete an existing Inprogress review from the list | TC-103 | Completed review renders read-only", async ({ page, manageReviews }) => {
         const base = new Date();
         const format = (d: Date): string => d.toISOString().split('T')[0];
         const today = format(base);
@@ -246,7 +288,10 @@ test.describe("Test cases for Manage reviews", () => {
         await manageReviews.confirmReview();
         await manageReviews.verifySuccessToastForSave();
         await manageReviews.waitUntilFormLoaderDissapear();
-        await manageReviews.validateDataReadonly();
+        const readonlyData = await manageReviews.validateDataReadonly();
+        await expect(readonlyData.rating).toBeDisabled();
+        await expect(readonlyData.comment).toBeDisabled();
+        await expect(readonlyData.generalComment).toBeDisabled();
     })
 
 
@@ -293,5 +338,73 @@ test.describe("Test cases for Manage reviews", () => {
         expect(supervisorData.optionCount).toBe(1);
         expect(supervisorData.option).not.toBeNull();
         expect(supervisorData.option).toBe(frontend.manageReviewData.validateSupervisor.supervisorName);
+    })
+
+
+    test("TC-006 | Edit an Inactive review's period / due date / reviewer", async ({ page, manageReviews }) => {
+
+        const base = new Date();
+        const format = (d: Date): string => d.toISOString().split('T')[0];
+
+        const yesterday = new Date(base);
+        yesterday.setDate(base.getDate() - 1);
+        const startDate = format(yesterday);
+
+        const tomorrow = new Date(base);
+        tomorrow.setDate(base.getDate() + 1);
+        const endDate = format(tomorrow);
+
+        const oneAndHalfWeek = new Date(base);
+        oneAndHalfWeek.setDate(base.getDate() + 10);
+        const dueDate = format(oneAndHalfWeek)
+
+
+        await manageReviews.loginAs('admin')
+        await page.goto(frontend.manageReviewData.routes.manageReviews)
+        await manageReviews.clickOnEditIcon(frontend.manageReviewData.validateDataForSaveReview.displayName)
+        await manageReviews.fillReview(frontend.manageReviewData.updateReview.employeeName, frontend.manageReviewData.updateReview.supervisorName, startDate, endDate, dueDate);
+        await manageReviews.clickActivateBtn();
+        await manageReviews.verifySuccessToastForActivate();
+    })
+
+    test("TC-007 | Delete a review from the list", async ({ page, manageReviews }) => {
+
+        await manageReviews.loginAs('admin')
+        await page.goto(frontend.manageReviewData.routes.manageReviews)
+        await manageReviews.clickOnDeleteReview(frontend.manageReviewData.dataForDeleteReview.employeeName)
+        await manageReviews.clickYesOnDeleteConfirmation();
+        await manageReviews.verifySuccessToastforDeletion();
+    })
+    test("TC-300 | Empty Save → 5× Required", async ({ page, manageReviews }) => {
+
+        await manageReviews.loginAs('admin')
+        await page.goto(frontend.manageReviewData.routes.manageReviews)
+        await manageReviews.clickOnAddReview();
+        await manageReviews.clickActivateBtn();
+        const requiredErrors = manageReviews.validateRequiredErrors();
+        await expect(requiredErrors.employeeError).toBeVisible();
+        await expect(requiredErrors.supervisorError).toBeVisible();
+        await expect(requiredErrors.startDateError).toBeVisible();
+        await expect(requiredErrors.endDateError).toBeVisible();
+        await expect(requiredErrors.dueDateError).toBeVisible();
+    })
+
+    test.only(" TC-500 | Empty list shows No Records Found Toast", async ({ page, manageReviews }) => {
+
+        await manageReviews.loginAs('admin')
+        await page.goto(frontend.manageReviewData.routes.manageReviews)
+        await page.route('**/api/v2/performance/manage/**', async route => {
+            if (route.request().method() === 'GET') {
+                route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify({ "data": [], "meta": { "total": 0 }, "rels": [] })
+                })
+                return;
+            }
+            await route.continue();
+        })
+        await manageReviews.VerifyNoRecords();
+
     })
 })
