@@ -389,7 +389,7 @@ test.describe("Test cases for Manage reviews", () => {
         await expect(requiredErrors.dueDateError).toBeVisible();
     })
 
-    test.only(" TC-500 | Empty list shows No Records Found Toast", async ({ page, manageReviews }) => {
+    test(" TC-500 | Empty list shows No Records Found Toast", async ({ page, manageReviews }) => {
 
         await manageReviews.loginAs('admin')
         await page.goto(frontend.manageReviewData.routes.manageReviews)
