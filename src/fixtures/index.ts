@@ -55,7 +55,7 @@ import { ClaimExpenseTypesPage } from '../pages/claim/ClaimExpenseTypesPage';
 import { SubmitClaimPage } from '../pages/claim/SubmitClaimPage';
 import { AssignClaimPage } from '../pages/claim/AssignClaimPage';
 import { EmployeeClaimsPage } from '../pages/claim/EmployeeClaimsPage';
-import { ManageReviews } from '../pages/performance/ManageReviews'
+import { ManageReviewsPage } from '../pages/performance/ManageReviews'
 import { MaintenancePage } from '../pages/maintenance/MaintenancePage'
 
 
@@ -108,7 +108,7 @@ export type OrangehrmFixtures = {
   submitClaimPage: SubmitClaimPage;
   assignClaimPage: AssignClaimPage;
   employeeClaimsPage: EmployeeClaimsPage;
-  manageReviews:ManageReviews;
+  manageReviewsPage:ManageReviewsPage;
   maintenancePage: MaintenancePage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
   orangehrmApiContext: APIRequestContext;
@@ -312,8 +312,8 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
   employeeClaimsPage: async ({ page }, use) => {
     await use(new EmployeeClaimsPage(page));
   },
-  manageReviews : async ({page}, use) => {
-    await use (new ManageReviews(page))
+  manageReviewsPage : async ({page}, use) => {
+    await use (new ManageReviewsPage(page))
   },
   maintenancePage: async ({ page }, use) => {
     await use(new MaintenancePage(page));

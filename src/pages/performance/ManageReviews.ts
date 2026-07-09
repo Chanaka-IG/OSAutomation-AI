@@ -1,9 +1,8 @@
-import { stat } from "node:fs";
 import { BasePage } from "../BasePage";
 import { Page, Locator, expect } from "@playwright/test";
 import type { supervisorReview } from '../../../test-data/performance/frontend/manageReviews'
 
-export class ManageReviews extends BasePage {
+export class ManageReviewsPage extends BasePage {
 
     readonly addBtn: Locator;
     readonly employeeNameInput: Locator;
@@ -186,6 +185,17 @@ export class ManageReviews extends BasePage {
             dueDateError: this.page.locator('.oxd-grid-item').filter({ hasText: 'Due Date' }).getByText('Required', { exact: true })
         }
 
-
+    }
+    async fillNameInputForInvalid(empName: string): Promise<void> {
+        await this.employeeNameInput.click();
+        await this.employeeNameInput.clear();
+        await this.employeeNameInput.pressSequentially(empName);
+        await this.page.keyboard.press('Tab');
+      
+    }
+    async verifyEmployeeNameInvalidError(): Promise<{ employeeError: Locator }> {
+         return {
+            employeeError: this.page.locator('.oxd-grid-item').filter({ hasText: 'Employee Name' }).getByText('Invalid', { exact: true }),
+        }
     }
 }

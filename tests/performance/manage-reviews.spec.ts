@@ -5,6 +5,8 @@ import { api } from '../../test-data';
 
 test.describe.configure({ timeout: 120_000 });
 
+const EMPTY_REVIEWS_RESPONSE = { data: [], meta: { total: 0 }, rels: [] };
+
 test.beforeEach(() => {
     test.skip(!env.baseURL, 'Set BASE_URL to run this suite.');
 });
@@ -197,7 +199,7 @@ test.afterAll(async ({ manageReview, orangehrmAdminApi }) => {
 
 test.describe("Test cases for Manage reviews", () => {
 
-    test("TC-004 | Full lifecycle: create → activate → reviewer evaluates → In Progress → Completed", async ({ page, manageReviews }) => {
+    test("TC-004 | Full lifecycle: create → activate → reviewer evaluates → In Progress → Completed", async ({ page, manageReviewsPage }) => {
 
         const base = new Date();
         const format = (d: Date): string => d.toISOString().split('T')[0];
@@ -217,29 +219,29 @@ test.describe("Test cases for Manage reviews", () => {
         const dueDate = format(oneMonthAfter)
 
         //actions as admin
-        await manageReviews.loginAs('admin')
+        await manageReviewsPage.loginAs('admin')
         await page.goto(frontend.manageReviewData.routes.manageReviews)
-        await manageReviews.clickOnAddReview();
-        await manageReviews.fillReview(frontend.manageReviewData.reviewData.employeeName, frontend.manageReviewData.reviewData.supervisorName, startDate, endDate, dueDate);
-        await manageReviews.clickActivateBtn();
-        await manageReviews.verifySuccessToastForActivate();
-        expect(await manageReviews.checkReviewStatusAsAdmin(frontend.manageReviewData.validateData.employeeName)).toBe(frontend.manageReviewData.validateData.reviewStatus);
-        await manageReviews.logOut();
+        await manageReviewsPage.clickOnAddReview();
+        await manageReviewsPage.fillReview(frontend.manageReviewData.reviewData.employeeName, frontend.manageReviewData.reviewData.supervisorName, startDate, endDate, dueDate);
+        await manageReviewsPage.clickActivateBtn();
+        await manageReviewsPage.verifySuccessToastForActivate();
+        expect(await manageReviewsPage.checkReviewStatusAsAdmin(frontend.manageReviewData.validateData.employeeName)).toBe(frontend.manageReviewData.validateData.reviewStatus);
+        await manageReviewsPage.logOut();
 
         //action as supervisor
-        await manageReviews.loginWithCredentials(frontend.manageReviewData.logasSupervisor.username, frontend.manageReviewData.logasSupervisor.password);
+        await manageReviewsPage.loginWithCredentials(frontend.manageReviewData.logasSupervisor.username, frontend.manageReviewData.logasSupervisor.password);
         await page.goto(frontend.manageReviewData.routes.reviewsAsSupervisor)
-        await manageReviews.clickOnActionAsSupervisor(frontend.manageReviewData.validateData.employeeName)
-        await manageReviews.fillReviewasSupervvisor(frontend.manageReviewData.supervisorReview, today);
-        await manageReviews.clickSave();
-        await manageReviews.verifySuccessToastForSave();
-        await manageReviews.clickComplete();
-        await manageReviews.confirmReview();
-        await manageReviews.verifySuccessToastForSave();
+        await manageReviewsPage.clickOnActionAsSupervisor(frontend.manageReviewData.validateData.employeeName)
+        await manageReviewsPage.fillReviewasSupervvisor(frontend.manageReviewData.supervisorReview, today);
+        await manageReviewsPage.clickSave();
+        await manageReviewsPage.verifySuccessToastForSave();
+        await manageReviewsPage.clickComplete();
+        await manageReviewsPage.confirmReview();
+        await manageReviewsPage.verifySuccessToastForSave();
 
     })
 
-    test("TC-001 | Admin creates a review (Save)", async ({ page, manageReviews }) => {
+    test("TC-001 | Admin creates a review (Save)", async ({ page, manageReviewsPage }) => {
 
         const base = new Date();
         const format = (d: Date): string => d.toISOString().split('T')[0];
@@ -259,43 +261,43 @@ test.describe("Test cases for Manage reviews", () => {
         const dueDate = format(oneMonthAfter)
 
         //actions as admin
-        await manageReviews.loginAs('admin')
+        await manageReviewsPage.loginAs('admin')
         await page.goto(frontend.manageReviewData.routes.manageReviews)
-        await manageReviews.clickOnAddReview();
-        await manageReviews.fillReview(frontend.manageReviewData.saveReview.employeeName, frontend.manageReviewData.saveReview.supervisorName, startDate, endDate, dueDate);
-        await manageReviews.clickSave();
-        await manageReviews.verifySuccessToastForUpdate();
-        expect(await manageReviews.checkReviewStatusAsAdmin(frontend.manageReviewData.validateDataForSave.employeeName)).toBe(frontend.manageReviewData.validateDataForSave.reviewStatus);
+        await manageReviewsPage.clickOnAddReview();
+        await manageReviewsPage.fillReview(frontend.manageReviewData.saveReview.employeeName, frontend.manageReviewData.saveReview.supervisorName, startDate, endDate, dueDate);
+        await manageReviewsPage.clickSave();
+        await manageReviewsPage.verifySuccessToastForUpdate();
+        expect(await manageReviewsPage.checkReviewStatusAsAdmin(frontend.manageReviewData.validateDataForSave.employeeName)).toBe(frontend.manageReviewData.validateDataForSave.reviewStatus);
     })
 
-    test("TC-200 | ESS cannot access the Manage Reviews admin page ", async ({ page, manageReviews }) => {
+    test("TC-200 | ESS cannot access the Manage Reviews admin page ", async ({ page, manageReviewsPage }) => {
 
-        await manageReviews.loginWithCredentials(api.reviewData.apiEmployees[1].username, api.reviewData.apiEmployees[1].password);
+        await manageReviewsPage.loginWithCredentials(api.reviewData.apiEmployees[1].username, api.reviewData.apiEmployees[1].password);
         await page.goto(frontend.manageReviewData.routes.manageReviews)
-        await expect(manageReviews.verifyAccessDeniedVisibility()).toBeVisible();
+        await expect(manageReviewsPage.verifyAccessDeniedVisibility()).toBeVisible();
     })
 
-    test("TC-003 | Complete an existing Inprogress review from the list | TC-103 | Completed review renders read-only", async ({ page, manageReviews }) => {
+    test("TC-003 | Complete an existing Inprogress review from the list | TC-103 | Completed review renders read-only", async ({ page, manageReviewsPage }) => {
         const base = new Date();
         const format = (d: Date): string => d.toISOString().split('T')[0];
         const today = format(base);
 
-        await manageReviews.loginAs('admin')
+        await manageReviewsPage.loginAs('admin')
         await page.goto(frontend.manageReviewData.routes.manageReviews)
-        await manageReviews.clickOnActionAsSupervisor(frontend.manageReviewData.validateDataForComplete.employeeName)
-        await manageReviews.fillReviewasSupervvisor(frontend.manageReviewData.supervisorReview, today);
-        await manageReviews.clickComplete();
-        await manageReviews.confirmReview();
-        await manageReviews.verifySuccessToastForSave();
-        await manageReviews.waitUntilFormLoaderDissapear();
-        const readonlyData = await manageReviews.validateDataReadonly();
+        await manageReviewsPage.clickOnActionAsSupervisor(frontend.manageReviewData.validateDataForComplete.employeeName)
+        await manageReviewsPage.fillReviewasSupervvisor(frontend.manageReviewData.supervisorReview, today);
+        await manageReviewsPage.clickComplete();
+        await manageReviewsPage.confirmReview();
+        await manageReviewsPage.verifySuccessToastForSave();
+        await manageReviewsPage.waitUntilFormLoaderDissapear();
+        const readonlyData = await manageReviewsPage.validateDataReadonly();
         await expect(readonlyData.rating).toBeDisabled();
         await expect(readonlyData.comment).toBeDisabled();
         await expect(readonlyData.generalComment).toBeDisabled();
     })
 
 
-    test("TC-005 | Created review is searchable in the list ", async ({ page, manageReviews }) => {
+    test("TC-005 | Created review is searchable in the list ", async ({ page, manageReviewsPage }) => {
 
         const base = new Date();
         const format = (d: Date): string => d.toISOString().split('T')[0];
@@ -314,12 +316,12 @@ test.describe("Test cases for Manage reviews", () => {
         oneMonthAfter.setMonth(base.getMonth() + 1);
         const dueDate = format(oneMonthAfter)
 
-        await manageReviews.loginAs('admin')
+        await manageReviewsPage.loginAs('admin')
         await page.goto(frontend.manageReviewData.routes.manageReviews)
-        await manageReviews.fillSearchCriteria(frontend.manageReviewData.searchCriteria.employeeName);
-        await manageReviews.clickSearch();
-        await manageReviews.waitUntilTableLoaderDissapear()
-        const validateData = await manageReviews.validateDataInTable(frontend.manageReviewData.validateDataForSearch.employeeName)
+        await manageReviewsPage.fillSearchCriteria(frontend.manageReviewData.searchCriteria.employeeName);
+        await manageReviewsPage.clickSearch();
+        await manageReviewsPage.waitUntilTableLoaderDissapear()
+        const validateData = await manageReviewsPage.validateDataInTable(frontend.manageReviewData.validateDataForSearch.employeeName)
         expect(validateData.employeeName).toBe(frontend.manageReviewData.validateDataForSearch.employeeName);
         expect(validateData.jobTitle).toBe(frontend.manageReviewData.validateDataForSearch.jobTitle);
         expect(validateData.period).toBe(startDate + " - " + endDate);
@@ -328,20 +330,20 @@ test.describe("Test cases for Manage reviews", () => {
         expect(validateData.status).toBe(frontend.manageReviewData.validateDataForSearch.reviewStatus);
     })
 
-    test("TC-100 | Reviewer autocomplete shows only the employee's supervisors", async ({ page, manageReviews }) => {
+    test("TC-100 | Reviewer autocomplete shows only the employee's supervisors", async ({ page, manageReviewsPage }) => {
 
-        await manageReviews.loginAs('admin')
+        await manageReviewsPage.loginAs('admin')
         await page.goto(frontend.manageReviewData.routes.manageReviews)
-        await manageReviews.clickOnAddReview();
-        await manageReviews.selectEmployee(frontend.manageReviewData.validateSupervisor.employeeName);
-        const supervisorData = await manageReviews.validateSupervisor(frontend.manageReviewData.validateSupervisor.supervisorForSearch);
+        await manageReviewsPage.clickOnAddReview();
+        await manageReviewsPage.selectEmployee(frontend.manageReviewData.validateSupervisor.employeeName);
+        const supervisorData = await manageReviewsPage.validateSupervisor(frontend.manageReviewData.validateSupervisor.supervisorForSearch);
         expect(supervisorData.optionCount).toBe(1);
         expect(supervisorData.option).not.toBeNull();
         expect(supervisorData.option).toBe(frontend.manageReviewData.validateSupervisor.supervisorName);
     })
 
 
-    test("TC-006 | Edit an Inactive review's period / due date / reviewer", async ({ page, manageReviews }) => {
+    test("TC-006 | Edit an Inactive review's period / due date / reviewer", async ({ page, manageReviewsPage }) => {
 
         const base = new Date();
         const format = (d: Date): string => d.toISOString().split('T')[0];
@@ -359,29 +361,29 @@ test.describe("Test cases for Manage reviews", () => {
         const dueDate = format(oneAndHalfWeek)
 
 
-        await manageReviews.loginAs('admin')
+        await manageReviewsPage.loginAs('admin')
         await page.goto(frontend.manageReviewData.routes.manageReviews)
-        await manageReviews.clickOnEditIcon(frontend.manageReviewData.validateDataForSaveReview.displayName)
-        await manageReviews.fillReview(frontend.manageReviewData.updateReview.employeeName, frontend.manageReviewData.updateReview.supervisorName, startDate, endDate, dueDate);
-        await manageReviews.clickActivateBtn();
-        await manageReviews.verifySuccessToastForActivate();
+        await manageReviewsPage.clickOnEditIcon(frontend.manageReviewData.validateDataForSaveReview.displayName)
+        await manageReviewsPage.fillReview(frontend.manageReviewData.updateReview.employeeName, frontend.manageReviewData.updateReview.supervisorName, startDate, endDate, dueDate);
+        await manageReviewsPage.clickActivateBtn();
+        await manageReviewsPage.verifySuccessToastForActivate();
     })
 
-    test("TC-007 | Delete a review from the list", async ({ page, manageReviews }) => {
+    test("TC-007 | Delete a review from the list", async ({ page, manageReviewsPage }) => {
 
-        await manageReviews.loginAs('admin')
+        await manageReviewsPage.loginAs('admin')
         await page.goto(frontend.manageReviewData.routes.manageReviews)
-        await manageReviews.clickOnDeleteReview(frontend.manageReviewData.dataForDeleteReview.employeeName)
-        await manageReviews.clickYesOnDeleteConfirmation();
-        await manageReviews.verifySuccessToastforDeletion();
+        await manageReviewsPage.clickOnDeleteReview(frontend.manageReviewData.dataForDeleteReview.employeeName)
+        await manageReviewsPage.clickYesOnDeleteConfirmation();
+        await manageReviewsPage.verifySuccessToastforDeletion();
     })
-    test("TC-300 | Empty Save → 5× Required", async ({ page, manageReviews }) => {
+    test("TC-300 | Empty Save → 5× Required", async ({ page, manageReviewsPage }) => {
 
-        await manageReviews.loginAs('admin')
+        await manageReviewsPage.loginAs('admin')
         await page.goto(frontend.manageReviewData.routes.manageReviews)
-        await manageReviews.clickOnAddReview();
-        await manageReviews.clickActivateBtn();
-        const requiredErrors = manageReviews.validateRequiredErrors();
+        await manageReviewsPage.clickOnAddReview();
+        await manageReviewsPage.clickActivateBtn();
+        const requiredErrors = manageReviewsPage.validateRequiredErrors();
         await expect(requiredErrors.employeeError).toBeVisible();
         await expect(requiredErrors.supervisorError).toBeVisible();
         await expect(requiredErrors.startDateError).toBeVisible();
@@ -389,22 +391,32 @@ test.describe("Test cases for Manage reviews", () => {
         await expect(requiredErrors.dueDateError).toBeVisible();
     })
 
-    test(" TC-500 | Empty list shows No Records Found Toast", async ({ page, manageReviews }) => {
+    test("TC-500 | Empty list shows No Records Found Toast", async ({ page, manageReviewsPage }) => {
 
-        await manageReviews.loginAs('admin')
-        await page.goto(frontend.manageReviewData.routes.manageReviews)
+        await manageReviewsPage.loginAs('admin')
         await page.route('**/api/v2/performance/manage/**', async route => {
             if (route.request().method() === 'GET') {
-                route.fulfill({
+                await route.fulfill({
                     status: 200,
                     contentType: 'application/json',
-                    body: JSON.stringify({ "data": [], "meta": { "total": 0 }, "rels": [] })
+                    body: JSON.stringify(EMPTY_REVIEWS_RESPONSE)
                 })
                 return;
             }
             await route.continue();
         })
-        await manageReviews.VerifyNoRecords();
+        await page.goto(frontend.manageReviewData.routes.manageReviews)
+        await manageReviewsPage.VerifyNoRecords();
 
+    })
+
+    test("TC-301: Free-typed (unbound) employee name is rejected", async ({ page, manageReviewsPage }) => {
+
+        await manageReviewsPage.loginAs('admin')
+        await page.goto(frontend.manageReviewData.routes.manageReviews)
+        await manageReviewsPage.clickOnAddReview();
+        await manageReviewsPage.fillNameInputForInvalid(frontend.manageReviewData.invalidNameInput.employeeName);
+        const InvalidErrors = await manageReviewsPage.verifyEmployeeNameInvalidError();
+        await expect(InvalidErrors.employeeError).toBeVisible();
     })
 })
