@@ -77,4 +77,8 @@ export const manageReviews = {
     employeeName: 'Benjamin Walker',
     reviewStatus: 'Activated'
   },
+    invalidNameInput: {
+    employeeName: 'Benjamin Walker',
+    reviewStatus: 'Activated'
+  },
 }
