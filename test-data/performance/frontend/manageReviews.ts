@@ -6,6 +6,14 @@ export type supervisorReview = {
   finalComment: string
 };
 
+export type reviewForm = {
+  employeeName: string,
+  /** Single name token — the supervisors autocomplete API only matches one word (verified live: "Andrew Symonds" → 0 hits, "Symonds" → 1). */
+  supervisorSearch: string,
+  /** Full option label ("First Middle Last") used for the exact-match click. */
+  supervisorName: string,
+};
+
 export const manageReviews = {
 
   routes: {
@@ -15,11 +23,13 @@ export const manageReviews = {
 
   reviewData: {
     employeeName: 'Maraso Jack Kallis',
-    supervisorName: 'Rezaa'
+    supervisorSearch: 'Rezaa',
+    supervisorName: 'Rezaa Diyago Hendricks'
   },
   saveReview: {
     employeeName: 'Adams Mugas Gilchrist',
-    supervisorName: 'Marco'
+    supervisorSearch: 'Marco',
+    supervisorName: 'Marco Hales Janson'
   },
 
   jobTitle: {
@@ -31,6 +41,10 @@ export const manageReviews = {
   validateData: {
     employeeName: 'Maraso Kallis',
     reviewStatus: 'Activated'
+  },
+  validateDataForCompleted: {
+    employeeName: 'Maraso Kallis',
+    reviewStatus: 'Completed'
   },
   validateDataForSave: {
     employeeName: 'Adams Gilchrist',
@@ -57,7 +71,7 @@ export const manageReviews = {
   supervisorReview: {
     rating: 30,
     comment: "Supervisor Review",
-    generalComment: "Supervisor geberal Review",
+    generalComment: "Supervisor general Review",
     finalRating: 40,
     finalComment: "Final comment added"
   },
@@ -71,14 +85,18 @@ export const manageReviews = {
   },
   updateReview: {
     employeeName: 'Adams Mugas Gilchrist',
-    supervisorName: 'Marco'
+    supervisorSearch: 'Marco',
+    supervisorName: 'Marco Hales Janson'
+  },
+  updateReviewValidate: {
+    employeeName: 'Adams Gilchrist',
+    reviewStatus: 'Activated'
   },
   dataForDeleteReview: {
     employeeName: 'Benjamin Walker',
     reviewStatus: 'Activated'
   },
-    invalidNameInput: {
-    employeeName: 'Benjamin Walker',
-    reviewStatus: 'Activated'
+  invalidNameInput: {
+    employeeName: 'Nonexistent Person Zz'
   },
 }
