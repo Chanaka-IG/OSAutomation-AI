@@ -1,5 +1,7 @@
 # Test Review — Performance → Manage Reviews
 
+> **Fix status (2026-07-09):** All findings applied. #1 (`test.only`) was removed by hand; #2–#17 were fixed across the spec, page object, test data, and `ManageReviewsApi` (scoped `deleteReviewsForEmployees` + `createIfAbsent` replace `deleteAllReviews`; supervisor autocomplete verified live to only match single-name tokens, so exact-match clicks use full display names with a one-word search query). Suite verified: 10/11 passed on the full run; TC-004 failed once on a transient blank login page in `beforeEach` (username input never rendered — environment hiccup, not the changes) and passed on an isolated re-run, which also proved the `createIfAbsent` rerun path and the scoped cleanup (deleted 6 suite records incl. the UI-created review). Net: 11/11 verified passing.
+
 **File under review:** `src/pages/performance/ManageReviews.ts`
 **Imported files also reviewed (per review rules):** `tests/performance/manage-reviews.spec.ts`, `test-data/performance/frontend/manageReviews.ts`, `test-data/performance/api/manageReviews.ts`, `src/api/orangehrmOSAPI/ManageReviewsApi.ts`, `src/pages/BasePage.ts`, `src/fixtures/apiAction.ts`, `src/fixtures/index.ts`
 **Reviewed against:** `playwright-best-practices` skill, `orangehrm-opensource-domain` skill (+ `ui-selectors.md`, `business-rules.md`, `user-flows.md`), and live-verified Manage Reviews behavior (Save → Inactive / Activate → Activated; reviewer scoped to employee's supervisors; empty save → exactly 5× "Required").

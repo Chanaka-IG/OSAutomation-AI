@@ -1,6 +1,6 @@
 import { BasePage } from "../BasePage";
-import { Page, Locator, expect } from "@playwright/test";
-import type { supervisorReview } from '../../../test-data/performance/frontend/manageReviews'
+import { Page, Locator } from "@playwright/test";
+import type { supervisorReview, reviewForm } from '../../../test-data/performance/frontend/manageReviews'
 
 export class ManageReviewsPage extends BasePage {
 
@@ -23,6 +23,7 @@ export class ManageReviewsPage extends BasePage {
     readonly accessDeniedMsg: Locator;
     readonly searchBtn: Locator;
     readonly yesDeleteBtn: Locator;
+    readonly requiredFieldErrors: Locator;
 
     constructor(page: Page) {
         super(page)
@@ -45,14 +46,15 @@ export class ManageReviewsPage extends BasePage {
         this.accessDeniedMsg = this.page.getByText('Credential Required', { exact: true })
         this.searchBtn = this.page.getByRole('button', { name: 'Search' })
         this.yesDeleteBtn = this.page.getByRole('button', { name: 'Yes, Delete' })
+        this.requiredFieldErrors = this.page.getByText('Required', { exact: true })
     }
     async clickOnAddReview(): Promise<void> {
         await this.addBtn.click();
     }
 
-    async fillReview(empName: string, supervisorName: string, startDate: string, endDate: string, dueDate: string): Promise<void> {
-        await this.selectEmployee(empName);
-        await this.selectSupervisor(supervisorName);
+    async fillReview(review: reviewForm, startDate: string, endDate: string, dueDate: string): Promise<void> {
+        await this.selectEmployee(review.employeeName);
+        await this.selectSupervisor(review.supervisorSearch, review.supervisorName);
         await this.fillStartDate(startDate);
         await this.fillEndDate(endDate);
         await this.fillDueDate(dueDate);
@@ -67,24 +69,21 @@ export class ManageReviewsPage extends BasePage {
         await option.click();
     }
 
-    async selectSupervisor(supervisorName: string): Promise<void> {
+    async selectSupervisor(searchQuery: string, supervisorName: string): Promise<void> {
         await this.supervisorNameInput.click();
         await this.supervisorNameInput.clear();
-        await this.supervisorNameInput.pressSequentially(supervisorName);
-        const option = this.page.getByRole('option', { name: supervisorName });
+        await this.supervisorNameInput.pressSequentially(searchQuery);
+        const option = this.page.getByRole('option', { name: supervisorName, exact: true });
         await option.waitFor({ state: 'visible', timeout: 8_000 });
         await option.click();
     }
-    async validateSupervisor(supervisorName: string): Promise<{ optionCount: number; option: string | null; }> {
+
+    /** Types a supervisor query and returns the resulting option list for assertions in the spec. */
+    async searchSupervisorOptions(searchQuery: string): Promise<Locator> {
         await this.supervisorNameInput.click();
-        await this.supervisorNameInput.pressSequentially(supervisorName);
-        await this.page.getByRole('option', { name: supervisorName }).waitFor({ state: 'visible', timeout: 8_000 });
-        const optionCount = await this.page.getByRole('option').count();
-        const option = await this.page.getByRole('option').first().textContent();
-        return {
-            optionCount: optionCount,
-            option: option
-        };
+        await this.supervisorNameInput.pressSequentially(searchQuery);
+        await this.page.getByRole('option', { name: searchQuery }).first().waitFor({ state: 'visible', timeout: 8_000 });
+        return this.page.getByRole('option');
     }
 
     async fillStartDate(startDate: string): Promise<void> {
@@ -103,28 +102,46 @@ export class ManageReviewsPage extends BasePage {
         await this.activeBtn.click()
     }
 
-    async checkReviewStatusAsAdmin(employeeName: string): Promise<string> {
-        const status = await this.page.getByRole('row').filter({ hasText: employeeName }).first().locator('[role="cell"]').nth(6).textContent();
-        return status ?? "";
+    reviewRow(employeeName: string): Locator {
+        return this.page.getByRole('row').filter({ hasText: employeeName }).first();
+    }
+
+    /** Row matched by employee AND status — disambiguates when an employee has several reviews. */
+    reviewRowWithStatus(employeeName: string, status: string): Locator {
+        return this.page.getByRole('row').filter({ hasText: employeeName }).filter({ hasText: status });
+    }
+
+    reviewStatusCell(employeeName: string): Locator {
+        return this.reviewRow(employeeName).getByRole('cell').nth(6);
+    }
+
+    reviewRowCells(employeeName: string): { employeeName: Locator, jobTitle: Locator, period: Locator, dueDate: Locator, reviewer: Locator, status: Locator } {
+        const row = this.reviewRow(employeeName);
+        return {
+            employeeName: row.getByRole('cell').nth(1),
+            jobTitle: row.getByRole('cell').nth(2),
+            period: row.getByRole('cell').nth(3).locator('.data'),
+            dueDate: row.getByRole('cell').nth(4),
+            reviewer: row.getByRole('cell').nth(5),
+            status: row.getByRole('cell').nth(6),
+        };
     }
 
     async clickOnActionAsSupervisor(employeeName: string): Promise<void> {
-        await this.page.getByRole('row').filter({ hasText: employeeName }).getByTitle('Evaluate').click();
-
+        await this.reviewRow(employeeName).getByTitle('Evaluate').click();
     }
     async clickOnDeleteReview(employeeName: string): Promise<void> {
-        await this.page.getByRole('row').filter({ hasText: employeeName }).locator('.bi-trash').click();
+        await this.reviewRow(employeeName).locator('.bi-trash').click();
     }
     async clickOnEditIcon(employeeName: string): Promise<void> {
-        await this.page.getByRole('row').filter({ hasText: employeeName }).getByTitle('Edit').click();
-
+        await this.reviewRow(employeeName).getByTitle('Edit').click();
     }
-    async fillReviewasSupervvisor(reviewData: supervisorReview, today: string): Promise<void> {
+    async fillReviewAsSupervisor(reviewData: supervisorReview, completionDate: string): Promise<void> {
         await this.rating.fill(String(reviewData.rating))
         await this.comment.fill(reviewData.comment)
         await this.generalComment.fill(reviewData.generalComment)
-        await this.pickDateFromDatePicker(today, this.completionDate)
-        await this.finalRating.fill(String(reviewData.rating))
+        await this.pickDateFromDatePicker(completionDate, this.completionDate)
+        await this.finalRating.fill(String(reviewData.finalRating))
         await this.finalComment.fill(reviewData.finalComment)
     }
     async clickSave(): Promise<void> {
@@ -135,9 +152,6 @@ export class ManageReviewsPage extends BasePage {
     }
     async confirmReview(): Promise<void> {
         await this.okBtn.click();
-    }
-    verifyAccessDeniedVisibility(): Locator {
-        return this.accessDeniedMsg;
     }
     async fillSearchCriteria(employeeName: string): Promise<void> {
         await this.selectEmployeeForSearch(employeeName);
@@ -153,20 +167,7 @@ export class ManageReviewsPage extends BasePage {
         await option.click();
     }
 
-    async validateDataInTable(employeeName: string): Promise<{ employeeName: string | null, jobTitle: string | null, period: string | null, dueDate: string | null, reviewer: string | null, status: string | null }> {
-        const row = this.page.getByRole('row').filter({ hasText: employeeName });
-        return {
-            employeeName: await row.getByRole('cell').nth(1).textContent(),
-            jobTitle: await row.getByRole('cell').nth(2).textContent(),
-            period: await row.getByRole('cell').nth(3).locator('.data').textContent(),
-            dueDate: await row.getByRole('cell').nth(4).textContent(),
-            reviewer: await row.getByRole('cell').nth(5).textContent(),
-            status: await row.getByRole('cell').nth(6).textContent(),
-        };
-    }
-
-    async validateDataReadonly(): Promise<{ rating: Locator, comment: Locator, generalComment: Locator }> {
-        await this.page.waitForEvent('load');
+    readonlyEvaluationFields(): { rating: Locator, comment: Locator, generalComment: Locator } {
         return {
             rating: this.rating,
             comment: this.comment,
@@ -191,11 +192,9 @@ export class ManageReviewsPage extends BasePage {
         await this.employeeNameInput.clear();
         await this.employeeNameInput.pressSequentially(empName);
         await this.page.keyboard.press('Tab');
-      
+
     }
-    async verifyEmployeeNameInvalidError(): Promise<{ employeeError: Locator }> {
-         return {
-            employeeError: this.page.locator('.oxd-grid-item').filter({ hasText: 'Employee Name' }).getByText('Invalid', { exact: true }),
-        }
+    employeeNameInvalidError(): Locator {
+        return this.page.locator('.oxd-grid-item').filter({ hasText: 'Employee Name' }).getByText('Invalid', { exact: true });
     }
 }
