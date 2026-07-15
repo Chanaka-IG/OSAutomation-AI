@@ -25,7 +25,7 @@ export const addEmployee = {
 
   /** Absolute paths to test fixture files. */
   files: {
-    validJpg: path.join(FILES_DIR, 'test-photo.jpg'),
+    validJpg: path.join(FILES_DIR, 'profile_picture_Male.jpg'),
     validPng: path.join(FILES_DIR, 'test-photo.png'),
     invalidDocument: path.join(FILES_DIR, 'test-document.pdf'),
     oversizedImage: path.join(FILES_DIR, 'test-photo-large.png'),

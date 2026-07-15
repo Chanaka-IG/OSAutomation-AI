@@ -1,9 +1,18 @@
+import fs from 'fs';
+import path from 'path';
 import type { EmployeeSeed } from '../../../test-data/pim/api/employees';
 import { employees as employeesData } from '../../../test-data/pim/api/employees';
 import { createLogger } from '../../lib/logger';
 import { BaseApiService } from '../BaseApiService';
 
 const log = createLogger('EmployeesApi');
+
+const IMAGE_MIME_BY_EXT: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.gif': 'image/gif',
+};
 
 /**
  * OrangeHRM Admin API v2 - employees.
@@ -34,9 +43,10 @@ export class EmployeesApi extends BaseApiService {
   async createIfAbsent(payload: EmployeeSeed): Promise<void> {
     const response = await this.postEmployee(payload);
     if (response.ok()) {
-      log.info(`Employee successfully added: ${this.displayName(payload)}`);
+      log.info(`Employee successfully added: ${this.displayName(payload)} (${payload.employeeId})`);
       return;
     }
+
     const text = await response.text();
     const status = response.status();
     if (
@@ -47,7 +57,10 @@ export class EmployeesApi extends BaseApiService {
     ) {
       // NOTE: 400/422 can also be a genuine validation failure — keep the body in the
       // log so a wrongly-skipped create stays diagnosable.
-      log.info(`Employee already present, skipping: ${payload.employeeId})`);
+      log.info(`Employee already present, skipping: ${payload.employeeId}`, {
+        status,
+        body: text.slice(0, 200),
+      });
       return;
     }
 
@@ -252,11 +265,37 @@ export class EmployeesApi extends BaseApiService {
         firstName: payload.firstName,
         lastName: payload.lastName,
         middleName: payload.middleName,
+        ...(payload.profilePicture
+          ? { empPicture: this.buildEmpPicture(payload.profilePicture) }
+          : {}),
       },
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
     });
+  }
+
+  /**
+   * The employees API takes the profile picture inline as a base64 attachment
+   * (`{name, type, base64, size}`), not multipart — max 1 MB, jpeg/png/gif only.
+   */
+  private buildEmpPicture(filePath: string): {
+    name: string;
+    type: string;
+    base64: string;
+    size: number;
+  } {
+    const buffer = fs.readFileSync(filePath);
+    const mimeType = IMAGE_MIME_BY_EXT[path.extname(filePath).toLowerCase()];
+    if (!mimeType) {
+      throw new Error(`EmployeesApi.buildEmpPicture: unsupported image type ${filePath}`);
+    }
+    return {
+      name: path.basename(filePath),
+      type: mimeType,
+      base64: buffer.toString('base64'),
+      size: buffer.length,
+    };
   }
 }
