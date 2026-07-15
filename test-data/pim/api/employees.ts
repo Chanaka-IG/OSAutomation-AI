@@ -1,10 +1,14 @@
 import { env } from '../../../src/config/env';
+import path from 'path';
+
+const FILES_DIR = path.join(__dirname, '../../files');
 
 export type EmployeeSeed = {
   employeeId: string;
   firstName: string;
   lastName: string;
   middleName: string;
+  profilePicture?: string;
 };
 
 /**
@@ -34,12 +38,14 @@ export const employees = {
       firstName: 'Marcus',
       lastName: 'Chen',
       middleName: 'James',
+      profilePicture: path.join(FILES_DIR, 'profile_picture_Male.jpg'),
     },
     {
       employeeId: '0003',
       firstName: 'Elena',
       lastName: 'Vasquez',
       middleName: 'Sofia',
+      profilePicture: path.join(FILES_DIR, 'profile_picture_Female.jpg'),
     },
   ] as const satisfies readonly EmployeeSeed[],
 };

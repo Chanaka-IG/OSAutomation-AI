@@ -5,7 +5,8 @@ export type AdminUserSeed = {
   password: string;
   status: boolean;
   userRoleId: number;
-  empNumber: number;
+  /** Stable PIM employeeId (e.g. '0002') — resolved to empNumber at seed time. */
+  employeeId: string;
 };
 
 export const adminUsers = {
@@ -25,7 +26,7 @@ export const adminUsers = {
       password: 'admin@OHRM123',
       status: true,
       userRoleId: 2,
-      empNumber: 2,
+      employeeId: '0002',
     },
   ] as const satisfies readonly AdminUserSeed[],
 };
