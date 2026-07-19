@@ -21,20 +21,22 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness, kpi, users, empl
   const empNumber = await employees.getEmpNumberByEmployeeId(frontend.performance.employees[0].employeeId);
 
   if (empNumber !== undefined) {
-    await users.createIfAbsent({
-      username: frontend.performance.userData.username,
-      password: frontend.performance.userData.password,
-      status: frontend.performance.userData.status,
-      userRoleId: frontend.performance.userData.userRoleId,
-      empNumber: empNumber
-    });
+    await users.createIfAbsent(
+      {
+        username: frontend.performance.userData.username,
+        password: frontend.performance.userData.password,
+        status: frontend.performance.userData.status,
+        userRoleId: frontend.performance.userData.userRoleId,
+      },
+      empNumber,
+    );
   }
   for (const kpiData of kpiAPIdata.seedRecords) {
     await kpi.createIfAbsent(kpiData)
   }
 })
 
-test.afterAll(async ({ orangehrmApiContext, orangehrmAdminApi,kpi }) => {
+test.afterAll(async ({ orangehrmAdminApi, kpi }) => {
   await orangehrmAdminApi.loginAsAdmin();
   await kpi.deleteAllKpis();
 });
@@ -118,7 +120,7 @@ test.describe('Add KPIs', () => {
     expect(toastMessage).toContain(frontend.performance.toastMsg.update);
   });
 
-  test('TC-104 | Job Title dropdown lists only real job titles', async ({ addKpisPage, orangehrmApiContext, orangehrmAdminApi,jobTitle }) => {
+  test('TC-104 | Job Title dropdown lists only real job titles', async ({ addKpisPage, orangehrmAdminApi, jobTitle }) => {
     await orangehrmAdminApi.loginAsAdmin();
     const systemJobTitles = await jobTitle.getAll();
     const systemJobTitleNames = systemJobTitles.map(job => job.title);

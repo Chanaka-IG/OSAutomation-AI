@@ -57,9 +57,9 @@ test.beforeAll(async ({ masterDataReadiness, orangehrmAdminApi, employees, users
                 username: api.reviewData.apiEmployees[i].username,
                 password: api.reviewData.apiEmployees[i].password,
                 status: api.reviewData.apiEmployees[i].status,
-                userRoleId: api.reviewData.apiEmployees[i].userRoleId,
-                empNumber: supervisorEmpNumber
-            });
+                userRoleId: api.reviewData.apiEmployees[i].userRoleId,},
+                supervisorEmpNumber
+            );
         }
 
         const essEmpNumber = await employees.getEmpNumberByEmployeeId(api.reviewData.apiEmployees[i + 1].employeeId);
@@ -69,9 +69,9 @@ test.beforeAll(async ({ masterDataReadiness, orangehrmAdminApi, employees, users
                 username: api.reviewData.apiEmployees[i + 1].username,
                 password: api.reviewData.apiEmployees[i + 1].password,
                 status: api.reviewData.apiEmployees[i + 1].status,
-                userRoleId: api.reviewData.apiEmployees[i + 1].userRoleId,
-                empNumber: essEmpNumber
-            });
+                userRoleId: api.reviewData.apiEmployees[i + 1].userRoleId},
+                essEmpNumber
+            );
         }
         await assignDerectSupervisors.createSupervisors(essEmpNumber, supervisorEmpNumber);
         await assignJobTitles.assignJobTitles(essEmpNumber, jobTitleID, frontend.manageReviewData.jobTitle.title);
@@ -126,7 +126,7 @@ test.describe("Test cases for Manage reviews", () => {
             await page.goto(frontend.manageReviewData.routes.manageReviews);
         });
 
-        test("TC-004 | Full lifecycle: create → activate → reviewer evaluates → In Progress → Completed", async ({ page, manageReviewsPage }) => {
+        test.only("TC-004 | Full lifecycle: create → activate → reviewer evaluates → In Progress → Completed", async ({ page, manageReviewsPage }) => {
 
             //actions as admin
             await manageReviewsPage.clickOnAddReview();

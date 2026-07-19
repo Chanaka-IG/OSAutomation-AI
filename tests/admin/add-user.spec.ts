@@ -64,9 +64,8 @@ test.beforeAll(async ({ orangehrmAdminApi, masterDataReadiness }) => {
       username: seed.username,
       password: usersData.samples.strongPassword,
       status: seed.status,
-      userRoleId: 2,
-      empNumber: suiteEmpNumber,
-    });
+      userRoleId: 2
+    }, suiteEmpNumber);
     createdUsernames.push(seed.username);
   }
 });

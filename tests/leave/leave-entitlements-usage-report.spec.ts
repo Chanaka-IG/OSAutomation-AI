@@ -95,9 +95,9 @@ test.describe('Leave Entitlements and Usage Report', () => {
       username: d.user.username,
       password: d.user.password,
       status: true,
-      userRoleId: d.user.userRoleId,
+      userRoleId: d.user.userRoleId},
       empNumber,
-    });
+    );
 
     // 4. Resolve a sub unit that returns zero rows in the Leave Type report (empty state).
     //    The seeded employee carries no sub unit, so it never falls into the chosen unit.

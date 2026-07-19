@@ -128,18 +128,19 @@ test.describe('Leave E2E lifecycle (entitle → apply → action)', () => {
     }
 
     // 4. ESS users
+
     await usersApi.createIfAbsent({
       username: essUser.username, password: essUser.password,
-      status: true, userRoleId: essUser.userRoleId, empNumber: essEmp,
-    });
+      status: true, userRoleId: essUser.userRoleId}, essEmp,
+    );
     await usersApi.createIfAbsent({
       username: subordinateUser.username, password: subordinateUser.password,
-      status: true, userRoleId: subordinateUser.userRoleId, empNumber: subEmp,
-    });
+      status: true, userRoleId: subordinateUser.userRoleId}, subEmp,
+    );
     await usersApi.createIfAbsent({
       username: supervisorUser.username, password: supervisorUser.password,
-      status: true, userRoleId: supervisorUser.userRoleId, empNumber: supEmp,
-    });
+      status: true, userRoleId: supervisorUser.userRoleId}, supEmp,
+    );
 
     // 5. subordinate → reports to supervisor (Direct)
     await empApi.addSupervisorIfAbsent(subEmp, supEmp, reportingMethodId);

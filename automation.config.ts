@@ -30,8 +30,7 @@ export default defineConfig({
     navigationTimeout: 90_000,
     video: 'on',
     screenshot: 'on',
-
-    trace: 'on-first-retry',
+    trace: 'on',
   },
 
   /* Configure projects for major browsers */

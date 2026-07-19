@@ -57,10 +57,7 @@ export class EmployeesApi extends BaseApiService {
     ) {
       // NOTE: 400/422 can also be a genuine validation failure — keep the body in the
       // log so a wrongly-skipped create stays diagnosable.
-      log.info(`Employee already present, skipping: ${payload.employeeId}`, {
-        status,
-        body: text.slice(0, 200),
-      });
+      log.info(`Employee already present, skipping: ${payload.employeeId}`);
       return;
     }
 
