@@ -75,9 +75,9 @@ test.describe('Apply Leave (ESS)', () => {
       username: essUser.username,
       password: essUser.password,
       status: true,
-      userRoleId: essUser.userRoleId,
-      empNumber: essEmpNumber,
-    });
+      userRoleId: essUser.userRoleId},
+      essEmpNumber,
+    );
   });
 
   test.afterAll(async ({ browser }) => {

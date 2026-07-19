@@ -6,7 +6,7 @@ export type AdminUserSeed = {
   status: boolean;
   userRoleId: number;
   /** Stable PIM employeeId (e.g. '0002') — resolved to empNumber at seed time. */
-  employeeId: string;
+  employeeId?: string;
 };
 
 export const adminUsers = {

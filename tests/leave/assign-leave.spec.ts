@@ -98,9 +98,9 @@ test.describe('Authenticated — Assign Leave', () => {
       username: essUser.username,
       password: essUser.password,
       status: true,
-      userRoleId: essUser.userRoleId,
-      empNumber: essEmpNumber,
-    });
+      userRoleId: essUser.userRoleId},
+      essEmpNumber
+    );
 
     // Create supervisor employee + user, then make the main employee report to them
     // (TC-007 / TC-202). employees.ess is intentionally left as a NON-subordinate.
@@ -113,9 +113,9 @@ test.describe('Authenticated — Assign Leave', () => {
       username: supervisorUser.username,
       password: supervisorUser.password,
       status: true,
-      userRoleId: supervisorUser.userRoleId,
-      empNumber: supEmpNumber,
-    });
+      userRoleId: supervisorUser.userRoleId},
+      supEmpNumber,
+    );
 
     // main employee → reports to supervisor (Direct)
     await empApi.addSupervisorIfAbsent(assignEmpNumber, supEmpNumber, reportingMethodId);
