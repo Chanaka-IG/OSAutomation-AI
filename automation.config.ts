@@ -2,11 +2,14 @@ import { defineConfig, devices } from '@playwright/test';
 import { env } from './src/config/env';
 
 export default defineConfig({
-  /** Verifies seeded master data before UI/API runs; writes `test-results/master-data-status.json`. See `scripts/playwright-global-setup.ts`. */
-  globalSetup:
-    process.env.SKIP_MASTER_DATA_CHECK === '1'
-      ? undefined
-      : './scripts/playwright-global-setup.ts',
+  /**
+   * Verifies seeded master data before UI/API runs; writes `test-results/master-data-status.json`.
+   * See `scripts/playwright-global-setup.ts`.
+   *
+   * Always registered — the script itself honours `SKIP_MASTER_DATA_CHECK=1` and returns early, and
+   * it must still run to clear the per-run `seedOncePerRun` markers.
+   */
+  globalSetup: './scripts/playwright-global-setup.ts',
 
   testDir: './tests',
   /** Run test cases one after another (stable against shared UI/session flakiness). Override locally: `--workers=4`. */

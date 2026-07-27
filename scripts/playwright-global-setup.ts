@@ -4,6 +4,7 @@ import { OrangehrmAdminApi } from '../src/api/orangehrmOSAPI/OrangehrmAdminApi';
 import { env } from '../src/config/env';
 import { seedAllMasterData } from '../src/setup/masterData';
 import { verifyMasterData, writeMasterDataStatus } from '../src/setup/masterDataVerification';
+import { resetSeedGuards } from '../src/setup/runSeedGuard';
 
 /** Playwright CLI `--project` / `-p` values (globalSetup receives full config, so we read argv). */
 function selectedProjectsFromArgv(): string[] {
@@ -35,6 +36,9 @@ function selectedProjectsFromArgv(): string[] {
  * Status file: `test-results/master-data-status.json`
  */
 export default async function playwrightGlobalSetup(_config: FullConfig): Promise<void> {
+  /** New run — drop last run's `seedOncePerRun` markers so suite setup seeds again. */
+  resetSeedGuards();
+
   if (process.env.SKIP_MASTER_DATA_CHECK === '1') {
     writeMasterDataStatus({
       ok: true,

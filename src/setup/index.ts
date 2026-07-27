@@ -5,6 +5,8 @@ export {
   type MasterDataStatus,
 } from './masterDataVerification';
 
+export { resetSeedGuards, seedOncePerRun } from './runSeedGuard';
+
 export {
   seedAllMasterData,
   seedJobTitles,

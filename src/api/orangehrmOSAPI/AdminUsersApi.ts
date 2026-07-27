@@ -5,6 +5,13 @@ import { BaseApiService } from '../BaseApiService';
 
 const log = createLogger('AdminUsersApi');
 
+/**
+ * Seed payload accepted by {@link AdminUsersApi.create} / {@link AdminUsersApi.createIfAbsent}.
+ * `empNumber` may travel in the payload instead of the positional argument — both call styles
+ * exist across the suites (`src/setup/masterData/adminUsers.ts` passes it positionally).
+ */
+export type AdminUserCreateInput = AdminUserSeed & { empNumber?: number };
+
 /** OrangeHRM Admin API v2 — users. Callers resolve {@link AdminUserSeed.employeeId} to an empNumber first. */
 export class AdminUsersApi extends BaseApiService {
   async getAll(): Promise<Array<{ id: number; userName: string }>> {
@@ -18,7 +25,7 @@ export class AdminUsersApi extends BaseApiService {
     return json.data ?? [];
   }
 
-  async createIfAbsent(payload: AdminUserSeed, empNumber: number): Promise<void> {
+  async createIfAbsent(payload: AdminUserCreateInput, empNumber?: number): Promise<void> {
     const all = await this.getAll();
     if (all.some((u) => u.userName === payload.username)) {
       log.info(`User already exists, skipping: ${payload.username}`);
@@ -27,14 +34,22 @@ export class AdminUsersApi extends BaseApiService {
     await this.create(payload, empNumber);
   }
 
-  async create(payload: AdminUserSeed, empNumber: number): Promise<void> {
+  async create(payload: AdminUserCreateInput, empNumber?: number): Promise<void> {
+    const resolvedEmpNumber = empNumber ?? payload.empNumber;
+    if (resolvedEmpNumber === undefined) {
+      throw new Error(
+        `AdminUsersApi.create: empNumber is required for ${payload.username} — ` +
+          `pass it positionally or on the payload.`,
+      );
+    }
+
     const response = await this.post(adminUsersData.adminPath, {
       data: {
         username: payload.username,
         password: payload.password,
         status: payload.status,
         userRoleId: payload.userRoleId,
-        empNumber,
+        empNumber: resolvedEmpNumber,
       },
       headers: {
         Accept: 'application/json',

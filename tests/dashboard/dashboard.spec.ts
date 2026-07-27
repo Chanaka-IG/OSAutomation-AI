@@ -135,7 +135,7 @@ test.describe('Dashboard', () => {
       await expect(dashboardPage.widgetByName(title).first()).toBeVisible({ timeout: 10_000 });
     }
 
-    // Folded TC-502 — exactly the 6 verified quick-launch tiles.
+    // Folded TC-502 — exactly the verified quick-launch tiles for a non-supervising admin.
     for (const tile of quickLaunch.admin) {
       await expect(dashboardPage.quickLaunchCard(tile.title).first()).toBeVisible();
     }
@@ -168,7 +168,7 @@ test.describe('Dashboard', () => {
   });
 
   // ── P1: TC-004 — Remaining quick-launch tiles navigate to their modules ──────
-  test('TC-DSH-004 — Timesheets, Apply Leave, My Leave and My Timesheet tiles navigate', async ({
+  test('TC-DSH-004 — Apply Leave and My Leave tiles navigate', async ({
     loginPage, page, dashboardPage,
   }) => {
     // Every tile not already covered by its own dedicated test (TC-002 / TC-003).

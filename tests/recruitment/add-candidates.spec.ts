@@ -14,7 +14,7 @@ import { EmployeesApi } from '../../src/api/orangehrmOSAPI/EmployeesApi';
  *   npx playwright test tests/recruitment/add-candidates.spec.ts --config automation.config.ts --project=chromium
  */
 
-test.describe.configure({ mode: 'serial', timeout: 180_000 });
+test.describe.configure({ mode: 'parallel', timeout: 180_000 });
 
 // ─── Suite-level state ──────────────────────────────────────────────────────
 const createdCandidateIds: number[] = [];
