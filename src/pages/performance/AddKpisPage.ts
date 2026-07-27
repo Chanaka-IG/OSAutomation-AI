@@ -116,7 +116,10 @@ export class AddKpisPage extends BasePage {
     }
 
     async isRowExists(kpiName: string): Promise<void> {
-        await expect (this.page.locator('.oxd-table-card').filter({ hasText: kpiName })).toBeVisible();
+        await expect(this.page.locator('.oxd-table-card').filter({ hasText: kpiName })).toBeVisible();
+    }
+    async isRowNotExists(kpiName: string): Promise<void> {
+        await expect(this.page.locator('.oxd-table-card').filter({ hasText: kpiName })).not.toBeVisible();
     }
 
     private getRowByName(kpiName: string): Locator {

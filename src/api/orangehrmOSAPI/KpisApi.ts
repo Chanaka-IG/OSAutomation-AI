@@ -83,6 +83,10 @@ export class KpisApi extends BaseApiService {
         for (const kpi of allKpis) {
             idList.push(kpi.id)
         }
+        if (idList.length === 0) {
+            log.info('No KPIs to delete.');
+            return
+        }
         await this.deleteExistKpis(idList)
 
     }

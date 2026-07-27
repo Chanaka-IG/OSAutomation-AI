@@ -11,8 +11,9 @@ import { BasePage } from '../BasePage';
  *
  * Admin widgets: Time at Work · My Actions · Quick Launch · Buzz Latest Posts ·
  * Employees on Leave Today · Employee Distribution by Sub Unit / by Location.
- * Quick Launch tiles (`.orangehrm-quick-launch-card`), Admin set: Assign Leave,
- * Leave List, Timesheets, Apply Leave, My Leave, My Timesheet.
+ * Quick Launch tiles (`.orangehrm-quick-launch-card`) come from
+ * `GET /api/v2/dashboard/shortcuts` and vary per user. Admin set: Assign Leave, Leave List,
+ * Apply Leave, My Leave. The Timesheets and My Timesheet tiles are off for that account.
  */
 export class DashboardPage extends BasePage {
   readonly breadcrumbHeading: Locator;

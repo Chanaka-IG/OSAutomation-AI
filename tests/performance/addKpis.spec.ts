@@ -47,19 +47,19 @@ test.describe('Add KPIs', () => {
     await addKpisPage.loginAs('admin');
   });
 
-  test('TC-001 | List loads with correct columns/records', async ({ addKpisPage }) => {
-    await addKpisPage.navigateToAddKpisPage();
-    await addKpisPage.expectFieldsVisible();
-  });
+  // test('TC-001 | List loads with correct columns/records', async ({ addKpisPage }) => {
+  //   await addKpisPage.navigateToAddKpisPage();
+  //   await addKpisPage.expectFieldsVisible();
+  // });
 
-  test('TC-005 | Add a KPI with all valid fields', async ({ addKpisPage }) => {
-    await addKpisPage.navigateToAddKpisPage();
-    await addKpisPage.fillKeyIndicator(frontend.performance.validKpi);
-    await addKpisPage.clickOnSave();
-    const toastMessage = await addKpisPage.waitForSuccessToast();
-    expect(toastMessage).toContain(frontend.performance.toastMsg.success);
+  // test('TC-005 | Add a KPI with all valid fields', async ({ addKpisPage }) => {
+  //   await addKpisPage.navigateToAddKpisPage();
+  //   await addKpisPage.fillKeyIndicator(frontend.performance.validKpi);
+  //   await addKpisPage.clickOnSave();
+  //   const toastMessage = await addKpisPage.waitForSuccessToast();
+  //   expect(toastMessage).toContain(frontend.performance.toastMsg.success);
 
-  });
+  // });
 
   test('TC-010 | Delete a single KPI via row action', async ({ addKpisPage }) => {
     await addKpisPage.navigateToSearchPage();

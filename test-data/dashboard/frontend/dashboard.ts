@@ -58,20 +58,26 @@ export const dashboardData = {
     distByLocation: 'Employee Distribution by Location',
   },
 
-  /** Admin quick-launch tiles and their navigation targets (verified). */
+  /**
+   * Admin quick-launch tiles and their navigation targets (verified).
+   *
+   * The tile set is whatever `GET /api/v2/dashboard/shortcuts` returns for the logged-in user.
+   * On this environment both Time shortcuts come back false — `time.employee_timesheet` is gated
+   * on supervising someone (admin has no subordinates) and `time.my_timesheet` is off for the
+   * admin and ESS accounts alike — so only the four leave shortcuts render. Re-add the
+   * Timesheets / My Timesheet tiles here if the target instance starts serving them.
+   */
   quickLaunch: {
     admin: [
       { title: 'Assign Leave', urlPattern: /leave\/assignLeave/ },
       { title: 'Leave List', urlPattern: /leave\/viewLeaveList/ },
-      { title: 'Timesheets', urlPattern: /time\/viewEmployeeTimesheet/ },
       { title: 'Apply Leave', urlPattern: /leave\/applyLeave/ },
       { title: 'My Leave', urlPattern: /leave\/viewMyLeaveList/ },
-      { title: 'My Timesheet', urlPattern: /time\/viewMyTimesheet/ },
     ],
-    /** Self-service tiles every role keeps. */
-    essTitles: ['Apply Leave', 'My Leave', 'My Timesheet'],
+    /** Self-service tiles every role keeps (My Timesheet excluded — see above). */
+    essTitles: ['Apply Leave', 'My Leave'],
     /** Admin-only tiles that must NOT render for plain ESS. */
-    adminOnlyTitles: ['Assign Leave', 'Leave List', 'Timesheets'],
+    adminOnlyTitles: ['Assign Leave', 'Leave List'],
   },
 
   /** Verified widget empty-state texts. */
