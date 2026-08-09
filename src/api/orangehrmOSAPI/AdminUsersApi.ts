@@ -5,11 +5,6 @@ import { BaseApiService } from '../BaseApiService';
 
 const log = createLogger('AdminUsersApi');
 
-/**
- * Seed payload accepted by {@link AdminUsersApi.create} / {@link AdminUsersApi.createIfAbsent}.
- * `empNumber` may travel in the payload instead of the positional argument — both call styles
- * exist across the suites (`src/setup/masterData/adminUsers.ts` passes it positionally).
- */
 export type AdminUserCreateInput = AdminUserSeed & { empNumber?: number };
 
 /** OrangeHRM Admin API v2 — users. Callers resolve {@link AdminUserSeed.employeeId} to an empNumber first. */
