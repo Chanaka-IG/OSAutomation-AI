@@ -26,6 +26,8 @@ import { events as claimEvents } from './claim/api/events';
 import { expenseTypes as claimExpenseTypes } from './claim/api/expenseTypes';
 import { claimRequests } from './claim/api/claimRequests';
 import { reviewData } from './performance/api/manageReviews'
+import { buzzData } from './buzz/api/buzzDataApi'
+
 
 import { auth } from './auth';
 import { addEmployee } from './pim/frontend/add-employee';
@@ -56,6 +58,8 @@ import { customFields as customFieldsFrontend } from './pim/frontend/customField
 import { reportingMethods as reportingMethodsFrontend } from './pim/frontend/reportingMethods';
 import { manageReviews as manageReviewsFrontend} from './performance/frontend/manageReviews'
 import { maintenance as maintenanceFrontend } from './maintenance/frontend/maintenance'
+import { buzzData as buzzDataFrontend } from './buzz/frontend/buzzData'
+
 
 import * as pimFrontendApi from './pim/frontend-api';
 
@@ -81,7 +85,8 @@ export const api = {
   claimEvents,
   claimExpenseTypes,
   claimRequests,
-  reviewData
+  reviewData,
+  buzzData
 };
 
 /** UI routes, URL patterns, and form sample values, grouped by module. */
@@ -114,7 +119,8 @@ export const frontend = {
   employeeTimesheets: timeEmployeeTimesheets,
   timesheetLifecycle: timeTimesheetLifecycle,
   manageReviewData : manageReviewsFrontend,
-  maintenance: maintenanceFrontend
+  maintenance: maintenanceFrontend,
+  buzz: buzzDataFrontend
 
 };
 

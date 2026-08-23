@@ -32,7 +32,7 @@ export default defineConfig({
     baseURL: env.baseURL || undefined,
     navigationTimeout: 90_000,
     video: 'on',
-    screenshot: 'on',
+    screenshot: 'only-on-failure',
     trace: 'on',
   },
 

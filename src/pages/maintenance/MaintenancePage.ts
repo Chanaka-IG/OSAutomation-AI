@@ -42,6 +42,7 @@ export class MaintenancePage extends BasePage {
   readonly purgeDialogBody: Locator;
   readonly confirmPurgeButton: Locator;
   readonly cancelPurgeButton: Locator;
+  searchFieldError: Locator;
 
   constructor(page: Page) {
     super(page);

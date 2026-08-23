@@ -57,6 +57,7 @@ import { AssignClaimPage } from '../pages/claim/AssignClaimPage';
 import { EmployeeClaimsPage } from '../pages/claim/EmployeeClaimsPage';
 import { ManageReviewsPage } from '../pages/performance/ManageReviews'
 import { MaintenancePage } from '../pages/maintenance/MaintenancePage'
+import { BuzzPage } from '../pages/buzz/buzzPage'
 
 
 /** Custom fixtures (must not be named `Fixtures` — clashes with Playwright's `Fixtures<>` generic). */
@@ -108,8 +109,9 @@ export type OrangehrmFixtures = {
   submitClaimPage: SubmitClaimPage;
   assignClaimPage: AssignClaimPage;
   employeeClaimsPage: EmployeeClaimsPage;
-  manageReviewsPage:ManageReviewsPage;
+  manageReviewsPage: ManageReviewsPage;
   maintenancePage: MaintenancePage;
+  buzzPage: BuzzPage;
   /** OrangeHRM host + browser-like Accept headers; use with {@link orangehrmAdminApi}. */
   orangehrmApiContext: APIRequestContext;
   orangehrmAdminApi: OrangehrmAdminApi;
@@ -312,11 +314,14 @@ export const test = base.extend<OrangehrmFixtures, OrangehrmWorkerFixtures>({
   employeeClaimsPage: async ({ page }, use) => {
     await use(new EmployeeClaimsPage(page));
   },
-  manageReviewsPage : async ({page}, use) => {
-    await use (new ManageReviewsPage(page))
+  manageReviewsPage: async ({ page }, use) => {
+    await use(new ManageReviewsPage(page))
   },
   maintenancePage: async ({ page }, use) => {
     await use(new MaintenancePage(page));
+  },
+  buzzPage: async ({ page }, use) => {
+    await use(new BuzzPage(page));
   },
   orangehrmApiContext: async ({ playwright }, use) => {
     const context = await playwright.request.newContext({
